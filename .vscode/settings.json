@@ -1,0 +1,51 @@
+{
+        "calva.customREPLCommandSnippets": [
+        {
+            "name": "Start decision-konsent Server",
+            "ns": "user",
+            "repl": "clj",
+            "snippet": "(start)"
+        },
+        {
+            "name": "Stop decision-konsent Server",
+            "ns": "user",
+            "repl": "clj",
+            "snippet": "(stop)"
+        },
+        {
+            "name": "Restart decision-konsent Server",
+            "ns": "user",
+            "repl": "clj",
+            "snippet": "(restart)"
+        }
+    ],
+    "calva.replConnectSequences": [
+                {
+            "name": "Server only - decision-konsent",
+            "projectType": "Leiningen",
+            "afterCLJReplJackInCode": "(in-ns 'user) (start)",
+            "cljsType": "none",
+            "menuSelections": {
+                "leinProfiles": [
+                    "dev"
+                ]
+            }
+        },
+        {
+            "name": "Server + Client – decision-konsent",
+            "projectType": "lein-shadow",
+            "afterCLJReplJackInCode": "(start)",
+            "cljsType": "shadow-cljs",
+            "menuSelections": {
+                "leinProfiles": [
+                    "dev"
+                ],
+                "cljsLaunchBuilds": [
+                    "app",
+                    "test"
+                ],
+                "cljsDefaultBuild": "app"
+            }
+        }
+    ]
+}
