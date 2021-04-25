@@ -8,15 +8,25 @@
     [conman.core :as conman]
     [decision-konsent.config :refer [env]]
     [mount.core :refer [defstate]]
-    [luminus-migrations.core :as migrations])
+    [luminus-migrations.core :as migrations]
+    [decision-konsent.db.names :as names])
   (:import (org.postgresql.util PGobject)))
+
+
+
+(defn add-rand-user! []
+ (let [u (names/create-rand-user)]
+   (println u)
+   (create-user! u)
+   u))
+
 
 (defstate ^:dynamic *db*
   :start (if-let [jdbc-url (env :database-url)]
            (do
-             (conman/connect! {:jdbc-url jdbc-url})
-             (log/info "going to migrate at startup...")
-             (migrations/migrate ["migrate"] (select-keys env [:database-url])))
+             (conman/connect! {:jdbc-url jdbc-url}))
+             ;(log/info "going to migrate at startup..."))
+             ;(migrations/migrate ["migrate"] (select-keys env [:database-url])))
            (do
              (log/warn "database connection URL was not found, please set :database-url in your config, e.g: dev-config.edn")
              *db*))

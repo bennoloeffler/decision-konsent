@@ -10,11 +10,15 @@
 (defn home-page [request]
   (layout/render request "home.html"))
 
+(defn add-rand-user! [request]
+  (response/ok (db/add-rand-user!)))
+
 (defn home-routes []
   [""
    {:middleware [middleware/wrap-csrf
                  middleware/wrap-formats]}
    ["/" {:get home-page}]
+   ["/adduser" {:get add-rand-user!}]
    ["/docs" {:get (fn [_]
                     (-> (response/ok (-> "docs/docs.md" io/resource slurp))
                         (response/header "Content-Type" "text/plain; charset=utf-8")))}]])
