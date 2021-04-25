@@ -59,8 +59,12 @@
              :handler (constantly (ok {:message "owner created konsent"}))}}]
 
      ["/discuss"
-      {:get {:summary "owner (o) and participants (p) may discuss a while and even change the problem-description while finding ideas and options for possible solutions."
-             :handler (constantly (ok {:message "well, you know - i think..."}))}}]
+      {:get {:parameters {:query {:text string?}}
+             :summary "owner (o) and participants (p) may discuss a while and even change the problem-description while finding ideas and options for possible solutions."
+             ;:handler (constantly (ok {:message "well, you know - i think..."}))
+             :handler (fn [{{{:keys [text]} :query} :parameters}]
+                        {:status 200
+                         :body {:message (str "i totally disagree with: " text)}})}}]
 
      ["/o-start-suggest-ask-vote-iteration"
       {:get {:summary "when the time is right, somebody may start the formal konsent process. She then is the new owner (o)"
