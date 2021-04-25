@@ -46,9 +46,51 @@
              {:url "/api/swagger.json"
               :config {:validator-url nil}})}]]
 
-   ["/ping"
-    {:get (constantly (ok {:message "pong"}))}]
-   
+   ["/konsent"
+     {:swagger {:tags ["konsent"]}}
+
+
+     ["/ping"
+      {:get {:summary "just see the konsent app living..."
+             :handler (constantly (ok {:message "pong"}))}}]
+
+     ["/o-create-konsent"
+      {:get {:summary "an owner (o) starts an konsent - with problem-description and participants (p)"
+             :handler (constantly (ok {:message "owner created konsent"}))}}]
+
+     ["/discuss"
+      {:get {:summary "owner (o) and participants (p) may discuss a while and even change the problem-description while finding ideas and options for possible solutions."
+             :handler (constantly (ok {:message "well, you know - i think..."}))}}]
+
+     ["/o-start-suggest-ask-vote-iteration"
+      {:get {:summary "when the time is right, somebody may start the formal konsent process. She then is the new owner (o)"
+             :handler (constantly (ok {:message "from now on - lets get formal! owner is now: "}))}}]
+
+     ["/p-ask-to-understand-suggestion"
+      {:get {:summary "all the participants (p) may ask one or more questions in order to understand the suggested decision"
+             :handler (constantly (ok {:message "ask to get answers - not to pre-vote."}))}}]
+
+     ["/o-answer"
+      {:get {:summary "the owner (o) has to answer the questions. Sometimes 'I don´t know' will be the truth"
+             :handler (constantly (ok {:message "understanding and answering may make the owner learn"}))}}]
+
+     ["/p-no-more-questions"
+      {:get {:summary "after a while, the participants (p) will signal: I have no more questions."
+             :handler (constantly (ok {:message "finished asking - waiting for vote"}))}}]
+
+     ["/o-ask-for-vote"
+      {:get {:summary "the owner (o) summarises the proposed decision with the details/learnings from the questions and asks the participants (p) to vote"
+             :handler (constantly (ok {:message "this is my proposal XYZ. please vote. show concerns, veto - or just a YES!"}))}}]
+
+     ["/p-vote"
+      {:get {:summary "a participant (p) votes with :yes :major :minor :veto and a hint"
+             :handler (constantly (ok {:message "you voted wisely"}))}}]
+
+     ["/o-end-konsent"
+      {:get {:summary "there may be no decision - but the owner stops the process. Either because there is no more need or she just gives up because of repeated major concerns or vetos"
+             :handler (constantly (ok {:message "understanding and answering may make the owner learn"}))}}]]
+
+
 
    ["/math"
     {:swagger {:tags ["math"]}}
