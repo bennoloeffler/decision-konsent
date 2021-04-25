@@ -14,11 +14,6 @@
 
 
 
-(defn add-rand-user! []
- (let [u (names/create-rand-user)]
-   (println u)
-   (create-user! u)
-   u))
 
 
 (defstate ^:dynamic *db*
@@ -33,6 +28,14 @@
   :stop (conman/disconnect! *db*))
 
 (conman/bind-connection *db* "sql/queries.sql")
+
+
+(defn add-rand-user! []
+ (let [u (names/create-rand-user)]
+   (println u)
+   (create-user! u)
+   u))
+
 
 (defn pgobj->clj [^org.postgresql.util.PGobject pgobj]
   (let [type (.getType pgobj)
