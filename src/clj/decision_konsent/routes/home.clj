@@ -13,6 +13,9 @@
 (defn add-rand-user! [request]
   (response/ok (db/add-rand-user!)))
 
+(defn get-users [request]
+  (response/ok (db/get-all-users)))
+
 (defn migrate! [request]
   (response/ok {:result (db/migrate!)}))
 
@@ -26,6 +29,7 @@
                  middleware/wrap-formats]}
    ["/" {:get home-page}]
    ["/adduser" {:get add-rand-user!}]
+   ["/allusers" {:get get-users}]
    ["/migrate" {:get migrate!}]
    ["/rollback" {:get rollback!}]
 

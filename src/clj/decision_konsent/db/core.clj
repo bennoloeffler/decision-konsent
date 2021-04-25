@@ -27,6 +27,8 @@
 
 (conman/bind-connection *db* "sql/queries.sql")
 
+(defn get-all-users []
+  (get-users))
 
 (defn add-rand-user! []
  (let [u (names/create-rand-user)]
@@ -36,13 +38,15 @@
 
 (defn migrate! []
   (log/info "going to migrate...")
-  (migrations/migrate ["migrate"] (select-keys env [:database-url]))
-  "migrated")
+  (let [url (select-keys env [:database-url])]
+    (migrations/migrate ["migrate"] url)
+    (str "MIGRATED DB: " url)))
 
 (defn rollback! []
   (log/info "going to rollback...")
-  (migrations/migrate ["rollback"] (select-keys env [:database-url]))
-  "rolled back")
+  (let [url (select-keys env [:database-url])]
+    (migrations/migrate ["rollback"] url)
+    (str "ROLLED BACK DB: " url)))
 
 (defn pgobj->clj [^org.postgresql.util.PGobject pgobj]
   (let [type (.getType pgobj)
