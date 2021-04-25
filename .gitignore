@@ -16,3 +16,6 @@ profiles.clj
 shadow-cljs.edn
 /node_modules
 /log
+.idea
+.calva
+decision-konsent.iml

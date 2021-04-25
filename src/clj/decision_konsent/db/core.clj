@@ -7,12 +7,16 @@
     [clojure.tools.logging :as log]
     [conman.core :as conman]
     [decision-konsent.config :refer [env]]
-    [mount.core :refer [defstate]])
+    [mount.core :refer [defstate]]
+    [luminus-migrations.core :as migrations])
   (:import (org.postgresql.util PGobject)))
 
 (defstate ^:dynamic *db*
   :start (if-let [jdbc-url (env :database-url)]
-           (conman/connect! {:jdbc-url jdbc-url})
+           (do
+             (conman/connect! {:jdbc-url jdbc-url})
+             (log/info "going to migrate at startup...")
+             (migrations/migrate ["migrate"] (select-keys env [:database-url])))
            (do
              (log/warn "database connection URL was not found, please set :database-url in your config, e.g: dev-config.edn")
              *db*))
