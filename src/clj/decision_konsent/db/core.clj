@@ -20,8 +20,6 @@
   :start (if-let [jdbc-url (env :database-url)]
            (do
              (conman/connect! {:jdbc-url jdbc-url}))
-             ;(log/info "going to migrate at startup..."))
-             ;(migrations/migrate ["migrate"] (select-keys env [:database-url])))
            (do
              (log/warn "database connection URL was not found, please set :database-url in your config, e.g: dev-config.edn")
              *db*))
@@ -36,6 +34,15 @@
    (create-user! u)
    u))
 
+(defn migrate! []
+  (log/info "going to migrate...")
+  (migrations/migrate ["migrate"] (select-keys env [:database-url]))
+  "migrated")
+
+(defn rollback! []
+  (log/info "going to rollback...")
+  (migrations/migrate ["rollback"] (select-keys env [:database-url]))
+  "rolled back")
 
 (defn pgobj->clj [^org.postgresql.util.PGobject pgobj]
   (let [type (.getType pgobj)

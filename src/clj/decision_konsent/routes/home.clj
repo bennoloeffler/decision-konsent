@@ -13,12 +13,22 @@
 (defn add-rand-user! [request]
   (response/ok (db/add-rand-user!)))
 
+(defn migrate! [request]
+  (response/ok {:result (db/migrate!)}))
+
+(defn rollback! [request]
+  (response/ok {:result (db/rollback!)}))
+
+
 (defn home-routes []
   [""
    {:middleware [middleware/wrap-csrf
                  middleware/wrap-formats]}
    ["/" {:get home-page}]
    ["/adduser" {:get add-rand-user!}]
+   ["/migrate" {:get migrate!}]
+   ["/rollback" {:get rollback!}]
+
    ["/docs" {:get (fn [_]
                     (-> (response/ok (-> "docs/docs.md" io/resource slurp))
                         (response/header "Content-Type" "text/plain; charset=utf-8")))}]])
