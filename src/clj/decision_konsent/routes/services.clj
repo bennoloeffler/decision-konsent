@@ -9,7 +9,8 @@
     [reitit.ring.middleware.parameters :as parameters]
     [decision-konsent.middleware.formats :as formats]
     [ring.util.http-response :refer :all]
-    [clojure.java.io :as io]))
+    [clojure.java.io :as io]
+    [decision-konsent.db.core :as db]))
 
 (defn service-routes []
   ["/api"
@@ -65,6 +66,21 @@
              :handler (fn [{{{:keys [text]} :query} :parameters}]
                         {:status 200
                          :body {:message (str "i totally disagree with: " text)}})}}]
+     ["/message"
+      {:get {:summary "just get all messages"
+             :parameters {:query {}}
+             ;:responses {200 {:body {:total pos-int?}}}
+             :handler (fn [_]
+                        {:status 200
+                         :body   {:messages (map :message (db/get-messages))}})}
+       :post {:summary "just send a message to everybody"
+              :parameters {:body {:message string?}}
+              ;:responses {200 {:body {:messages string?}}}
+              :handler (fn [{{{:keys [message]} :body} :parameters}]
+                         (db/create-message! {:message message})
+                         (println "wrote message: " message)
+                         {:status 200
+                          :body (map :message (db/get-messages))})}}]
 
      ["/o-start-suggest-ask-vote-iteration"
       {:get {:summary "when the time is right, somebody may start the formal konsent process. She then is the new owner (o)"

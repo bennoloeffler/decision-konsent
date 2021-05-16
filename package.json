@@ -1,9 +1,18 @@
 {
+  "scripts": {
+    "css-build": "node-sass --omit-source-map-url resources/scss/mystyles.scss resources/public/css/mystyles.css",
+    "css-watch": "npm run css-build -- --watch"
+  },
   "dependencies": {
+    "bulma": "^0.9.2",
+    "bulma-extensions": "^6.2.7",
+    "highlight.js": "9.18.1",
     "react": "17.0.1",
-    "react-dom": "17.0.1"
+    "react-dom": "17.0.1",
+    "react-highlight.js": "1.0.7"
   },
   "devDependencies": {
+    "@creativebulma/bulma-tooltip": "^1.2.0",
     "xmlhttprequest": "1.8.0"
   }
 }

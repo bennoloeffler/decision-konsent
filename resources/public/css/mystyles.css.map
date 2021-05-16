@@ -1,0 +1,9 @@
+{
+  "version": 3,
+  "file": "mystyles.css",
+  "sources": [
+    "../../../resources\\scss\\mystyles.scss"
+  ],
+  "names": [],
+  "mappings": "AAAA,AAAA,IAAI,EAAE,AAAF,IAAM,CAAC;EACP,WAAW,EAAE,8CAA8C;EAC3D,MAAM,EAAE,IAAI;EACZ,WAAW,EAAE,IAAI,GACpB;;AACD,uDAAuD"
+}

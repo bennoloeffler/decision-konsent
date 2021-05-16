@@ -1,7 +1,7 @@
 (defproject decision-konsent "0.1.0-SNAPSHOT"
 
-  :description "FIXME: write description"
-  :url "http://example.com/FIXME"
+  :description "konsent app"
+  :url "https://git.heroku.com/decision-konsent.git"
 
   :dependencies [[ch.qos.logback/logback-classic "1.2.3"]
                  [cljs-ajax "0.8.3"]
@@ -50,7 +50,12 @@
   :target-path "target/%s/"
   :main ^:skip-aot decision-konsent.core
 
-  :plugins [[lein-shadow "0.2.0"]] 
+  :plugins [[lein-shadow "0.2.0"]
+            [yogthos/lein-sass "0.1.10"]]
+            ;[lein-scss "0.4.0"]]
+  :sass {:source "resources/scss/"
+         :target "resources/public/css/"}
+  ; lein scss watch OR lein scss
   :clean-targets ^{:protect false}
   [:target-path "target/cljsbuild"]
   :shadow-cljs
@@ -62,7 +67,7 @@
      :asset-path "/js"
      :modules {:app {:entries [decision-konsent.app]}}
      :devtools
-     {:watch-dir "resources/public" :preloads [re-frisk.preload]}
+     {:watch-dir "resources/public" :preloads [day8.re-frame-10x.preload]} ; re-frisk.preload
      :dev
      {:closure-defines {"re_frame.trace.trace_enabled_QMARK_" true}}}
     :test
@@ -90,13 +95,15 @@
                                  [cider/piggieback "0.5.2"]
                                  [pjstadig/humane-test-output "0.11.0"]
                                  [prone "2020-01-17"]
-                                 [re-frisk "1.4.0"]
+                                 [day8.re-frame/re-frame-10x "0.7.0"];[re-frisk "1.4.0"]
                                  [ring/ring-devel "1.9.2"]
                                  [ring/ring-mock "0.4.0"]]
                   :plugins      [[com.jakemccrary/lein-test-refresh "0.24.1"]
-                                 [jonase/eastwood "0.3.5"]] 
-                  
-                  
+                                 [jonase/eastwood "0.3.5"]]
+
+
+
+
                   :source-paths ["env/dev/clj"  "env/dev/cljs" "test/cljs"]
                   :resource-paths ["env/dev/resources"]
                   :repl-options {:init-ns user

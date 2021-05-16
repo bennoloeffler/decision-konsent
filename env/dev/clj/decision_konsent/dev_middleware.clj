@@ -9,3 +9,4 @@
       wrap-reload
       wrap-error-page
       (wrap-exceptions {:app-namespaces ['decision-konsent]})))
+
