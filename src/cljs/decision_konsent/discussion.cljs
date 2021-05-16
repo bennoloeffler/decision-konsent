@@ -70,6 +70,7 @@
           {:type :text
            :name :message
            :on-change #(swap! fields assoc :message (-> % .-target .-value))
+           :on-key-down #(when (= (.-keyCode %) 13) (send-message! fields))
            :value (:message @fields)}]]
       [messages-form]])))
 

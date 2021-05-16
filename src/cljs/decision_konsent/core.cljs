@@ -101,7 +101,7 @@
                 {:class (when @expanded? :is-active)}
                 [:div.navbar-start
                  [nav-link "#/" "home" :home]
-                 [nav-link "#/my-konsents" "myKonsents" :my-konsents]
+                 [nav-link "#/my-konsents" "my-konsents" :my-konsents]
                  [nav-link "#/about" "about" :about]]]]))
 
 (defn about-page []
@@ -110,10 +110,17 @@
 
 (defn my-konsents-page []
   [:section.section>div.container>div.content
-   [:div "here will be all your contents to choose one"]
-   #_(when-let [docs @(rf/subscribe [:docs])]
-       [:div {:dangerouslySetInnerHTML {:__html (md->html docs)}}])])
-
+   [:nav.panel
+    [:p.panel-heading "my-konsents"]
+    [:a.panel-block
+     [:span.panel-icon
+       [:i.fas.fa-book {:aria-hidden "true"}]] "new bib - or not..."]
+    [:a.panel-block
+     [:span.panel-icon
+      [:i.fas.fa-bomb {:aria-hidden "true"}]] "konsent about the new coffee machine"]
+    [:a.panel-block
+     [:span.panel-icon
+      [:i.fas.fa-fighter-jet {:aria-hidden "true"}]] "decision regarding new traveling rules"]]])
 (defn home-page []
       [:section.section>div.container>div.content
        ;[:h3 "Your Comments, Discussions and Feature-Requests and more..."]
