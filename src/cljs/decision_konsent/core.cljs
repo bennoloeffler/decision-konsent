@@ -156,6 +156,7 @@
 
 
 (defn init! []
+  (println "GOING TO START BELs Konsent Server")
   (start-router!)
   (ajax/load-interceptors!)
   (rf/dispatch-sync [:initialize])
