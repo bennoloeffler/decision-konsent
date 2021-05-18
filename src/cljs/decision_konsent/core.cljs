@@ -30,7 +30,7 @@
 (rf/reg-fx
   :ajax/get
   (fn [{:keys [url success-event error-event success-path]}]
-    (println "start ajax...")
+    (println "start ajax/get...")
     (GET url
       (cond-> {:headers {"Accept" "application/transit+json"}}
         success-event (assoc :handler
@@ -43,42 +43,36 @@
                            #(rf/dispatch
                               (conj error-event %)))))))
 
-(rf/reg-event-fx
-  :messages/load
-  (fn [{:keys [db]} _]
-    (println "start loading...")
-    {:db       (assoc db :messages/loading? true)
-     :ajax/get {:url           "/api/konsent/message"
-                :success-path  [:messages]
-                :success-event [:messages/set]}}))
+#_(rf/reg-fx
+    :ajax/post
+    (fn [{:keys [url success-event error-event success-path]}]
+      (println "start ajax/post...")
+      (POST url
+        (cond-> {:headers {"Accept" "application/transit+json"}}
+           success-event (assoc :handler
+                                #(rf/dispatch
+                                   (conj success-event
+                                     (if success-path
+                                        (get-in % success-path)
+                                        %))))
+           error-event (assoc :error-handler
+                               #(rf/dispatch
+                                  (conj error-event %)))))))
 
-(rf/reg-event-db
-  :messages/set
-  (fn [db [_ messages]]
-    (println ( str "set messages: " messages))
-    (-> db
-        (assoc :messages/loading? false
-               :messages/list messages))))
 
-;; register subscription
-(rf/reg-sub
-  :messages/loading?
-  (fn [db _]
-    (:messages/loading? db)))
+(def logged-in (r/atom false))
 
-(rf/reg-sub
-  :messages/list
-  (fn [db _]
-    (reverse (:messages/list db))))
+(defn login-button []
+  [:button.button.is-primary {:on-click #(reset! logged-in true)} [:span.icon.is-large>i.fas.fa-1x.fa-sign-in-alt] [:span "login"]])
 
-(comment
+(defn register-button []
+  [:button.button.is-warning {:on-click #(rf/dispatch [:common/set-error "registration is not yet available - sorry"])} [:span.icon.is-large>i.fas.fa-1x.fa-pen-nib] [:span "register an account and then..."]])
 
-  ;; use subscription in hiccup ???
-  (if @(rf/subscribe [:message/loading?]))
+(defn logout-button []
+  [:button.button.is-primary.is-outlined {:on-click #(reset! logged-in false)} [:span.icon.is-large>i.fas.fa-1x.fa-sign-out-alt] [:span "logout"]])
 
-  ; fire event
-  (rf/dispatch [:initialize]))
-
+(defn user-indicator []
+  [:button.button.is-primary.is-outlined {:on-click #(rf/dispatch [:common/set-error "profile editing not yet available - sorry"])}[:span.icon.is-large>i.fas.fa-1x.fa-address-card] [:span "gandalf@arakis.pl"]])
 
 
 (defn nav-link [uri title page]
@@ -87,11 +81,13 @@
     :class (when (= page @(rf/subscribe [:common/page-id])) :is-active)}
    title])
 
+
 (defn navbar []
   (r/with-let [expanded? (r/atom false)]
-              [:nav.navbar.is-info>div.container
-               [:div.navbar-brand
-                [:a.navbar-item {:href "/" :style {:font-weight :bold}} "decision-konsent"]
+              [:nav.navbar.is-light>div.container
+               [:div.navbar-brand.
+                ;[:a.navbar-item [:img {:src "img/logo-100x100-gelb-trans.png" :alt "konsent"}]]
+                [:a.navbar-item {:href "/" :style {:font-weight :bold}} [:img {:src "img/logo-100x100-gelb-trans.png" :alt "konsent"}]]
                 [:span.navbar-burger.burger
                  {:data-target :nav-menu
                   :on-click    #(swap! expanded? not)
@@ -102,11 +98,36 @@
                 [:div.navbar-start
                  [nav-link "#/" "home" :home]
                  [nav-link "#/my-konsents" "my-konsents" :my-konsents]
-                 [nav-link "#/about" "about" :about]]]]))
+                 [nav-link "#/about" "about" :about]]
+                [:div.navbar-end
+                 [:div.navbar-item
+                  (if (not @logged-in)
+                   [:div.buttons.has-addons
+                    [register-button]
+                    [login-button]]
+                   [:div.buttons.has-addons
+                    [user-indicator]
+                    [logout-button]])]]]]))
+
 
 (defn about-page []
-  [:section.section>div.container>div.content
-   [:div "Redleg & BELs konsent app" #_{:src "/img/warning_clojure.png"}]])
+  [:section.section>div.container.is-vertical.is-flexible
+   [:div.column.is-one-third
+       [:article.message.is-primary
+        [:div.message-header
+         [:p "about..."] [:div.card
+                          [:div.card-image
+                           [:figure.image.is-3by3
+                            [:img {:src "img/logo-100x100-gelb-trans.png" :alt "Placeholder image"}]]]]
+         #_[:button.delete {:aria-label "delete"}]]
+        [:div.message-body "konsent with a K -
+     neither 'to consent' nor consensus.
+     Basically, it's decision making based on the absence of objections or major concerns. "
+         [:a  {:href "https://thedecider.app/consent-decision-making"} "See here for more info."]
+         " Made be Armin and Benno."]]]])
+
+
+
 
 (defn my-konsents-page []
   [:section.section>div.container>div.content
@@ -121,39 +142,69 @@
     [:a.panel-block
      [:span.panel-icon
       [:i.fas.fa-fighter-jet {:aria-hidden "true"}]] "decision regarding new traveling rules"]]])
+
+
 (defn home-page []
       [:section.section>div.container>div.content
-       ;[:h3 "Your Comments, Discussions and Feature-Requests and more..."]
-       [:div.field [:button.button.is-inactive {:disabled true} "the shortes tutorial of the world: "] [d/konsent]]
-       [d/discussion-form]
-       #_(when-let [docs @(rf/subscribe [:docs])]
-           [:div {:dangerouslySetInnerHTML {:__html (md->html docs)}}])])
+        [:div.field.mb-6
+         [:form.box
+           [:label.label "Mini-Tutorial: taking team decisions fast!"]
+           [:div.mb-6 "Coming from a problem, first discuss possible options.
+             Then, somebody suggests a specific solution, actions, etc. She or he is in charge to
+             drive the decision.
+             Now everybody can ask questions in order to understand the proposal.Don't start again discussing
+             contradictions, your standpoint or feelings. As soon as everybody
+             understand the details of the proposal, everybody gives hers or his agreement,
+             concern or veto. If there are (only) agreements and minor concerns, the decision is taken.
+             Perfect! If there are major concerns, they are spoken out and are worked into the proposal.
+             In case of a veto, the person that issued the veto places the next proposal."
+             [:strong " Please try the buttons below..."]]
+          [d/konsent]]]
+        [d/discussion-form]])
+
+
+(defn errors-section []
+  (if-let [errs @(rf/subscribe [:common/error])]
+    [:section.section>div.container>div.content
+     [:article.message.is-warning
+      [:div.message-header
+       [:p "a loving warning from the machine..."]
+       [:button.delete {:aria-label "delete" :on-click #(rf/dispatch [:common/clear-error])}]]
+      (for [err errs]
+       [:div.message-body err])]]))
 
 (defn page []
   (if-let [page @(rf/subscribe [:common/page])]
-    [:div
+    [:div.column;.is-two-thirds
      [navbar]
      [:div.columns.is-centered>div.column
+      [errors-section]
       [page]]]))
+
 
 (defn navigate! [match _]
   (rf/dispatch [:common/navigate match]))
+
 
 (def router
   (reitit/router
     [["/" {:name        :home
            :view        #'home-page
-           :controllers [{:start (fn [_] (rf/dispatch [:page/init-home]))}]}]
+           #_ [ :controllers [{:start (fn [_] (rf/dispatch [:page/init-home]))}]]}]
+
      ["/about" {:name :about
                 :view #'about-page}]
+
      ["/my-konsents" {:name :my-konsents
                       :view #'my-konsents-page}]]))
+
 
 (defn start-router! []
   (rfe/start!
     router
     navigate!
     {}))
+
 
 ;; -------------------------
 ;; Initialize app

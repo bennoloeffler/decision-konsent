@@ -1,24 +1,24 @@
 -- :name create-user! :! :n
 -- :doc creates a new user record
 INSERT INTO users
-(email_login, password)
-VALUES (:email_login, :password)
+(email, password)
+VALUES (:email, :password)
 
 -- :name update-user! :! :n
 -- :doc updates an existing user record
 UPDATE users
 SET password = :password
-WHERE email_login = :email_login
+WHERE email = :email
 
 -- :name get-user :? :1
 -- :doc retrieves a user record given the id
 SELECT * FROM users
-WHERE email_login = :email_login
+WHERE email = :email
 
 -- :name delete-user! :! :n
 -- :doc deletes a user record given the id
 DELETE FROM users
-WHERE email_login = :email_login
+WHERE email = :email
 
 -- :name get-users :? :*
 -- :doc retrieves all users records

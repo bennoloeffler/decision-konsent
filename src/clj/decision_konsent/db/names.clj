@@ -80,7 +80,7 @@
      :first_name first
      :last_name last
      :email email
-     :pass password}))
+     :password password}))
 
 
 (comment

@@ -1,3 +1,3 @@
 CREATE TABLE users
-(email_login VARCHAR(150) PRIMARY KEY,
+(email VARCHAR(150) PRIMARY KEY,
  password VARCHAR(150)  NOT NULL);

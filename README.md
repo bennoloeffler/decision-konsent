@@ -15,11 +15,12 @@ scss/sass build and watch: `npm run css-watch` and css-build (see package.json)
 1. datastructure for a growing consent, that is used and notified between clients and server
 1. backend-server with database that creates and saves konsents (save-consent)
 1. register as user (if you want to create konsent)
-1. use an invitation link to take part in an konsent without registration
-1. login as user (email, password, picture?)
+1. login as user (email, password)
+1. validation of forms (client and server)
 1. create a consent (invite participants while creation)
-1. invite participants after creation
 1. see all my running kosents 
+1. invite participants after creation
+1. use an invitation link to take part in an konsent without registration
 1. disuss (write a message into a running konsent)
 1. start voting (and see, who has votet - but not how)
 1. finish voting (even if sombody did not vote)

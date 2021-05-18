@@ -3,30 +3,74 @@
             [ajax.core :refer [GET POST]]
             [re-frame.core :as rf]))
 
+(rf/reg-event-fx
+  :message/save
+  (fn [{:keys [db]} _]
+    (println "event: saving...")
+    {:db       (assoc db :messages/loading? true)
+     :ajax/post {:url           "/api/konsent/message"
+                 :success-path  [:messages]
+                 :success-event [:messages/set]}}))
+
+(rf/reg-event-fx
+  :messages/load
+  (fn [{:keys [db]} _]
+    (println "event: loading...")
+    {:db       (assoc db :messages/loading? true)
+     :ajax/get {:url           "/api/konsent/message"
+                :success-path  [:messages]
+                :success-event [:messages/set]}}))
+
+(rf/reg-event-db
+  :messages/set
+  (fn [db [_ messages]]
+    (println (str "event: set messages: " messages))
+    (-> db
+        (assoc :messages/loading? false
+               :messages/list messages))))
+
+(rf/reg-sub
+  :messages/loading?
+  (fn [db _]
+    (:messages/loading? db)))
+
+(rf/reg-sub
+  :messages/list
+  (fn [db _]
+    (reverse (:messages/list db))))
+
+
+
+
 (defn big-icon-button [tooltip-text icon-name]
-  [:button.button.is-primary.is-outlined { :data-tooltip tooltip-text :class "has-tooltip-arrow"} [:span.icon>i.fas.fa-1x {:class icon-name}]])
+  [:button.button.is-primary.is-outlined { :data-tooltip tooltip-text :class "has-tooltip-arrow"}
+    [:span.icon>i.fas.fa-1x {:class icon-name}]])
+
 
 (defn konsent []
   [:span
    [big-icon-button "No concern.\nLet's do it." "fa-arrow-alt-circle-up"]
    [big-icon-button "Minor concern!\nHave to say them.\nBut then: Let's do it." "fa-arrow-alt-circle-right"]
-   [big-icon-button "Major concern!\nThey need to be reflected.\nOnly if they are reflected,\nI could go with this suggestion." "fa-arrow-alt-circle-down"]
-   [big-icon-button "VETO.\nI would like to take responsibility\nand make a next suggestion.\nYou know: This is ultima ratio..." "fa-bolt"]])
+   [big-icon-button "Major concern!\nThey need to be reflected.\nOnly if they are reflected,\nI could go with
+     this suggestion." "fa-arrow-alt-circle-down"]
+   [big-icon-button "VETO.\nI would like to take responsibility\nand make a next suggestion.\nYou know:
+     This is ultima ratio..." "fa-bolt"]])
+
 
 (defn small-icon-button
   ([icon-name] (small-icon-button nil icon-name))
-  ([_ icon-name]
+  ([_ icon-name] ; _ for :key
    [:button.button.is-rounded.is-light {:data-tooltip icon-name
                                         :class        "has-tooltip-arrow"
                                         :on-click     #(js/console.log icon-name)}
      [:span.icon.is-large>i.fas.fa-1x {:class icon-name}]]))
 
+
 (defn small-icon-buttons [& icon-names]
   [:div (map (fn [icon-name] [small-icon-button {:key icon-name} (str icon-name)]) icon-names)])
 
 
-
-(defn send-message! [fields]
+(defn send-message! [fields] ;TODO switch to dispatch / event / effect
   (POST "/api/konsent/message"
         {:params @fields
          :handler #(do ( .log js/console (str %))
@@ -34,17 +78,11 @@
          :error-handler #(.error js/console (str "error: " %))}))
 
 
-#_(defn message-list [messages]
-    [:div.container>div.list>ul
-     (for [message @messages]
-       ^{:key message}
-       [:div.list-item>li message])])
-
 (defn message-list [messages]
   [:nav.panel
     [:p.panel-heading "feedbacks & comments"]
     (for [message @messages]
-       ^{:key message}
+       ^{:key message} ; TODO really an id...
        ;[:div.list-item>li message]
        [:a.panel-block
          [:span.panel-icon
@@ -56,15 +94,15 @@
     [:div "loading messages..."]
     [:div (message-list (rf/subscribe [:messages/list]))]))
 
+
 (defn discussion-form []
  (let [fields (r/atom {})]
    (fn []
-    [:div
+    [:form.box
       [:div.field.has-addons {:data-tooltip "leave a message, give feedback, suggest improvements..."}
-        [:input.button.is-primary
+        [:input.button.is-outlined.is-primary
           {:type :submit
            :value "send"
-
            :on-click #(send-message! fields)}]
         [:input.input
           {:type :text

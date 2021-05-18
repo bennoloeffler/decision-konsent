@@ -10,7 +10,10 @@
     [decision-konsent.middleware.formats :as formats]
     [ring.util.http-response :refer :all]
     [clojure.java.io :as io]
-    [decision-konsent.db.core :as db]))
+    [decision-konsent.db.core :as db]
+    [ring.util.http-response :as response]
+    [decision-konsent.auth :as auth])
+  (:import (clojure.lang ExceptionInfo)))
 
 (defn service-routes []
   ["/api"
@@ -47,6 +50,45 @@
              {:url "/api/swagger.json"
               :config {:validator-url nil}})}]]
 
+   ["/user"
+     {:swagger {:tags ["user"]}}
+
+     ["/register"
+      {:post {:summary    "create a new user"
+              :parameters {:body {:email string? :password string? :confirm string?}}
+              :responses  {200 {:body {:message string?}}
+                           400 {:body {:message string?}}
+                           409 {:body {:message string?}}}
+              :handler    (fn [{{{:keys [email password confirm]} :body} :parameters}]
+                            (println "going to register user: " email)
+                            (if-not (= password confirm)
+                              (response/bad-request {:message "Password and confirm do not match."})
+                              (try
+                                (auth/create-user! email password)
+                                (response/ok {:message "User registered. Please login."})
+                                (catch ExceptionInfo e
+                                  (if (= (:decision-konsent/error-id (ex-data e))
+                                         ::auth/duplicate-user)
+                                    (response/conflict {:message "Failed. User already exists."})
+                                    (throw e))))))}}]
+
+
+     ["/login"
+      {:post {:summary    "user authentictes with email and password"
+              :parameters {:body {:email string? :password string?}}
+              :responses {200 {:body {:identity {:email string?}}}
+                          401 {:body {:message string?}}}
+              :handler (fn [{{{:keys [email password]} :body} :parameters
+                             session :session}]
+                           (if-some [user (auth/authenticate-user email password)]
+                             (-> (response/ok {:identity user})
+                                 (assoc :session (assoc session :identity user)))
+                             (response/unauthorized {:message "Incorrect login or password."})))}}]
+
+
+     ["/logout"
+       {:post {:handler (fn [_] (-> (response/ok {:logged-out-identity "ghost"})
+                                    (assoc :session nil)))}}]]
    ["/konsent"
      {:swagger {:tags ["konsent"]}}
 

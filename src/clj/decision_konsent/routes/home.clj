@@ -30,8 +30,8 @@
    ["/" {:get home-page}]
    ["/adduser" {:get add-rand-user!}]
    ["/allusers" {:get get-users}]
-   ["/migrate" {:get migrate!}]
-   ["/rollback" {:get rollback!}]
+   ["/migrate" {:get migrate!}] ; TODO find a better solution
+   ["/rollback" {:get rollback!}] ; TODO find a better solution
 
    ["/docs" {:get (fn [_]
                     (-> (response/ok (-> "docs/docs.md" io/resource slurp))
