@@ -39,7 +39,7 @@
 
    ;; swagger documentation
    ["" {:no-doc true
-        :swagger {:info {:title "my-api"
+        :swagger {:info {:title "the konsent-app-api"
                          :description "https://cljdoc.org/d/metosin/reitit"}}}
 
     ["/swagger.json"
@@ -97,11 +97,23 @@
       {:get {:summary "just see the konsent app living..."
              :handler (constantly (ok {:message "pong"}))}}]
 
-     ["/o-create-konsent"
-      {:get {:summary "an owner (o) starts an konsent - with problem-description and participants (p)"
+     ["/create-konsent"
+      {:get {:summary "An owner (o) starts an konsent - with problem-description and participants (p). An id will be created."
              :handler (constantly (ok {:message "owner created konsent"}))}}]
 
-     ["/discuss"
+     ["/save-konsent"
+      {:get {:summary "Somebody saves a consent"
+             :handler (constantly (ok {:message "user saved konsent"}))}}]
+
+     ["/delete-konsent"
+      {:get {:summary "User delete a consent"
+             :handler (constantly (ok {:message "user deleted konsent"}))}}]
+
+     ["/all-konsents-for-user"
+      {:get {:summary "A user askes for all consents he is involved in."
+             :handler (constantly (ok {:message "user konsents"}))}}]
+
+    #_["/discuss"
       {:get {:parameters {:query {:text string?}}
              :summary "owner (o) and participants (p) may discuss a while and even change the problem-description while finding ideas and options for possible solutions."
              ;:handler (constantly (ok {:message "well, you know - i think..."}))
@@ -116,45 +128,47 @@
                         {:status 200
                          :body   {:messages (map :message (db/get-messages))}})}
        :post {:summary "just send a message to everybody"
-              :parameters {:body {:message string?}}
-              ;:responses {200 {:body {:messages string?}}}
-              :handler (fn [{{{:keys [message]} :body} :parameters}]
-                         (db/create-message! {:message message})
-                         (println "wrote message: " message)
-                         {:status 200
-                          :body (map :message (db/get-messages))})}}]
+              :parameters {:body-params {:message string?}}
+              ;:responses {200 {:body {:messages seq?}}}
+              :handler (fn [input ]
+                         (let [{{:keys [message]} :body-params} input]
+                           (println "received message: " (:body-params input))
+                           (db/create-message! {:message message})
+                           ;(println "wrote message: " message)
+                           {:status 200
+                            :body (map :message (db/get-messages))}))}}]
 
-     ["/o-start-suggest-ask-vote-iteration"
+     #_["/o-start-suggest-ask-vote-iteration"
       {:get {:summary "when the time is right, somebody may start the formal konsent process. She then is the new owner (o)"
              :handler (constantly (ok {:message "from now on - lets get formal! owner is now: "}))}}]
 
-     ["/p-ask-to-understand-suggestion"
+     #_["/p-ask-to-understand-suggestion"
       {:get {:summary "all the participants (p) may ask one or more questions in order to understand the suggested decision"
              :handler (constantly (ok {:message "ask to get answers - not to pre-vote."}))}}]
 
-     ["/o-answer"
+    #_["/o-answer"
       {:get {:summary "the owner (o) has to answer the questions. Sometimes 'I don´t know' will be the truth"
              :handler (constantly (ok {:message "understanding and answering may make the owner learn"}))}}]
 
-     ["/p-no-more-questions"
+    #_["/p-no-more-questions"
       {:get {:summary "after a while, the participants (p) will signal: I have no more questions."
              :handler (constantly (ok {:message "finished asking - waiting for vote"}))}}]
 
-     ["/o-ask-for-vote"
+    #_["/o-ask-for-vote"
       {:get {:summary "the owner (o) summarises the proposed decision with the details/learnings from the questions and asks the participants (p) to vote"
              :handler (constantly (ok {:message "this is my proposal XYZ. please vote. show concerns, veto - or just a YES!"}))}}]
 
-     ["/p-vote"
+    #_["/p-vote"
       {:get {:summary "a participant (p) votes with :yes :major :minor :veto and a hint"
              :handler (constantly (ok {:message "you voted wisely"}))}}]
 
-     ["/o-end-konsent"
+    #_["/o-end-konsent"
       {:get {:summary "there may be no decision - but the owner stops the process. Either because there is no more need or she just gives up because of repeated major concerns or vetos"
              :handler (constantly (ok {:message "understanding and answering may make the owner learn"}))}}]]
 
 
 
-   ["/math"
+   #_["/math"
     {:swagger {:tags ["math"]}}
 
     ["/plus"
@@ -171,7 +185,7 @@
                         {:status 200
                          :body {:total (+ x y)}})}}]]
 
-   ["/files"
+   #_["/files"
     {:swagger {:tags ["files"]}}
 
     ["/upload"

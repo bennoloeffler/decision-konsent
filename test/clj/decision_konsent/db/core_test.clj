@@ -26,6 +26,10 @@
     (mount/start
      #'decision-konsent.config/env
      #'decision-konsent.db.core/*db*)
+    (migrations/migrate ["rollback"] (select-keys env [:database-url]))
+    (migrations/migrate ["rollback"] (select-keys env [:database-url]))
+    (migrations/migrate ["rollback"] (select-keys env [:database-url]))
+
     (migrations/migrate ["migrate"] (select-keys env [:database-url]))
     (f)))
 

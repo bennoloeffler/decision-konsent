@@ -3,7 +3,8 @@
     [ajax.core :as ajax]
     [luminus-transit.time :as time]
     [cognitect.transit :as transit]
-    [re-frame.core :as rf]))
+    [re-frame.core :as rf]
+    [ajax.core :refer [GET POST]]))
 
 (defn local-uri? [{:keys [uri]}]
   (not (re-find #"^\w+?://" uri)))
@@ -28,3 +29,10 @@
          conj
          (ajax/to-interceptor {:name "default headers"
                                :request default-headers})))
+
+(defn send-message! [fields]
+  (println "sending: " fields)
+  (POST "api/konsent/message"
+        {:params        fields
+         :handler       #(do (.log js/console (str "response:" %)) (rf/dispatch [:messages/set %]))
+         :error-handler #(.error js/console (str "error:" %))}))

@@ -1,5 +1,6 @@
 (ns decision-konsent.db.konsent-test
   (:require [clojure.test :refer :all])
+  (:require [decision-konsent.db.core :as db])
   (:require [decision-konsent.db.konsent :as k])
   (:require
     [luminus-migrations.core :as migrations]
@@ -18,6 +19,15 @@
      #'decision-konsent.db.core/*db*)
     (migrations/migrate ["migrate"] (select-keys env [:database-url]))
     (f)))
+
+
+(deftest create-message!-test
+  (jdbc/with-transaction [t-conn decision-konsent.db.core/*db* {:rollback-only true}]
+                         (let [data (db/create-message! t-conn
+                                                       {:message "this is the message"})]
+                           ;(log/debug (str "DATA: " data))
+                           (is (= 1 data)))))
+
 
 (deftest create-konsent!-test
   (jdbc/with-transaction [t-conn decision-konsent.db.core/*db* {:rollback-only true}]

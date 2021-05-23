@@ -1,49 +1,17 @@
 (ns decision-konsent.discussion
   (:require [reagent.ratom :as r]
             [ajax.core :refer [GET POST]]
-            [re-frame.core :as rf]))
-
-(rf/reg-event-fx
-  :message/save
-  (fn [{:keys [db]} _]
-    (println "event: saving...")
-    {:db       (assoc db :messages/loading? true)
-     :ajax/post {:url           "/api/konsent/message"
-                 :success-path  [:messages]
-                 :success-event [:messages/set]}}))
-
-(rf/reg-event-fx
-  :messages/load
-  (fn [{:keys [db]} _]
-    (println "event: loading...")
-    {:db       (assoc db :messages/loading? true)
-     :ajax/get {:url           "/api/konsent/message"
-                :success-path  [:messages]
-                :success-event [:messages/set]}}))
-
-(rf/reg-event-db
-  :messages/set
-  (fn [db [_ messages]]
-    (println (str "event: set messages: " messages))
-    (-> db
-        (assoc :messages/loading? false
-               :messages/list messages))))
-
-(rf/reg-sub
-  :messages/loading?
-  (fn [db _]
-    (:messages/loading? db)))
-
-(rf/reg-sub
-  :messages/list
-  (fn [db _]
-    (reverse (:messages/list db))))
+            [re-frame.core :as rf]
+            [decision-konsent.discussion-events]))
 
 
+
+(def prevent-reload {:on-submit (fn [e] (do (.preventDefault e)
+                                            (identity false)))})
 
 
 (defn big-icon-button [tooltip-text icon-name]
-  [:button.button.is-primary.is-outlined { :data-tooltip tooltip-text :class "has-tooltip-arrow"}
+  [:button.button.is-primary.is-outlined.mr-1 {:type "button" :data-tooltip tooltip-text :class "has-tooltip-arrow"}
     [:span.icon>i.fas.fa-1x {:class icon-name}]])
 
 
@@ -70,46 +38,74 @@
   [:div (map (fn [icon-name] [small-icon-button {:key icon-name} (str icon-name)]) icon-names)])
 
 
-(defn send-message! [fields] ;TODO switch to dispatch / event / effect
-  (POST "/api/konsent/message"
-        {:params @fields
-         :handler #(do ( .log js/console (str %))
-                       (rf/dispatch [:messages/load]))
-         :error-handler #(.error js/console (str "error: " %))}))
-
-
 (defn message-list [messages]
   [:nav.panel
     [:p.panel-heading "feedbacks & comments"]
-    (for [message @messages]
-       ^{:key message} ; TODO really an id...
+    (for [message (map vector @messages (range))]
+       ^{:key (str (first message) (last message))} ; TODO really an id...
        ;[:div.list-item>li message]
        [:a.panel-block
          [:span.panel-icon
-          [:i.fas.fa-book {:aria-hidden "true"}]] message])])
+          [:i.fas.fa-book {:aria-hidden "true"}]] (first message)])])
 
 
 (defn messages-form []
-  (if @(rf/subscribe [:messages/loading?])
-    [:div "loading messages..."]
-    [:div (message-list (rf/subscribe [:messages/list]))]))
+  ;(if @(rf/subscribe [:messages/loading?])
+    ;[:form.box [:div "loading..."] [:button.button.is-loading]]
+    [:div (message-list (rf/subscribe [:messages/list]))])
+
+(defn login []
+  [:form.box prevent-reload
+   [:div.field
+    [:label.label "Email"]
+    [:div.control
+     [:input.input {:type "email" :placeholder "e.g. alex@example.com"}]]]
+   [:div.field
+    [:label.label "Password"]
+    [:div.control
+     [:input.input {:type "password" :placeholder "********"}]]]
+
+   [:button.button.is-primary.mr-1.mt-3 "Sign in"]
+   [:button.button.is-primary.is-outlined.mt-3 "No account? Create an account..."]])
+
+(defn register []
+  [:form.box prevent-reload
+   [:div.field
+    [:label.label "Email"]
+    [:div.control
+     [:input.input {:type "email" :placeholder "e.g. alex@example.com"}]]]
+   [:div.field
+    [:label.label "Password"]
+    [:div.control
+     [:input.input {:type "password" :placeholder "********"}]]]
+   [:div.field
+    [:label.label "Confirm Password"]
+    [:div.control
+     [:input.input {:type "Password" :placeholder "********"}]]]
+   [:div
+    [:button.button.is-primary.mr-1.mt-3 "Create your account"]
+    [:button.button.is-primary.is-outlined.mt-3 "I have an account. Just login."]]])
+
 
 
 (defn discussion-form []
  (let [fields (r/atom {})]
    (fn []
-    [:form.box
-      [:div.field.has-addons {:data-tooltip "leave a message, give feedback, suggest improvements..."}
-        [:input.button.is-outlined.is-primary
-          {:type :submit
-           :value "send"
-           :on-click #(send-message! fields)}]
-        [:input.input
-          {:type :text
-           :name :message
-           :on-change #(swap! fields assoc :message (-> % .-target .-value))
-           :on-key-down #(when (= (.-keyCode %) 13) (send-message! fields))
-           :value (:message @fields)}]]
-      [messages-form]])))
+    [:div
+     [:form.box prevent-reload
+         [:div.field.has-addons {:data-tooltip "leave a message, give feedback, suggest improvements..."}
+
+           [:input.button.is-outlined.is-primary.mr-1
+             {;:class  (if @(rf/subscribe [:messages/loading?])  "is-primary" "is-loading")
+              :type :button
+              :value "send"
+              :on-click #(do (println "f: " @fields) (rf/dispatch [:message/save @fields]))}] ;#(send-message! fields)}]
+           [:input.input
+            {:type        :text
+             :name        :message
+             :on-change   #(swap! fields assoc :message (-> % .-target .-value))
+             :on-key-down #(when (= (.-keyCode %) 13)  (do (println "f: " @fields) (rf/dispatch [:message/save @fields])))
+             :value       (:message @fields)}]]
+         [messages-form]]])))
 
 

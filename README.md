@@ -2,6 +2,23 @@
 
 ## checkout, checkin, running, testing, deploy
 
+run the build tools:
+start console (3x)
+cd \projects\_clj\decision-konsent>
+
+#### 1 SCSS (css rebuild + reload as typed)
+npm run css-watch
+
+#### 2 SHADOW (frontend, cljs - recompile + reload as typed)
+lein shadow watch app
+
+#### 3 TEST (run tests 
+$env:DATABASE_URL="postgresql://localhost/konsent_test?user=postgres&password=xr600r"
+lein test-refresh
+
+#### 4 REPL (start, stop, restart - change and reload)
+intellij
+
 create project: `lein new luminus decision-konsent +cljs +swagger +postgres +reagent +re-rame +shadow-cljs`   
 set database env for prod/env locally: `$env:DATABASE_URL="postgresql://localhost/konsent_heroku?user=postgres&password=xr600r"`  
 run locally: `lein run`  

@@ -8,56 +8,13 @@
     [goog.history.EventType :as HistoryEventType]
     [markdown.core :refer [md->html]]
     [decision-konsent.ajax :as ajax]
-    [decision-konsent.events]
+    [decision-konsent.core-events]
     [reitit.core :as reitit]
     [reitit.frontend.easy :as rfe]
     [clojure.string :as string]
     [decision-konsent.discussion :as d]
     [ajax.core :refer [GET POST]])
-
   (:import goog.History))
-
-
-
-;; register event-handler (rf/reg-event-db)
-(rf/reg-event-fx
-  :initialize
-  (fn [_ _]
-    (println ":initialize event")
-    {:db {:messages/loading? true}
-     :dispatch [:messages/load]}))
-
-(rf/reg-fx
-  :ajax/get
-  (fn [{:keys [url success-event error-event success-path]}]
-    (println "start ajax/get...")
-    (GET url
-      (cond-> {:headers {"Accept" "application/transit+json"}}
-        success-event (assoc :handler
-                             #(rf/dispatch
-                                (conj success-event
-                                      (if success-path
-                                        (get-in % success-path)
-                                        %))))
-        error-event (assoc :error-handler
-                           #(rf/dispatch
-                              (conj error-event %)))))))
-
-#_(rf/reg-fx
-    :ajax/post
-    (fn [{:keys [url success-event error-event success-path]}]
-      (println "start ajax/post...")
-      (POST url
-        (cond-> {:headers {"Accept" "application/transit+json"}}
-           success-event (assoc :handler
-                                #(rf/dispatch
-                                   (conj success-event
-                                     (if success-path
-                                        (get-in % success-path)
-                                        %))))
-           error-event (assoc :error-handler
-                               #(rf/dispatch
-                                  (conj error-event %)))))))
 
 
 (def logged-in (r/atom false))
@@ -66,13 +23,13 @@
   [:button.button.is-primary {:on-click #(reset! logged-in true)} [:span.icon.is-large>i.fas.fa-1x.fa-sign-in-alt] [:span "login"]])
 
 (defn register-button []
-  [:button.button.is-warning {:on-click #(rf/dispatch [:common/set-error "registration is not yet available - sorry"])} [:span.icon.is-large>i.fas.fa-1x.fa-pen-nib] [:span "register an account and then..."]])
+  [:button.button.is-warning.mr-1 {:on-click #(rf/dispatch [:common/set-error "registration is not yet available - sorry"])} [:span.icon.is-large>i.fas.fa-1x.fa-pen-nib] [:span "register an account and then..."]])
 
 (defn logout-button []
   [:button.button.is-primary.is-outlined {:on-click #(reset! logged-in false)} [:span.icon.is-large>i.fas.fa-1x.fa-sign-out-alt] [:span "logout"]])
 
 (defn user-indicator []
-  [:button.button.is-primary.is-outlined {:on-click #(rf/dispatch [:common/set-error "profile editing not yet available - sorry"])}[:span.icon.is-large>i.fas.fa-1x.fa-address-card] [:span "gandalf@arakis.pl"]])
+  [:button.button.is-primary.is-outlined.mr-1 {:on-click #(rf/dispatch [:common/set-error "profile editing not yet available - sorry"])}[:span.icon.is-large>i.fas.fa-1x.fa-address-card] [:span "gandalf@arakis.pl"]])
 
 
 (defn nav-link [uri title page]
@@ -102,10 +59,10 @@
                 [:div.navbar-end
                  [:div.navbar-item
                   (if (not @logged-in)
-                   [:div.buttons.has-addons
+                   [:div.buttons
                     [register-button]
                     [login-button]]
-                   [:div.buttons.has-addons
+                   [:div.buttons
                     [user-indicator]
                     [logout-button]])]]]]))
 
@@ -125,8 +82,6 @@
      Basically, it's decision making based on the absence of objections or major concerns. "
          [:a  {:href "https://thedecider.app/consent-decision-making"} "See here for more info."]
          " Made be Armin and Benno."]]]])
-
-
 
 
 (defn my-konsents-page []
@@ -159,7 +114,10 @@
              Perfect! If there are major concerns, they are spoken out and are worked into the proposal.
              In case of a veto, the person that issued the veto places the next proposal."
              [:strong " Please try the buttons below..."]]
+
           [d/konsent]]]
+        [d/login]
+        [d/register]
         [d/discussion-form]])
 
 
@@ -170,8 +128,10 @@
       [:div.message-header
        [:p "a loving warning from the machine..."]
        [:button.delete {:aria-label "delete" :on-click #(rf/dispatch [:common/clear-error])}]]
-      (for [err errs]
-       [:div.message-body err])]]))
+      (for [err (map vector errs (range))]
+       ^{:key (str (first err) (last err))}
+       [:div.message-body (first err)])]]))
+
 
 (defn page []
   (if-let [page @(rf/subscribe [:common/page])]
@@ -183,6 +143,7 @@
 
 
 (defn navigate! [match _]
+  (println (str "navigate! match = " match _))
   (rf/dispatch [:common/navigate match]))
 
 
@@ -200,21 +161,23 @@
 
 
 (defn start-router! []
+  (println "starting up ROUTER")
   (rfe/start!
     router
     navigate!
     {}))
 
 
-;; -------------------------
+;;
 ;; Initialize app
+;;
 (defn ^:dev/after-load mount-components []
   (rf/clear-subscription-cache!)
   (rdom/render [#'page] (.getElementById js/document "app")))
 
 
 (defn init! []
-  (println "GOING TO START BELs Konsent Server")
+  (println "starting up konsent CLIENT SPA")
   (start-router!)
   (ajax/load-interceptors!)
   (rf/dispatch-sync [:initialize])
