@@ -28,7 +28,7 @@
     (println (str "event: set messages: " messages))
     (-> db
         (assoc :messages/loading? false
-               :messages/list messages))))
+               :messages/list (reverse messages)))))
 
 (rf/reg-sub
   :messages/loading?
