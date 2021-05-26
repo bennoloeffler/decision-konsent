@@ -34,5 +34,5 @@
   (println "sending: " fields)
   (POST "api/konsent/message"
         {:params        fields
-         :handler       #(do (.log js/console (str "response:" %)) (rf/dispatch [:messages/set %]))
+         :handler       #(do (.log js/console (str "response:" %)) (rf/dispatch [:messages/set  (:messages %)]))
          :error-handler #(.error js/console (str "error:" %))}))

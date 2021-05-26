@@ -22,11 +22,14 @@ intellij
 create project: `lein new luminus decision-konsent +cljs +swagger +postgres +reagent +re-rame +shadow-cljs`   
 set database env for prod/env locally: `$env:DATABASE_URL="postgresql://localhost/konsent_heroku?user=postgres&password=xr600r"`  
 run locally: `lein run`  
-compile permenently: `lein shadow watch app`  
+compile cljs incrementally: `lein shadow watch app`  
+build jar: `lein uberjar`  
 test heroku deploy: `heroku local`  
 continuous test: `lein test-refresh`  
 heroku with buildpack nodejs and clojure  
 scss/sass build and watch: `npm run css-watch` and css-build (see package.json)  
+deploy to heroku: `git commit -am "xyz" | git push heroku master`
+migrate and rollback: `heroku run bash | java -jar target/uberjar/decision-konsent.jar migrate`
 
 ## user stories
 1. datastructure for a growing consent, that is used and notified between clients and server

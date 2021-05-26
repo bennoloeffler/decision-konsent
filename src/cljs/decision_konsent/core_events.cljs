@@ -4,7 +4,8 @@
     [ajax.core :as ajax]
     [reitit.frontend.easy :as rfe]
     [ajax.core :refer [GET POST]]
-    [reitit.frontend.controllers :as rfc]))
+    [reitit.frontend.controllers :as rfc]
+    [decision-konsent.client-time :as ct]))
 
 
 
@@ -14,10 +15,19 @@
 
 (rf/reg-event-fx
   :initialize
-  (fn [_ _]
+  [(rf/inject-cofx :now)]
+  (fn [cofx _]
     ;(println ":initialize event")
-    {:db       {:messages/loading? true} ; effects map
-     :dispatch [:messages/load]}))
+    {:db         {:messages/loading? true :timestamp 0}     ; effects map
+     :dispatch-n [[:timer (:now cofx)]
+                  [:set-server-diff-time 0]
+                  [:init-server-diff-time]
+                  [:messages/load]]}))
+
+(rf/reg-cofx
+  :now
+  (fn [cofx _]
+    (assoc cofx :now (ct/current-time))))
 
 ;;
 ;; ajax
@@ -57,6 +67,7 @@
                                      #(rf/dispatch
                                         (conj error-event %)))
                   true (assoc :params {:message "this is it..."})))))
+
 
 ;;
 ;; navigate menu bar

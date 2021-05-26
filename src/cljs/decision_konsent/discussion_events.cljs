@@ -8,10 +8,10 @@
   (fn [{:keys [db]} [_ message]]
     (println "event: saving...")
     (ajax/send-message! message)
-    {:db        (assoc db :messages/loading? true)
+    {:db (assoc db :messages/loading? true)
      #_:ajax/post #_{:url           "/api/konsent/message"
-                 :success-path  [:messages]
-                 :success-event [:messages/set]}}))
+                     :success-path  [:messages]
+                     :success-event [:messages/set]}}))
 
 (rf/reg-event-fx
   :messages/load

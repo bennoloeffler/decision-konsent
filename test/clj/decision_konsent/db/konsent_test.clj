@@ -17,6 +17,7 @@
     (mount/start
      #'decision-konsent.config/env
      #'decision-konsent.db.core/*db*)
+    (migrations/migrate ["rollback"] (select-keys env [:database-url]))
     (migrations/migrate ["migrate"] (select-keys env [:database-url]))
     (f)))
 
@@ -24,8 +25,11 @@
 (deftest create-message!-test
   (jdbc/with-transaction [t-conn decision-konsent.db.core/*db* {:rollback-only true}]
                          (let [data (db/create-message! t-conn
-                                                       {:message "this is the message"})]
-                           ;(log/debug (str "DATA: " data))
+                                                       {:message "this is the message" :unixtime 1234567})
+                               read-val (db/get-messages)]
+                           (log/debug (str "DATA: " data))
+                           (log/debug (str "READ : " read-val))
+                           #_(is (= 1234567  read-val))
                            (is (= 1 data)))))
 
 

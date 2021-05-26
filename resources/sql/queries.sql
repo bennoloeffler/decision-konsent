@@ -63,9 +63,14 @@ SELECT * FROM konsents
 -- :name create-message! :! :n
 -- :doc creates a new message record
 INSERT INTO messages
-(message)
-VALUES (:message)
+(message, timestamp)
+VALUES (:message, :timestamp)
 
 -- :name get-messages :? :*
 -- :doc retrieves all messages records
 SELECT * FROM messages
+
+-- :name delete-message! :! :n
+-- :doc deletes a message record given the id
+DELETE FROM messages
+WHERE id = :id
