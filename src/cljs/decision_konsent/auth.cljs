@@ -28,12 +28,12 @@
                          :placeholder "********"
                          :on-change   #(swap! fields assoc :password (-> % .-target .-value))}]]]
 
-        [:button.button.is-primary.mr-1.mt-3
-         {:on-click #(rf/dispatch [:auth/start-login @fields])}
-         (if (not @(rf/subscribe [:auth/user]))
-           "login"
-           "you are logged in :-)")]
-        #_[:button.button.is-primary.is-outlined.mt-3 "No account? Create an account..."]]])))
+
+        (if (not @(rf/subscribe [:auth/user]))
+          [:button.button.is-primary.mr-1.mt-3
+           {:on-click #(rf/dispatch [:auth/start-login @fields])}
+           "login"]
+          [:h2.subtitle.is-6 "you are logged in :-)"])]])))
 
 (defn register []
   (let [fields (r/atom {})]
@@ -64,4 +64,4 @@
          [:button.button.is-primary.mr-1.mt-3
           {:on-click #(rf/dispatch [:auth/start-register @fields])}
           "register your account"]
-         #_[:button.button.is-primary.is-outlined.mt-3 "I have an account. Just login."]]]])))
+         (when @(rf/subscribe [:auth/register-worked]) [:h2.subtitle.is-6 "you sucessfully registered :-)"])]]])))

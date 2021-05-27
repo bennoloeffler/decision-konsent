@@ -16,7 +16,7 @@
   :auth/handle-register
   (fn [db [_ {:keys [identity]}]]
     ;(println "receiving identity: " identity)
-    (assoc db :register "worked")))
+    (assoc db :auth/register-worked "worked")))
 
 (rf/reg-event-db
   :auth/handle-login-error
@@ -35,6 +35,10 @@
   (fn [db _]
     (-> db :auth/user :email)))
 
+(rf/reg-sub
+  :auth/register-worked
+  (fn [db _]
+    (-> db :auth/register-worked)))
 
 (rf/reg-event-fx
   :auth/start-login
