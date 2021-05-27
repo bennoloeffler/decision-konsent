@@ -30,7 +30,7 @@
   [:a.button.is-warning.mr-1 {:href "#/register"} #_{:on-click #(rf/dispatch [:common/set-error "registration is not yet available - sorry"])} [:span.icon.is-large>i.fas.fa-1x.fa-pen-nib] [:span "register an account and then..."]])
 
 (defn logout-button []
-  [:button.button.is-primary.is-outlined {:on-click #(rf/dispatch [:auth/handle-logout])} [:span.icon.is-large>i.fas.fa-1x.fa-sign-out-alt] [:span "logout"]])
+  [:button.button.is-primary.is-outlined {:on-click #(rf/dispatch [:auth/start-logout])} [:span.icon.is-large>i.fas.fa-1x.fa-sign-out-alt] [:span "logout"]])
 
 (defn user-indicator []
   [:button.button.is-primary.is-outlined.mr-1 {:on-click #(rf/dispatch [:common/set-error "profile editing not yet available - sorry"])} [:span.icon.is-large>i.fas.fa-1x.fa-address-card] [:span @(rf/subscribe [:auth/user])]])

@@ -22,7 +22,8 @@
      :dispatch-n [[:timer (:now cofx)]
                   [:set-server-diff-time 0]
                   [:init-server-diff-time]
-                  [:messages/load]]}))
+                  [:messages/load]
+                  [:session/load]]}))
 
 (rf/reg-cofx
   :now
@@ -81,12 +82,12 @@
                                  (rfc/apply-controllers (:controllers old-match) match))]
       (assoc db :common/route new-match))))
 
-#_(rf/reg-event-fx
+(rf/reg-event-fx
     :common/navigate!
     (fn [_ [_ url-key params query]]
       {:common/navigate-fx! [url-key params query]}))
 
-#_(rf/reg-fx
+(rf/reg-fx
     :common/navigate-fx!
     (fn [[k & [params query]]]
       (rfe/push-state k params query)))

@@ -13,7 +13,8 @@
     [decision-konsent.db.core :as db]
     [ring.util.http-response :as response]
     [decision-konsent.auth :as auth]
-    [decision-konsent.unix-time :as ut])
+    [decision-konsent.unix-time :as ut]
+    [spec-tools.data-spec :as ds])
   (:import (clojure.lang ExceptionInfo)))
 
 (defn service-routes []
@@ -89,8 +90,17 @@
 
 
     ["/logout"
-     {:post {:handler (fn [_] (-> (response/ok {:logged-out-identity "ghost"})
-                                  (assoc :session nil)))}}]]
+     {:post {:handler (fn [_] (println "logged out")
+                        (-> (response/ok {:logged-out-identity "ghost"})
+                            (assoc :session nil)))}}]
+    ["/session"
+     {:get {:parameters {:query {}}
+            :handler    (fn [{{:keys [identity]} :session}]
+                          (println "try to get session")
+                          (response/ok {:session
+                                        {:identity
+                                         (not-empty
+                                           (select-keys identity [:email]))}}))}}]]
    ["/konsent"
     {:swagger {:tags ["konsent"]}}
 
