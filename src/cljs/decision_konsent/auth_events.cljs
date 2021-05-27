@@ -3,23 +3,25 @@
             [ajax.core :as ajax]))
 
 
-(rf/reg-event-db
+(rf/reg-event-fx
   :auth/handle-login
-  (fn [db [_ {:keys [identity]}]]
+  (fn [{:keys [db]} [_ {:keys [identity]}]]
     ;(println "receiving identity: " identity)
-    (rf/dispatch [:common/navigate! :my-konsents nil nil])
-    (assoc db :auth/user identity)))
-; TODO
-; switch to my-konsents
+    #_(rf/dispatch [:common/navigate! :my-konsents nil nil])
+    #_(assoc db :auth/user identity)
+    {:db       (assoc db :auth/user identity)
+     :dispatch [:common/navigate! :my-konsents nil nil]}))
 
 
-(rf/reg-event-db
+
+(rf/reg-event-fx
   :auth/handle-register
-  (fn [db [_ {:keys [identity]}]]
+  (fn [{:keys [db]} [_ {:keys [email]}]]
     ;(println "receiving identity: " identity)
-    (assoc db :auth/register-worked "worked")))
-; TODO
-; switch to my-konsents
+    #_(assoc db :auth/register-worked "worked")
+    {:db       (-> db (assoc :auth/register-worked email))
+     :dispatch [:common/navigate! :login nil nil]}))
+
 
 (rf/reg-event-db
   :auth/handle-login-error
@@ -27,10 +29,11 @@
     ;(println "receiving error: " data)
     (assoc db :common/error (conj (db :common/error) (-> data :response :message)))))
 
-(rf/reg-event-db
+(rf/reg-event-fx
   :auth/handle-logout
-  (fn [db _]
-    (dissoc db :auth/user)))
+  (fn [{:keys [db]} _]
+    {:db       (dissoc db :auth/user)
+     :dispatch [:common/navigate! :login nil nil]}))
 
 
 (rf/reg-sub
@@ -94,7 +97,7 @@
                   :format          (ajax/json-request-format)
                   :response-format (ajax/json-response-format {:keywords? true})
                   :on-success      [:session/set]
-                  :on-failure [:auth/handle-login-error]}}))
+                  :on-failure      [:auth/handle-login-error]}}))
 
 (rf/reg-event-db
   :session/set

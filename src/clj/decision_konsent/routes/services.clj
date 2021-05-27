@@ -58,7 +58,7 @@
     ["/register"
      {:post {:summary    "create a new user"
              :parameters {:body {:email string? :password string? :confirm string?}}
-             :responses  {200 {:body {:message string?}}
+             :responses  {200 {:body {:email string? :message string?}}
                           400 {:body {:message string?}}
                           409 {:body {:message string?}}}
              :handler    (fn [{{{:keys [email password confirm]} :body} :parameters}]
@@ -67,7 +67,7 @@
                              (response/bad-request {:message "Password and confirm do not match."})
                              (try
                                (auth/create-user! email password)
-                               (response/ok {:message "User registered. Please login."})
+                               (response/ok {:email email :message "User registered. Please login."})
                                (catch ExceptionInfo e
                                  (if (= (:decision-konsent/error-id (ex-data e))
                                         ::auth/duplicate-user)

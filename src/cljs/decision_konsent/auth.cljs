@@ -9,7 +9,8 @@
                                             (identity false)))})
 
 (defn login []
-  (let [fields (r/atom {:email "nothing typed" :password "nothing too"})]
+  (let [fields (r/atom {:email "nothing typed" :password "nothing too"})
+        email-registered @(rf/subscribe [:auth/register-worked])]
     (fn []
       [:section.section>div.container>div.content
        [:form.box prevent-reload
@@ -19,6 +20,7 @@
          [:label.label "Email"]
          [:div.control
           [:input.input {:type        "email"
+                         ;:value       email-registered
                          :placeholder "e.g. alex@example.com"
                          :on-change   #(swap! fields assoc :email (-> % .-target .-value))}]]]
         [:div.field
@@ -64,4 +66,4 @@
          [:button.button.is-primary.mr-1.mt-3
           {:on-click #(rf/dispatch [:auth/start-register @fields])}
           "register your account"]
-         (when @(rf/subscribe [:auth/register-worked]) [:h2.subtitle.is-6 "you sucessfully registered :-)"])]]])))
+         (when-let [registered @(rf/subscribe [:auth/register-worked])] [:h2.subtitle.is-6 (str "you sucessfully registered: " registered)])]]])))
