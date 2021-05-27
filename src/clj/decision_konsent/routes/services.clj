@@ -81,6 +81,7 @@
                           401 {:body {:message string?}}}
              :handler    (fn [{{{:keys [email password]} :body} :parameters
                                session                          :session}]
+                           (println "try to login user: " email)
                            (if-some [user (auth/authenticate-user email password)]
                              (-> (response/ok {:identity user})
                                  (assoc :session (assoc session :identity user)))

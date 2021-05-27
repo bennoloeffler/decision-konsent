@@ -1,5 +1,10 @@
 # decision-konsent
 
+## prepare
+install npm: https://nodejs.org/en/download/
+install dart-sass or node-sass --> npm install node-sass
+install shadow 
+install lein
 ## checkout, checkin, running, testing, deploy
 
 run the build tools:
@@ -18,6 +23,15 @@ lein test-refresh
 
 #### 4 REPL (start, stop, restart - change and reload)
 intellij
+
+#### 5 Heroku
+##### deploy
+lein uberjar
+heroku local
+git commit -am "login register messages time"
+git push heroku master
+##### migrate
+`heroku run bash | java -jar target/uberjar/decision-konsent.jar migrate`
 
 create project: `lein new luminus decision-konsent +cljs +swagger +postgres +reagent +re-rame +shadow-cljs`   
 set database env for prod/env locally: `$env:DATABASE_URL="postgresql://localhost/konsent_heroku?user=postgres&password=xr600r"`  

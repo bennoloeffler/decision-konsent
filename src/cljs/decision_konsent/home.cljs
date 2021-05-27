@@ -1,8 +1,8 @@
-(ns decision-konsent.discussion
+(ns decision-konsent.home
   (:require [reagent.ratom :as r]
             [ajax.core :refer [GET POST]]
             [re-frame.core :as rf]
-            [decision-konsent.discussion-events]
+            [decision-konsent.home-events]
             [decision-konsent.client-time :as ct]))
 
 
@@ -16,7 +16,7 @@
    [:span.icon>i.fas.fa-1x {:class icon-name}]])
 
 
-(defn konsent []
+(defn tutorial []
   [:span
    [big-icon-button "No concern.\nLet's do it." "fa-arrow-alt-circle-up"]
    [big-icon-button "Minor concern!\nHave to say them.\nBut then: Let's do it." "fa-arrow-alt-circle-right"]

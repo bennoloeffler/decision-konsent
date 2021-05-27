@@ -1,4 +1,4 @@
-(ns decision-konsent.discussion-events
+(ns decision-konsent.home-events
   (:require [ajax.core :refer [GET POST]]
             [re-frame.core :as rf]
             [decision-konsent.ajax :as ajax]))
