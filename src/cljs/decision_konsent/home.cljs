@@ -41,14 +41,14 @@
 
 
 (defn message-list [messages]
-  (let [localtime @(rf/subscribe [:timestamp])
+  (let [localtime   @(rf/subscribe [:timestamp])
         server-diff @(rf/subscribe [:server-diff-time])]
     [:nav.panel
      [:p.panel-heading "feedbacks & comments"]
      (for [message @messages]
        ^{:key (:id message)}
        [:a.panel-block
-        [:small.mr-3 (str "  ~" (ct/human-duration-sd (:timestamp message) localtime server-diff))]
+        [:small.mr-3 (str "  ~ " (ct/human-duration-sd (:timestamp message) localtime server-diff))]
         [:span.panel-icon
          [:i.fas.fa-book {:aria-hidden "true"}]]
         [:div.mr-3 (:message message)]])]))
@@ -63,7 +63,11 @@
 
 
 (defn discussion-form []
-  (let [fields (r/atom {})]
+  (let [fields        (r/atom {})
+        save-message! (fn []
+                        (when (-> (:message @fields) count (> 0))
+                          (rf/dispatch [:message/save @fields])
+                          (reset! fields {})))]
     (fn []
       [:div
        [:form.box prevent-reload
@@ -73,12 +77,12 @@
           {;:class  (if @(rf/subscribe [:messages/loading?])  "is-primary" "is-loading")
            :type     :button
            :value    "send"
-           :on-click #(do (println "f: " @fields) (rf/dispatch [:message/save @fields]))}] ;#(send-message! fields)}]
+           :on-click #(save-message!)}]                             ;#(send-message! fields)}]
          [:input.input
           {:type        :text
            :name        :message
            :on-change   #(swap! fields assoc :message (-> % .-target .-value))
-           :on-key-down #(when (= (.-keyCode %) 13) (do (println "f: " @fields) (rf/dispatch [:message/save @fields])))
+           :on-key-down #(when (= (.-keyCode %) 13) (save-message!))
            :value       (:message @fields)}]]
         [messages-form]]])))
 

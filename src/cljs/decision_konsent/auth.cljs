@@ -9,8 +9,8 @@
                                             (identity false)))})
 
 (defn login []
-  (let [fields (r/atom {:email "nothing typed" :password "nothing too"})
-        email-registered @(rf/subscribe [:auth/register-worked])]
+  (let [fields (r/atom {:email (or @(rf/subscribe [:auth/register-worked]) "") :password "nothing too"})]
+
     (fn []
       [:section.section>div.container>div.content
        [:form.box prevent-reload
@@ -20,14 +20,14 @@
          [:label.label "Email"]
          [:div.control
           [:input.input {:type        "email"
-                         ;:value       email-registered
+                         :value       (:email @fields)
                          :placeholder "e.g. alex@example.com"
                          :on-change   #(swap! fields assoc :email (-> % .-target .-value))}]]]
         [:div.field
          [:label.label "Password"]
          [:div.control
           [:input.input {:type        "password"
-                         :placeholder "********"
+                         :placeholder "X3$-smallLetters"
                          :on-change   #(swap! fields assoc :password (-> % .-target .-value))}]]]
 
 
