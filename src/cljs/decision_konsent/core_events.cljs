@@ -35,7 +35,7 @@
 ;;
 
 
-(rf/reg-fx
+(rf/reg-fx ; TODO: switch to :common/set-error-from-ajax
   :ajax/get
   (fn [{:keys [url success-event error-event success-path]}]
     (println "start ajax/get...")
@@ -51,23 +51,23 @@
                                     #(rf/dispatch
                                        (conj error-event %)))))))
 
-(rf/reg-fx
-  :ajax/post
-  (fn [{:keys [url success-event error-event success-path]}]
-    (println "start ajax/post...   url: " url "    path: " success-path)
-    (POST url
-          (cond-> {:headers {"Accept" "application/transit+json"}}
-                  success-event (assoc :handler
-                                       #(do (rf/dispatch
-                                              (conj success-event
-                                                    (if success-path
-                                                      (get-in % success-path)
-                                                      %)))
-                                            (println "got: " %)))
-                  error-event (assoc :error-handler
-                                     #(rf/dispatch
-                                        (conj error-event %)))
-                  true (assoc :params {:message "this is it..."})))))
+#_(rf/reg-fx ; TODO: switch to :common/set-error-from-ajax
+    :ajax/post
+    (fn [{:keys [url success-event error-event success-path]}]
+      (println "start ajax/post...   url: " url "    path: " success-path)
+      (POST url
+            (cond-> {:headers {"Accept" "application/transit+json"}}
+                    success-event (assoc :handler
+                                         #(do (rf/dispatch
+                                                (conj success-event
+                                                      (if success-path
+                                                        (get-in % success-path)
+                                                        %)))
+                                              (println "got: " %)))
+                    error-event (assoc :error-handler
+                                       #(rf/dispatch
+                                          (conj error-event %)))
+                    true (assoc :params {:message "this is it..."})))))
 
 
 ;;
@@ -122,6 +122,12 @@
   :common/set-error
   (fn [db [_ error]]
     (assoc db :common/error (conj (db :common/error) error))))
+
+(rf/reg-event-db
+  :common/set-error-from-ajax
+  (fn [db [_ data]]
+    ;(println "receiving error: " data)
+    (assoc db :common/error (conj (db :common/error) (-> data :response :message)))))
 
 (rf/reg-sub
   :common/error

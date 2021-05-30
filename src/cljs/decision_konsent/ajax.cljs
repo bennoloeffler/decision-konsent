@@ -27,12 +27,24 @@
 (defn load-interceptors! []
   (swap! ajax/default-interceptors
          conj
-         (ajax/to-interceptor {:name "default headers"
+         (ajax/to-interceptor {:name    "default headers"
                                :request default-headers})))
 
-(defn send-message! [fields]
-  (println "sending: " fields)
-  (POST "api/konsent/message"
-        {:params        fields
-         :handler       #(do (.log js/console (str "response:" %)) (rf/dispatch [:messages/set  (:messages %)]))
-         :error-handler #(.error js/console (str "error:" %))}))
+
+(defn http-xhrio [xhrio-map method]
+  {:method          method
+   :uri             (:uri xhrio-map)
+   :params          (:params xhrio-map)
+   :timeout         5000
+   :format          (ajax/json-request-format)
+   :response-format (ajax/json-response-format {:keywords? true})
+   :on-success      (:on-success xhrio-map)
+   :on-failure      (:on-failure xhrio-map)})
+
+
+(defn http-xhrio-post [xhrio-map]
+  (http-xhrio xhrio-map :post))
+
+
+(defn http-xhrio-get [xhrio-map]
+  (http-xhrio xhrio-map :get))

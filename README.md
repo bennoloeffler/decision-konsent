@@ -9,7 +9,7 @@ install lein
 
 run the build tools:
 start console (3x)
-cd \projects\_clj\decision-konsent>
+cd \projects\_clj\decision-konsent
 
 #### 1 SCSS (css rebuild + reload as typed)
 npm run css-watch

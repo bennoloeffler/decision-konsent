@@ -57,6 +57,11 @@ WHERE id = :id
 -- :doc retrieves all users records
 SELECT * FROM konsents
 
+-- :name get-konsents-for-user :? :*
+-- :doc retrieves all konsents for user
+SELECT * FROM konsents
+
+
 
 
 

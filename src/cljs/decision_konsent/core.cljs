@@ -13,15 +13,15 @@
     [reitit.frontend.easy :as rfe]
     [clojure.string :as string]
     [decision-konsent.home :as h]
+    [decision-konsent.konsent :as k]
     [ajax.core :refer [GET POST]]
     [decision-konsent.client-time :as ct]
     [decision-konsent.auth :as l])
   (:import goog.History))
 
-(def prevent-reload {:on-submit (fn [e] (do (.preventDefault e)
-                                            (identity false)))})
 
-(def logged-in (r/atom false))
+
+#_(def logged-in (r/atom false))
 
 (defn login-button []
   [:a.button.is-primary {:href "#/login"} #_{:on-click #(reset! logged-in true)} [:span.icon.is-large>i.fas.fa-1x.fa-sign-in-alt] [:span "login"]])
@@ -48,7 +48,7 @@
               [:nav.navbar.is-light>div.container
                [:div.navbar-brand.
                 ;[:a.navbar-item [:img {:src "img/logo-100x100-gelb-trans.png" :alt "konsent"}]]
-                [:a.navbar-item {:href "/" :style {:font-weight :bold}} [:img {:src "img/logo-100x100-gelb-trans.png" :alt "konsent"}]]
+                [:a.navbar-item.ml-3 {:href "/" :style {:font-weight :bold}} [:img {:src "img/logo-100x100-gelb-trans.png" :alt "konsent"}]]
                 [:span.navbar-burger.burger
                  {:data-target :nav-menu
                   :on-click    #(swap! expanded? not)
@@ -59,9 +59,10 @@
                 [:div.navbar-start
                  [nav-link "#/" "home" :home]
                  [nav-link "#/my-konsents" "my-konsents" :my-konsents]
+                 [nav-link "#/new-konsent" "new-konsent" :new-konsent]
                  [nav-link "#/about" "about" :about]]
                 [:div.navbar-end
-                 [:div.navbar-item
+                 [:div.navbar-item.mr-3
                   (if (not @(rf/subscribe [:auth/user]))
                     [:div.buttons
                      [register-button]
@@ -88,42 +89,12 @@
       " Made be Armin and Benno."]]]])
 
 
-(defn my-konsents-page []
-  [:section.section>div.container>div.content
-   [:nav.panel
-    [:p.panel-heading "my-konsents"]
-    [:a.panel-block
-     [:span.panel-icon
-      [:i.fas.fa-book {:aria-hidden "true"}]] "new bib - or not..."]
-    [:a.panel-block
-     [:span.panel-icon
-      [:i.fas.fa-bomb {:aria-hidden "true"}]] "konsent about the new coffee machine"]
-    [:a.panel-block
-     [:span.panel-icon
-      [:i.fas.fa-fighter-jet {:aria-hidden "true"}]] "decision regarding new traveling rules"]]])
-
-
 (defn home-page []
   [:section.section>div.container>div.content
    [:div.field.mb-6
     [:form.box
-     [:label.label "Mini-Tutorial: taking team decisions fast!"]
-     [:div.mb-6 "Coming from a problem, first discuss possible options.
-             Then, somebody suggests a specific solution, actions, etc. She or he is in charge to
-             drive the decision.
-             Now everybody can ask questions in order to understand the proposal.Don't start again discussing
-             contradictions, your standpoint or feelings. As soon as everybody
-             understand the details of the proposal, everybody gives hers or his agreement,
-             concern or veto. If there are (only) agreements and minor concerns, the decision is taken.
-             Perfect! If there are major concerns, they are spoken out and are worked into the proposal.
-             In case of a veto, the person that issued the veto places the next proposal."
-      [:strong " Please try the buttons below..."]]
-
      [h/tutorial]]]
-   ;[d/login]
-   ;[d/register]
    [h/discussion-form]])
-
 
 
 (defn errors-section []
@@ -140,7 +111,7 @@
 
 (defn page []
   (if-let [page @(rf/subscribe [:common/page])]
-    [:div.column.is-two-thirds
+    [:div.column ;.is-two-thirds
      [navbar]
      [:div.columns.is-centered>div.column
       [errors-section]
@@ -168,7 +139,9 @@
                    :view #'l/register}]
 
      ["/my-konsents" {:name :my-konsents
-                      :view #'my-konsents-page}]]))
+                      :view #'k/my-konsents-page}]
+     ["/new-konsent" {:name :new-konsent
+                      :view #'k/new-konsent-page}]]))
 
 
 (defn start-router! []

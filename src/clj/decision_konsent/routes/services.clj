@@ -14,7 +14,8 @@
     [ring.util.http-response :as response]
     [decision-konsent.auth :as auth]
     [decision-konsent.unix-time :as ut]
-    [spec-tools.data-spec :as ds])
+    [spec-tools.data-spec :as ds]
+    [decision-konsent.db.konsent :as k])
   (:import (clojure.lang ExceptionInfo)))
 
 (defn service-routes []
@@ -112,9 +113,14 @@
      {:get {:summary "just see the konsent app living..."
             :handler (constantly (ok {:message "pong"}))}}]
 
-    ["/create-konsent"
-     {:get {:summary "An owner (o) starts an konsent - with problem-description and participants (p). An id will be created."
-            :handler (constantly (ok {:message "owner created konsent"}))}}]
+    ["/create-konsent"                                      ; TODO error on server - reply with meaningful, displayable error message, see login
+     {:post {:summary "An owner (o) starts an konsent - with short-name problem-description and participants (p). An id will be created."
+             ;:parameters {:body {:email string? :password string?}}
+             :handler (fn [data]
+                        ;(println "data: " data)
+                        (let [params (-> data :body-params)]
+                          (println "params: " params)
+                          (response/ok (k/create-konsent! params))))}}]
 
     ["/save-konsent"
      {:get {:summary "Somebody saves a consent"
@@ -126,7 +132,10 @@
 
     ["/all-konsents-for-user"
      {:get {:summary "A user askes for all consents he is involved in."
-            :handler (constantly (ok {:message "user konsents"}))}}]
+            :handler (fn [data]
+                       (let [result (k/get-konsents-for-user "some")]
+                         (println result)
+                         (ok result)))}}]
 
     #_["/discuss"
        {:get {:parameters {:query {:text string?}}
@@ -140,7 +149,7 @@
              :parameters {:query {}}
              ;:responses {200 {:body {:total pos-int?}}}
              :handler    (fn [_]
-                           (println "deliver messages: " (db/get-messages))
+                           ;(println "deliver messages: " (db/get-messages))
                            {:status 200
                             :body   {:messages (db/get-messages)}})}
 
