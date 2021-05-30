@@ -27,7 +27,7 @@
   :auth/start-register
   (fn [_world [_ fields]]
     ;(println "sending fields: " fields)
-    {:http-xhrio {:method          :post ; TODO: switch to http-xhrio-post
+    {:http-xhrio {:method          :post                    ; TODO: switch to http-xhrio-post
                   :uri             "/api/user/register"
                   :params          fields
                   :timeout         5000
@@ -52,7 +52,7 @@
   :auth/start-login
   (fn [_world [_ fields]]
     ;(println "sending fields: " fields)
-    {:http-xhrio {:method          :post ; TODO: switch to http-xhrio-post
+    {:http-xhrio {:method          :post                    ; TODO: switch to http-xhrio-post
                   :uri             "/api/user/login"
                   :params          fields
                   :timeout         5000
@@ -66,12 +66,13 @@
   :auth/handle-login
   (fn [{:keys [db]} [_ {:keys [identity]}]]
     ;(println "receiving identity: " identity)
-    {:db       (assoc db :auth/user identity)
-     :dispatch [:common/navigate! :my-konsents nil nil]}))
+    {:db         (assoc db :auth/user identity)
+     :dispatch-n [[:konsent/load-list]
+                  [:common/navigate! :my-konsents nil nil]]}))
 
 
 (rf/reg-event-db
-  :auth/handle-login-error ; TODO: switch to :common/set-error-from-ajax
+  :auth/handle-login-error                                  ; TODO: switch to :common/set-error-from-ajax
   (fn [db [_ data]]
     ;(println "receiving error: " data)
     (assoc db :common/error (conj (db :common/error) (-> data :response :message)))))
@@ -81,7 +82,7 @@
 ;;
 
 (rf/reg-event-fx
-  :auth/start-logout ; TODO: switch to http-xhrio-post
+  :auth/start-logout                                        ; TODO: switch to http-xhrio-post
   (fn [_world [_ fields]]
     ;(println "sending logout: " fields)
     {:http-xhrio {:method          :post
@@ -109,7 +110,7 @@
   (fn [{:keys [db]} _]
     ;(println "reloading session - at least try...")
     {:db         (assoc db :session/loading? true)
-     :http-xhrio {:method          :get ; TODO: switch to http-xhrio-get
+     :http-xhrio {:method          :get                     ; TODO: switch to http-xhrio-get
                   :uri             "/api/user/session"
                   :timeout         5000
                   :format          (ajax/json-request-format)
