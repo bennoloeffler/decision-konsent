@@ -127,8 +127,12 @@
             :handler (constantly (ok {:message "user saved konsent"}))}}]
 
     ["/delete-konsent"
-     {:get {:summary "User delete a konsent"
-            :handler (constantly (ok {:message "user deleted konsent"}))}}]
+     {:post {:summary "User delete a konsent"
+             :handler (fn [data]
+                        ;(println "data: " data)
+                        (let [params (-> data :body-params)]
+                          ;(println "params: " params)
+                          (response/ok {:message (k/delete-konsent! params)})))}}]
 
     ["/all-konsents-for-user"
      {:get {:summary "A user askes for all konsents he is involved in."

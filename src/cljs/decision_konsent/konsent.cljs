@@ -64,10 +64,14 @@
     [:div
      (for [konsent-info konsents]
        [:a.panel-block
-        {:key (:id konsent-info)
-         :on-click #(rf/dispatch [:konsent/activate konsent-info])}
-        #_[:span.panel-icon [:i.fas.fa-book]]
-        (get-in konsent-info [:konsent :short-name])])]))
+        {:key (:id konsent-info)}
+        [:span.panel-icon
+         {:on-click #(rf/dispatch [:konsent/delete konsent-info])
+          :data-tooltip "delete?"
+          :class [:has-tooltip-warning :has-tooltip-arrow]}
+         [:i.fas.fa-archive]]
+        [:span {:on-click #(rf/dispatch [:konsent/activate konsent-info])}
+         (get-in konsent-info [:konsent :short-name])]])]))
 
 
 (defn konsent-list []

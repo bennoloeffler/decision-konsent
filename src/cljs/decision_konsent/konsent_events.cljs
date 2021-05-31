@@ -49,6 +49,17 @@
 
 
 (rf/reg-event-fx
+  :konsent/delete
+  (fn [{:keys [db] :as cofx} [_ fields]]
+      (println fields)
+      {:http-xhrio (ajax/http-xhrio-post
+                     {:uri        "/api/konsent/delete-konsent"
+                      :params     fields
+                      :on-success [:konsent/load-list]
+                      :on-failure [:common/set-error-from-ajax]})}))
+
+
+(rf/reg-event-fx
    :konsent/activate
    (fn [{:keys [db] :as cofx} [_ data]]
      {:db (assoc db :konsent/active data)
