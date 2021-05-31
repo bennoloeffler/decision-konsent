@@ -123,18 +123,22 @@
                           (response/ok (k/create-konsent! params))))}}]
 
     ["/save-konsent"
-     {:get {:summary "Somebody saves a consent"
+     {:get {:summary "Somebody saves a konsent"
             :handler (constantly (ok {:message "user saved konsent"}))}}]
 
     ["/delete-konsent"
-     {:get {:summary "User delete a consent"
+     {:get {:summary "User delete a konsent"
             :handler (constantly (ok {:message "user deleted konsent"}))}}]
 
     ["/all-konsents-for-user"
-     {:get {:summary "A user askes for all consents he is involved in."
+     {:get {:summary "A user askes for all konsents he is involved in."
             :handler (fn [data]
-                       (let [result (k/get-konsents-for-user "some")]
-                         (println result)
+                       (let [;_ (println data)
+                             email  (get-in data [:query-params "email"])
+                             params {:email email}
+                             ;_      (println "params: " params)
+                             result (k/get-konsents-for-user params)]
+                         ;(println result)
                          (ok result)))}}]
 
     #_["/discuss"

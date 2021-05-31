@@ -18,7 +18,7 @@
 (rf/reg-event-fx
   :konsent/load-list
   (fn [{:keys [db] :as cofx} [_ fields]]
-    (let [fields (-> fields (assoc :owner (-> db :auth/user :email)))]
+    (let [fields (-> fields (assoc :email (-> db :auth/user :email)))]
       (println "\n\nload list: " fields)
       {:http-xhrio (ajax/http-xhrio-get
                      {:uri        "/api/konsent/all-konsents-for-user"

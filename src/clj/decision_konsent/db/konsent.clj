@@ -35,9 +35,27 @@
 
 (defn get-konsents
   "get all"
-  ([] get-konsents nil)
+  ([] (db/get-konsents))
   ([t-conn]
    (db/get-konsents t-conn)))
 
-(defn get-konsents-for-user [email]
-  (db/get-konsents-for-user email))
+
+(defn get-konsents-for-user [email] ;TODO do this in database WITHOUT loading all konsents
+  (let [all       (db/get-konsents)
+        as-owner (filter #(= (:email email) (-> % :konsent :owner)) all)
+        as-part  (filter #(some #{(:email email)} (-> % :konsent :participants)) all)]
+     ;combine
+     ;(println "get my konsents: " email)
+     ;(println "all: " all)
+     ;(println "as owner: " as-owner)
+     ;(println "as parti: " as-part)
+     (distinct (into as-owner as-part))))
+
+#_(defn get-konsents-for-user [email]
+   (let [as-owner (db/get-konsents-for-user-as-owner email)
+         as-participant (db/get-konsents-for-user-as-participant email)]
+        ;combine
+        (println "get my konsents: " email)
+        (println "as owner: " as-owner)
+        (println "as parti: " as-participant)
+        (into as-owner as-participant)))

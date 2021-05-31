@@ -57,10 +57,15 @@ WHERE id = :id
 -- :doc retrieves all users records
 SELECT * FROM konsents
 
--- :name get-konsents-for-user :? :*
+-- :name get-konsents-for-user-as-owner :? :*
 -- :doc retrieves all konsents for user
 SELECT * FROM konsents
+WHERE konsent->>'owner' = :email
 
+-- :name get-konsents-for-user-as-participant :? :*
+-- :doc retrieves all konsents for user DOES NOT WORK! ERROR: Für den Parameter 2 wurde kein Wert angegeben.
+SELECT * FROM konsents
+WHERE count (konsent->>'participants' ? :email) > 0
 
 
 

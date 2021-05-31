@@ -1,3 +1,3 @@
 CREATE TABLE konsents (
  id       serial PRIMARY KEY,
- konsent  json   NOT NULL );
+ konsent  jsonb   NOT NULL );
