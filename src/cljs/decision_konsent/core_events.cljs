@@ -121,13 +121,18 @@
 (rf/reg-event-db
   :common/set-error
   (fn [db [_ error]]
+    (println "set error: ")
+    (cljs.pprint/pprint error)
     (assoc db :common/error (conj (db :common/error) error))))
 
 (rf/reg-event-db
   :common/set-error-from-ajax
   (fn [db [_ data]]
-    ;(println "receiving error: " data)
-    (assoc db :common/error (conj (db :common/error) (-> data :response :message)))))
+    (println "receiving error from ajax: ")
+    (cljs.pprint/pprint data)
+    (assoc db :common/error (conj (db :common/error)
+                                  (or (-> data :response :message)
+                                      (-> data :last-error))))))
 
 (rf/reg-sub
   :common/error

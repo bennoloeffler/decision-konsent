@@ -74,8 +74,10 @@
 (rf/reg-event-db
   :auth/handle-login-error                                  ; TODO: switch to :common/set-error-from-ajax
   (fn [db [_ data]]
-    ;(println "receiving error: " data)
-    (assoc db :common/error (conj (db :common/error) (-> data :response :message)))))
+    (cljs.pprint/pprint data)
+    (assoc db :common/error (conj (db :common/error)
+                                  (or (-> data :response :message)
+                                      (-> data :last-error))))))
 
 ;;
 ;; ---------- logout -----------
@@ -119,8 +121,10 @@
                   :on-failure      [:auth/handle-login-error]}})) ; TODO: ??? switch to :common/set-error-from-ajax
 
 
-(rf/reg-event-db
+(rf/reg-event-fx
   :session/set
-  (fn [db [_ data]]
+  (fn [{:keys [db]} [_ data]]
     ;(println  "\n\ngot session info: " data)
-    (assoc db :auth/user (-> data :session :identity))))
+    (let [identity   (-> data :session :identity)
+          load-event (if identity {:dispatch [:konsent/load-list]} {})]
+      (into load-event {:db (assoc db :auth/user identity)}))))

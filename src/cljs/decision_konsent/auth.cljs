@@ -46,7 +46,7 @@
        [:form.box utils/prevent-reload
         [:h1.title.is-4 "login"]
         [:h2.subtitle.is-6.mb-6 "login to your account with your email and password"]
-        [:div.field.
+        [:div.field
          [:label.label "Email"]
          [:div.control
           [:input.input {:type        "email"

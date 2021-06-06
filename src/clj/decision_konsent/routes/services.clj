@@ -15,7 +15,8 @@
     [decision-konsent.auth :as auth]
     [decision-konsent.unix-time :as ut]
     [spec-tools.data-spec :as ds]
-    [decision-konsent.db.konsent :as k])
+    [decision-konsent.db.konsent :as k]
+    [clojure.pprint :as pp])
   (:import (clojure.lang ExceptionInfo)))
 
 (defn service-routes []
@@ -119,12 +120,17 @@
              :handler (fn [data]
                         ;(println "data: " data)
                         (let [params (-> data :body-params)]
-                          (println "params: " params)
+                          ;(println "params: " params)
                           (response/ok (k/create-konsent! params))))}}]
 
     ["/save-konsent"
-     {:get {:summary "Somebody saves a konsent"
-            :handler (constantly (ok {:message "user saved konsent"}))}}]
+     {:post {:summary "user saves a konsent"
+             :handler (fn [data]
+                        ;(println "data: " data)
+                        (let [params (-> data :body-params)]
+                          (println "\n\nsaving konsent:")
+                          (pp/pprint params)
+                          (response/ok {:message (k/save-konsent! params)})))}}]
 
     ["/delete-konsent"
      {:post {:summary "User delete a konsent"

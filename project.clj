@@ -41,7 +41,13 @@
                  [ring/ring-defaults "0.3.2"]
                  [selmer "1.12.33"]
                  [thheller/shadow-cljs "2.12.1" :scope "provided"]
-                 [buddy "2.0.0"]]
+                 [buddy "2.0.0"]
+                 ;DEBUG
+                 [philoskim/debux "0.6.5"]            ;dbg debugger
+                 [hashp "0.1.1"]                    ;debugging #p
+                 [erdos.assert "0.1.0"] ;; power assert and examine
+                 [org.clojure/tools.trace "0.7.10"] ;; tracing
+                 [mvxcvi/puget "1.2.1"]] ;; color print
 
   :min-lein-version "2.0.0"
   

@@ -8,7 +8,7 @@
 
 
 (defn big-icon-button [tooltip-text icon-name]
-  [:button.button.is-primary.is-outlined.mr-1 {:type "button" :data-tooltip tooltip-text :class "has-tooltip-arrow"}
+  [:div.control>button.button.is-primary.is-outlined {:type "button" :data-tooltip tooltip-text :class "has-tooltip-arrow"}
    [:span.icon>i.fas.fa-1x {:class icon-name}]])
 
 
@@ -28,7 +28,9 @@
 
 
 (defn tutorial-buttons []
-  [:span
+  [:div.field.has-addons
+   [:div.control
+    [:input.input {:type "text" :placeholder "your concerns here..."}]]
    [big-icon-button "No concern.\nLet's do it." "fa-arrow-alt-circle-up"]
    [big-icon-button "Minor concern!\nHave to say them.\nBut then: Let's do it." "fa-arrow-alt-circle-right"]
    [big-icon-button "Major concern!\nThey need to be reflected.\nOnly if they are reflected,\nI could go with

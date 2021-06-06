@@ -1,11 +1,9 @@
 (ns decision-konsent.unix-time)
 
-#_(defn current-time []
-  #?(:clj (.getTime (java.util.Date.)))
-     :cljs (.getTime (js/Date.)))
-
+#?(:cljs
 (defn current-time []
-  ;(println "Date-Server: " (java.util.Date.))
-  (.getTime (java.util.Date.)))
+  (.getTime (js/Date.))))
 
-
+#?(:clj
+(defn current-time []
+  (.getTime (java.util.Date.))))

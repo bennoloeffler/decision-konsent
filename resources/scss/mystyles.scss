@@ -2,13 +2,17 @@
 @import "../../node_modules/bulma/sass/utilities/initial-variables";
 @import "../../node_modules/bulma/sass/utilities/functions";
 
-$tooltip-radius: 12px;
+$tooltip-radius: 20px;
 $tooltip-arrow-size: 12px;
 $primary: #215269;
-$info: $primary;
+$info: #85a0ac;
+
 
 @import "../../node_modules/bulma/bulma.sass";
+@import "../../node_modules/@creativebulma/bulma-badge/src/sass/index.sass";
+@import "../../node_modules/@creativebulma/bulma-collapsible/src/sass/index.sass";
+@import "../../node_modules/@creativebulma/bulma-tagsinput/src/sass/index.sass";
 @import "../../node_modules/@creativebulma/bulma-tooltip/src/sass/index.sass";
-/*@import "../../node_modules/@creativebulma/bulma-divider/src/sass/index.sass";*/
+
 @import "../../node_modules/bulma-extensions/bulma-divider/src/sass/index.sass";
 @import "../../node_modules/bulma-extensions/bulma-switch/src/sass/index.sass";

@@ -2,13 +2,17 @@
   (:require [re-frame.core :as rf]
             [reagent.core :as r]
             [decision-konsent.utils :as utils]
-            [decision-konsent.konsent-events]))
-
+            [decision-konsent.konsent-events]
+            [decision-konsent.modal :as m]
+            [decision-konsent.bulma-examples :as e]
+            [decision-konsent.client-time :as ct]
+            [decision-konsent.konsent-fsm :as k-fsm]))
 
 (def login-to-start "first login.\nthen start.")
 (def not-logged-in {:data-tooltip login-to-start
                     :class        [:has-tooltip-warning :has-tooltip-active :has-tooltip-arrow]
                     :disabled     true})
+(def divider [:div.is-divider.mt-6.mb-6 {:data-content "OR"}])
 
 
 (defn new-konsent-page []
@@ -42,10 +46,12 @@
                 (if @(rf/subscribe [:auth/user])
                   {:on-click #(rf/dispatch [:konsent/create @fields])}
                   not-logged-in)
-                "create the konsent"]]]]])))
+                "create the konsent"]]]]
+       divider
+       [e/all-examples]])))
 
 
-(defn example []
+(defn konsent-example-list []
   [:div
    [:a.panel-block
     [:span.panel-icon
@@ -66,16 +72,16 @@
        [:a.panel-block
         {:key (:id konsent-info)}
         [:span.panel-icon
-         {:on-click #(rf/dispatch [:konsent/delete konsent-info])
+         {:on-click     #(rf/dispatch [:konsent/delete konsent-info])
           :data-tooltip "delete?"
-          :class [:has-tooltip-warning :has-tooltip-arrow]}
-         [:i.fas.fa-archive]]
+          :class        [:has-tooltip-warning :has-tooltip-arrow]}
+         [:i.fas.fa-trash]]
         [:span {:on-click #(rf/dispatch [:konsent/activate konsent-info])}
          (get-in konsent-info [:konsent :short-name])]])]))
 
 
-(defn konsent-list []
-  [:div
+(defn konsent-list-page []
+  [:nav.panel
    [:p.panel-heading
     [:div.columns
      [:div.column.is-3
@@ -87,33 +93,319 @@
      [:div.column.is-9 "all my-konsents"]]]
    (if @(rf/subscribe [:auth/user])
      [konsents-of-user]
-     [example])])
+     [konsent-example-list])])
+
+;;
+;; view the active konsent
+;;
+
+
+(defn start-konsent []
+  [:div.columns
+   [:div.column.is-3 "your suggestion:"]
+   [:div.column [:div.field [:div.control [:textarea.textarea {:placeholder "form your suggestion..."}]]
+                 [:div.control [:button.button "submit your konsent suggestion"]]]]])
+
+
+(defn vote-for-konsent [k u]
+  [:div.columns
+   [:div.column.is-3 "my vote"]
+   [:div.column
+    [decision-konsent.home/tutorial-buttons]]])
+
+
+(defn time-gone-by [t]
+  (let [localtime   @(rf/subscribe [:timestamp])
+        server-diff @(rf/subscribe [:server-diff-time])
+        gone-by     (ct/human-duration-sd t localtime server-diff)]
+    ;(println "t: " t)
+    ;(println "gone-by: " gone-by)
+    ;(println "local: " localtime)
+    [:small (str "~ " gone-by)]))
+
+
+(defn add-time-badge [t]
+  [:span.badge.is-info [time-gone-by t]])
+
+(defn add-time-user-badge [t u]
+  [:span.badge.is-info u " " [time-gone-by t]])
+
+
+(defn owner-started [o t]
+  [:div
+   [:div.buttons.are-small
+    [:button.button.is-outlined.is-rounded {:key o} [:span.badge.is-info [time-gone-by t]] o]]])
+
+
+(defn participants [ps]
+  [:div.columns
+   [:div.column.is-3 "participants:"]
+   [:div.column
+    [:div.buttons.are-small
+     (for [p ps]
+       [:button.button.is-outlined.is-rounded {:key p} p])]]])
+
+(defn created-by-when [owner timestamp]
+  [:div.columns
+   [:div.column.is-3 "created by: "]
+   [:div.column [owner-started owner timestamp]]])
+
+(defn short-name-and-problemstatement [sn ps]
+  [:div.columns
+   [:div.column.is-3 sn]
+   [:div.column ps]])
+
+(defn participant-list [ps]
+  [:div.buttons.are-small
+   (for [p ps]
+     [:button.button.is-outlined.is-rounded {:key p} p])])
+
+; TODO rename in force-incomplete-vote
+(defn force-vote [k u]
+  [:div.columns
+   [:div.column.is-3 "Force end?"]
+   [:div.column.is-9
+    [:div.card>div.card-content>div.content [participant-list (k-fsm/users-with-missing-votes k)]]
+    [:form.box utils/prevent-reload
+     [:div.field>div.control
+      [:label.checkbox
+       [:input {:type     "checkbox"
+                :on-click #(rf/dispatch [:konsent/force-vote])}] "force end?"]]]]])
+
+; TODO: rename to force-all-ready
+(defn force-ready [k u]
+  [:div.columns
+   [:div.column.is-3 "Force vote?"]
+   [:div.column.is-9
+    [:form.box utils/prevent-reload
+     [:div.field>div.control
+      [:label.checkbox [:input {:type     "checkbox"
+                                :on-click #(rf/dispatch [:konsent/force-vote])}] "force vote?"]]]]])
+
+
+(defn wait-for-ready [k u]
+  [:div.columns
+   [:div.column.is-3 "Waiting for:"]
+   [:div.column.is-9
+    [:div.card>div.card-content>div.content [participant-list (k-fsm/users-missing-for-ready-to-vote k)]]]])
+
+(defn unanswered-question [q]
+  (let [fields (r/atom {:text ""})
+        ts     (-> q :question :timestamp)
+        p      (-> q :question :participant)
+        idx    (-> q :idx)]
+    (fn []
+      [:div.columns {:key idx}
+       [:div.column.is-3 "Please answer:"]
+       [:div.column.is-9
+        [:form.box utils/prevent-reload
+         [:div.card>div.card-content>div.content
+          [add-time-user-badge ts p]
+          (-> q :question :text)]
+         [:div.field>div.control>textarea.textarea
+          {:placeholder "Answer the question above..."
+           :value       (:text @fields)
+           :on-change   #(swap! fields assoc :text (-> % .-target .-value))}]
+         [:div.field>div.control>button.button
+          {:on-click #(do (rf/dispatch [:konsent/answer (assoc @fields :idx idx)]) (reset! fields {}))}
+          ;)}
+          "answer"]]]])))
+
+
+
+(defn answer [k]
+  (let [unanswered (seq (reverse (k-fsm/q&a-without-answers k)))]
+    (if unanswered
+      [:div
+       (for [q unanswered]
+         [unanswered-question (into q {:key (:idx q)})])]
+      [:div.columns
+       [:div.column.is-3 "No Questions..."]
+       [:div.column.is-9 "Users missing ready to vote:"]])))
+
+
+
+(defn ask []
+  (let [fields (r/atom {:text ""})]
+    (fn []
+      [:div.columns
+       [:div.column.is-3 "Question or ready?"]
+       [:div.column.is-9
+        [:form.box utils/prevent-reload
+         [:div.field>div.control
+          [:label.checkbox [:input {:type     "checkbox"
+                                    :on-click #(rf/dispatch [:konsent/ready-to-vote])}] "ready to vote!"]]
+         [:div.field>div.control>textarea.textarea
+          {:placeholder "I'm not yet done... My question is...ENTER"
+           :value       (:text @fields)
+           :on-change   #(swap! fields assoc :text (-> % .-target .-value))}]
+         [:div.field>div.control>button.button
+          {:on-click #(do (rf/dispatch [:konsent/ask @fields]) (reset! fields {}))}
+          ;)}
+          "ask"]]]])))
+
+
+(defn discuss []
+  (let [fields (r/atom {:text ""})]
+    (fn []
+      [:div.columns
+       [:div.column.is-3 "Discuss:"]
+       [:div.column
+        [:form.box utils/prevent-reload
+         [:div.field>div.control>textarea.textarea
+          {:placeholder "discuss perspectives, options, questions..."
+           :value       (:text @fields)
+           :on-change   #(swap! fields assoc :text (-> % .-target .-value))}]
+         [:div.field>div.control>button.button
+          {:on-click #(do (rf/dispatch [:konsent/discuss @fields]) (reset! fields {}))}
+          "send"]]]])))
+
+
+(defn propose []
+  (let [fields (r/atom {})]
+    (fn []
+      [:div.columns
+       [:div.column.is-3 "Propose:"]
+       [:div.column
+        [:form.box utils/prevent-reload
+         [:div.field>div.control>textarea.textarea
+          {:placeholder "create a proposal for voting"
+           :on-change   #(swap! fields assoc :text (-> % .-target .-value))}]
+         [:div.field>div.control>button.button
+          {:on-click #(rf/dispatch [:konsent/propose @fields])}
+          "create proposal"]]]])))
+
+
+(defn history [k u]
+  (let [active-iteration (k-fsm/active-iteration k)
+        messages         (reverse (:discussion active-iteration))
+        proposal         (:proposal active-iteration)
+        q&a              (seq (reverse (k-fsm/q&a-with-idx k)))] ;TODO do that all by subscriptions
+    [:div
+     (when q&a
+       [:div.columns
+        [:div.column.is-3 "Q&A"]
+        [:div.column
+         (for [one-q&a q&a]
+           (let [q   (:question one-q&a)
+                 a   (:answer one-q&a)
+                 qts (:timestamp q)
+                 ats (:timestamp a)
+                 qp  (:participant q)
+                 ap  (:participant a)
+                 idx (:idx one-q&a)]
+             ;[:div.box {:key (:timestamp message)}]
+             [:div.columns {:key qts}
+              [:div.column
+               [:div.card>div.card-content>div.content
+                [add-time-user-badge qts qp]
+                (:text q)]
+               (if a [:div.card>div.card-content>div.content
+                      [add-time-user-badge ats ap]
+                      (:text a)]
+                     [:div.card>div.card-content>div.content "no answer yet"])]]))]])
+     (when (k-fsm/proposal-made? k)
+       [:div.columns
+        [:div.column.is-3 [:h1.title.is-5 "Proposal:"]]
+        [:div.column
+         [:div.card>div.card-content>div.content
+          [add-time-user-badge (:timestamp proposal) (:participant proposal)]
+          (:text proposal)]]])
+     [:div.columns
+      [:div.column.is-3 "Discussion so far:"]
+      [:div.column.is-9
+       ;[:div.columns
+       (for [message messages]
+         ;[:div.box {:key (:timestamp message)}]
+         [:div.columns {:key (:timestamp message)}
+          [:div.column
+           [:div.card>div.card-content>div.content
+            [add-time-user-badge (:timestamp message) (:participant message)]
+            (:text message)]]])]]]))
 
 
 (defn konsent-active []
   #_[:a.panel-block (str @(rf/subscribe [:konsent/active]))]
- (let [konsent-info @(rf/subscribe [:konsent/active])]
-  [:div
-   [:p.panel-heading
-    [:div.columns
-     [:div.column.is-3
-      [:button.button.is-primary
-       (if @(rf/subscribe [:auth/user])
-         {:on-click #(rf/dispatch [:konsent/de-activate])}
-         not-logged-in)
-       "back to all konsents"]]
-     [:div.column.is-9 ""]]]
-   (if @(rf/subscribe [:auth/user])
-     ^{:key (:id konsent-info)}
-     [:a.panel-block
-      (str konsent-info)]
-     [example])]))
+  (let [k     @(rf/subscribe [:konsent/active])
+        u     @(rf/subscribe [:auth/user])
+        ;k            (:konsent konsent-info)
+        sn    (-> k :konsent :short-name)
+        ps    (-> k :konsent :participants)
+        probs (-> k :konsent :problem-statement)]
+    [:div
+     [:div.columns
+      [:div.column.is-3
+       [:button.button.is-primary
+        (if u
+          {:on-click #(rf/dispatch [:konsent/de-activate])}
+          not-logged-in)
+        "back to all konsents"]]
+      [:div.column.is-9 ""]]
+     (if u
+       [:div
+        ;[short-name-and-problemstatement sn probs]
+        ;[:div.is-divider.mt-6.mb-6 {:data-content "ask a question only to understand proposal"}]
+        ;[ask]
+        ;[:div.is-divider.mt-6.mb-6 {:data-content "free discussion to learn views, feelings, facts, opinions"}]
+        (when (and (k-fsm/voting-started? k) (k-fsm/user-is-proposer? k u))
+          [:div
+           [:div.is-divider.mt-6.mb-6 {:data-content "missing votes..."}]
+           [force-vote k u]])
+        (when (and (k-fsm/voting-started? k)  (not (k-fsm/user-voted? k u)))
+          [:div
+           [:div.is-divider.mt-6.mb-6 {:data-content "Voting time..."}]
+           [vote-for-konsent k u]])
+        (when (and (k-fsm/wait-for-other-users-to-be-ready k u) (k-fsm/user-is-proposer? k u))
+          [:div
+           [:div.is-divider.mt-6.mb-6 {:data-content "Go ahead?"}]
+           [force-ready k u]])
+        (when (and  (k-fsm/wait-for-other-users-to-be-ready k u) (not (k-fsm/user-is-proposer? k u)))
+          [:div
+           [:div.is-divider.mt-6.mb-6 {:data-content "PLEASE WAIT..."}]
+           [wait-for-ready k u]])
+        (when (k-fsm/ask? k u)
+          [:div
+           [:div.is-divider.mt-6.mb-6 {:data-content "understand proposal"}]
+           [ask]])
+        (when (k-fsm/answer? k u)
+          [:div
+           [:div.is-divider.mt-6.mb-6 {:data-content "answer questions regarding your proposal"}]
+           [answer k]])
+        (when (k-fsm/propose? k u)
+          [:div
+           [:div.is-divider.mt-6.mb-6 {:data-content "create proposal"}]
+           [propose]])
+        (when (k-fsm/discuss? k u)
+          [:div
+           [:div.is-divider.mt-6.mb-6 {:data-content "free discussion to learn views, feelings, facts, opinions"}]
+           [discuss]])
+        ;[:div.is-divider.mt-6.mb-6 {:data-content "or start a konsent by suggesting"}]
+        ;[vote-for-konsent]
+        ;[:div.is-divider.mt-6.mb-6 {:data-content "start konsent"}]
+        ;[start-konsent]
+        [:div.is-divider.mt-6.mb-6 {:data-content "what happend before..."}]
+        [history k u]
+        [:div.is-divider.mt-6.mb-6 {:data-content "started by with participants"}]
+        [short-name-and-problemstatement sn probs]
+        [participants ps]
+        [created-by-when (-> k :konsent :owner) (-> k :konsent :timestamp)]
+        [:div.is-divider.mt-6.mb-6 {:data-content "DEBUGGING"}]
+        [:div]]
+         ;[:pre (str "voters-set = " (k-fsm/voters-set k))]
+         ;[:pre (str "(not (k-fsm/user-voted? k u)) = " (not (k-fsm/user-voted? k u)))] ; (not (k-fsm/user-voted? k u))
+         ;[:pre (str "user = " u)]
+         ;[:pre (str "next-actions = " (k-fsm/next-actions-all-user k))]
+         ;[:pre (str "konsent = " (with-out-str (cljs.pprint/pprint k)))]]]
+
+       [konsent-example-list])]))
+
+
+
+
 
 
 (defn my-konsents-page []
   [:section.section>div.container>div.content
-   [:nav.panel
-    (if @(rf/subscribe [:konsent/active])
-      [konsent-active]
-      [konsent-list])]])
-
+   (if @(rf/subscribe [:konsent/active])
+     [konsent-active]
+     [konsent-list-page])])
