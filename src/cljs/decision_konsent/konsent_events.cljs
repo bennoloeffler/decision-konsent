@@ -108,6 +108,27 @@
                       :on-failure [:common/set-error-from-ajax]})
        :db         (assoc db :konsent/active new-k)})))
 
+
+(rf/reg-event-fx
+  :konsent/vote
+  (fn [{:keys [db] :as cofx} [_ fields]]
+    (let [active-k (db :konsent/active)
+          user     (-> db :auth/user :email)
+          text     (fields :text)
+          vote     (fields :vote)
+          new-k    (k-fsm/vote active-k user vote text)]
+      (println fields)
+      ;(println "created konsent cljc: " (k-fsm/create-konsent "" "" "" []))
+      {:http-xhrio (ajax/http-xhrio-post
+                     {:uri        "/api/konsent/save-konsent"
+                      :params     new-k
+                      :on-success [:konsent/handle-save-konsent]
+                      :on-failure [:common/set-error-from-ajax]})
+       :db         (assoc db :konsent/active new-k)})))
+
+
+
+
 (rf/reg-event-fx
   :konsent/answer
   (fn [{:keys [db] :as cofx} [_ fields]]
@@ -160,6 +181,24 @@
                       :on-success [:konsent/handle-save-konsent]
                       :on-failure [:common/set-error-from-ajax]})
        :db         (assoc db :konsent/active new-k)})))
+
+
+(rf/reg-event-fx
+  :konsent/force-incomplete-vote
+  (fn [{:keys [db] :as cofx} [_ _]]
+    (let [active-k (db :konsent/active)
+          user     (-> db :auth/user :email)
+          ;text     (fields :text)
+          new-k    (k-fsm/force-incomplete-vote active-k user)]
+      ;(println fields)
+      ;(println "created konsent cljc: " (k-fsm/create-konsent "" "" "" []))
+      {:http-xhrio (ajax/http-xhrio-post
+                     {:uri        "/api/konsent/save-konsent"
+                      :params     new-k
+                      :on-success [:konsent/handle-save-konsent]
+                      :on-failure [:common/set-error-from-ajax]})
+       :db         (assoc db :konsent/active new-k)})))
+
 
 (defn active-konsent-to-list [db]
   (let [active-konsent (db :konsent/active)

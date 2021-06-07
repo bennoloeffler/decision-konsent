@@ -68,55 +68,55 @@
 (def konsent-voted-veto
   (assoc-in konsent-all-marked-ready
             [:konsent :iterations 0 :votes]
-            [{:participant "o1" :vote :abstain :text "" :timestamp 12345}
-             {:participant "p2" :vote :minor-concern :text "c1" :timestamp 12345}
-             {:participant "p3" :vote :major-concern :text "c2-xyx" :timestamp 12345}
-             {:participant "p4" :vote :veto :text "c3-xyx" :timestamp 12345}]))
+            [{:participant "o1" :vote "abstain" :text "" :timestamp 12345}
+             {:participant "p2" :vote "minor-concern" :text "c1" :timestamp 12345}
+             {:participant "p3" :vote "major-concern" :text "c2-xyx" :timestamp 12345}
+             {:participant "p4" :vote "veto" :text "c3-xyx" :timestamp 12345}]))
 
 
 (def konsent-voted-veto-twice
   (assoc-in konsent-all-marked-ready
             [:konsent :iterations 0 :votes]
-            [{:participant "o1" :vote :abstain :text "" :timestamp 12345}
-             {:participant "p2" :vote :veto :text "c1" :timestamp 12345}
-             {:participant "p3" :vote :major-concern :text "c2-xyx" :timestamp 12345}
-             {:participant "p4" :vote :veto :text "c3-xyx" :timestamp 12345}]))
+            [{:participant "o1" :vote "abstain" :text "" :timestamp 12345}
+             {:participant "p2" :vote "veto" :text "c1" :timestamp 12345}
+             {:participant "p3" :vote "major-concern" :text "c2-xyx" :timestamp 12345}
+             {:participant "p4" :vote "veto" :text "c3-xyx" :timestamp 12345}]))
 
 
 (def konsent-voted-major
   (assoc-in konsent-all-marked-ready
             [:konsent :iterations 0 :votes]
-            [{:participant "o1" :vote :abstain :text "" :timestamp 12345}
-             {:participant "p2" :vote :minor-concern :text "c1" :timestamp 12345}
-             {:participant "p3" :vote :major-concern :text "c2-xyx" :timestamp 12345}
-             {:participant "p4" :vote :yes :text "c3-xyx" :timestamp 12345}]))
+            [{:participant "o1" :vote "abstain" :text "" :timestamp 12345}
+             {:participant "p2" :vote "minor-concern" :text "c1" :timestamp 12345}
+             {:participant "p3" :vote "major-concern" :text "c2-xyx" :timestamp 12345}
+             {:participant "p4" :vote "yes" :text "c3-xyx" :timestamp 12345}]))
 
 
 (def konsent-voted-minor
   (assoc-in konsent-all-marked-ready
             [:konsent :iterations 0 :votes]
-            [{:participant "o1" :vote :abstain :text "" :timestamp 12345}
-             {:participant "p2" :vote :minor-concern :text "c1" :timestamp 12345}
-             {:participant "p3" :vote :yes :text "c2-xyx" :timestamp 12345}
-             {:participant "p4" :vote :yes :text "c3-xyx" :timestamp 12345}]))
+            [{:participant "o1" :vote "abstain" :text "" :timestamp 12345}
+             {:participant "p2" :vote "minor-concern" :text "c1" :timestamp 12345}
+             {:participant "p3" :vote "yes" :text "c2-xyx" :timestamp 12345}
+             {:participant "p4" :vote "yes" :text "c3-xyx" :timestamp 12345}]))
 
 
 (def konsent-vote-incomplete
   (-> konsent-all-marked-ready
       (assoc-in
         [:konsent :iterations 0 :votes]
-        [{:participant "o1" :vote :abstain :text "" :timestamp 12345}
-         {:participant "p2" :vote :minor-concern :text "c1" :timestamp 12345}
-         {:participant "p3" :vote :yes :text "c2-xyx" :timestamp 12345}])))
+        [{:participant "o1" :vote "abstain" :text "" :timestamp 12345}
+         {:participant "p2" :vote "minor-concern" :text "c1" :timestamp 12345}
+         {:participant "p3" :vote "yes" :text "c2-xyx" :timestamp 12345}])))
 
 
 (def konsent-vote-force-incomplete-voting-major
   (-> konsent-all-marked-ready
       (assoc-in
         [:konsent :iterations 0 :votes]
-        [{:participant "o1" :vote :abstain :text "" :timestamp 12345}
-         {:participant "p2" :vote :major-concern :text "c1" :timestamp 12345}
-         {:participant "p3" :vote :yes :text "c2-xyx" :timestamp 12345}])
+        [{:participant "o1" :vote "abstain" :text "" :timestamp 12345}
+         {:participant "p2" :vote "major-concern" :text "c1" :timestamp 12345}
+         {:participant "p3" :vote "yes" :text "c2-xyx" :timestamp 12345}])
       (assoc-in
         [:konsent :iterations 0 :force-incomplete-vote]
         true)))
@@ -126,9 +126,9 @@
   (-> konsent-all-marked-ready
       (assoc-in
         [:konsent :iterations 0 :votes]
-        [{:participant "o1" :vote :abstain :text "" :timestamp 12345}
-         {:participant "p2" :vote :minor-concern :text "c1" :timestamp 12345}
-         {:participant "p3" :vote :yes :text "c2-xyx" :timestamp 12345}])
+        [{:participant "o1" :vote "abstain" :text "" :timestamp 12345}
+         {:participant "p2" :vote "minor-concern" :text "c1" :timestamp 12345}
+         {:participant "p3" :vote "yes" :text "c2-xyx" :timestamp 12345}])
       (assoc-in
         [:konsent :iterations 0 :force-incomplete-vote]
         true)))
@@ -223,7 +223,7 @@
                   :konsent :iterations first :force-vote)))
   (is (-> (signal-ready-to-vote konsent-proposed "user")
           :konsent :iterations first :ready (contains? "user")))
-  (is (-> (vote konsent-all-marked-ready "user" :yes "something")
+  (is (-> (vote konsent-all-marked-ready "user" "yes" "something")
           :konsent :iterations first :votes first :vote))
   (is (-> (force-incomplete-vote konsent-vote-incomplete "o2")
           :konsent :iterations first :votes first :vote)))
@@ -252,7 +252,7 @@
       ;pr-user-a
       (signal-ready-to-vote "user")
       ;pr-user-a
-      (vote "p3" :minor-concern "so far so good...")
+      (vote "p3" "minor-concern" "so far so good...")
       ;pr-user-a
       (force-incomplete-vote "p2")))
 
@@ -274,7 +274,7 @@
       ;pr-user-a
       (force-vote "p2")
       ;pr-user-a
-      (vote "p3" :veto "so far so good...")
+      (vote "p3" "veto" "so far so good...")
       ;pr-missing
       ;pr-user-a
       (force-incomplete-vote "p2")

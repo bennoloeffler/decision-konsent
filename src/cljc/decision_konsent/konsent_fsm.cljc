@@ -141,7 +141,7 @@
   [k]
   (->> (active-iteration k)
        :votes
-       (filter #(= :veto (:vote %)))
+       (filter #(or (= :veto (:vote %)) (= "veto" (:vote %))))
        (map :participant)
        set
        nil-if-empty))
@@ -173,13 +173,15 @@
 (defn veto?
   "was a veto in last voting?"
   [k]
-  (-> (votes-set k) (contains? :veto)))
+  (or (-> (votes-set k) (contains? "veto"))
+      (-> (votes-set k) (contains? :veto))))
 
 
 (defn major?
   "was a major concern in last voting?"
   [k]
-  (-> (votes-set k) (contains? :major-concern)))
+  (or (-> (votes-set k) (contains? "major-concern"))
+      (-> (votes-set k) (contains? :major-concern))))
 
 (defn q&a-with-idx
   "returns questions with :idx, representing the
@@ -478,7 +480,7 @@
         (assoc-in [:konsent :iterations current-iteration-idx :ready]
                   #{u})
         (assoc-in [:konsent :iterations current-iteration-idx :votes]
-                  [{:participant u :vote :yes :timestamp (ut/current-time)}]))))
+                  [{:participant u :vote "yes" :timestamp (ut/current-time)}]))))
 
 
 (defn ask
@@ -540,7 +542,12 @@
   (assert (contains? (next-actions k u) :vote))
   (let [current-iteration-idx (-> k :konsent :iterations count dec)]
     (-> k (update-in [:konsent :iterations current-iteration-idx :votes]
-                     conj {:participant u :vote the-vote :text text :timestamp (ut/current-time)})
+                     conj {:participant u
+                           :vote        (if (keyword? the-vote) ; - postgress...
+                                          (subs (str the-vote) 1) ;replace keyword by string
+                                          the-vote)
+                           :text        text
+                           :timestamp   (ut/current-time)})
         (check-if-next-and-switch u))))
 
 

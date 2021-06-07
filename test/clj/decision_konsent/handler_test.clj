@@ -30,7 +30,7 @@
       (is (= 200 (:status response)))
       (is (= {:message "User registered. Please login."} (m/decode-response-body response)))))
   (testing "login ok"
-      (let [response ((app) (-> (request :post "/api/user/login")
+    (let [response ((app) (-> (request :post "/api/user/login")
                               (json-body {:email "benno@soso", :password "something"})))]
       (is (= 200 (:status response)))
       (is (= {:identity {:email "benno@soso"}} (m/decode-response-body response)))))
@@ -47,13 +47,13 @@
       (is (= 400 (:status response1)))
       (is (= {:message "Password and confirm do not match."} (m/decode-response-body response1)))))
   (testing "login fail (wrong password)"
-      (let [response ((app) (-> (request :post "/api/user/login")
+    (let [response ((app) (-> (request :post "/api/user/login")
                               (json-body {:email "benno@soso", :password "somethingFAIL"})))]
       ;; 401 = unauthorized
       (is (= 401 (:status response)))
       (is (= {:message "Incorrect login or password."} (m/decode-response-body response)))))
   (testing "login fail (wrong user)"
-        (let [response ((app) (-> (request :post "/api/user/login")
+    (let [response ((app) (-> (request :post "/api/user/login")
                               (json-body {:email "UNKNOWN@soso", :password "something"})))]
       (is (= 401 (:status response)))
       (is (= {:message "Incorrect login or password."} (m/decode-response-body response))))))
