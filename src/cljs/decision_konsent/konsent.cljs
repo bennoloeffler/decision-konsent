@@ -361,6 +361,17 @@
             [add-time-user-badge (:timestamp message) (:participant message)]
             (:text message)]]])]]]))
 
+(defn debugging [k u]
+ [:div
+  [:div.is-divider.mt-6.mb-6 {:data-content "DEBUGGING"}]
+  [:div.columns
+   [:div.column.is-1 "DBUG"]
+   [:div.column.is-11
+    [:pre (str "voters-set = " (k-fsm/voters-set k))]
+    [:pre (str "(not (k-fsm/user-voted? k u)) = " (not (k-fsm/user-voted? k u)))] ; (not (k-fsm/user-voted? k u))
+    [:pre (str "user = " u)]
+    [:pre (str "next-actions = " (k-fsm/next-actions-all-user k))]
+    [:pre (str "konsent = " (with-out-str (cljs.pprint/pprint k)))]]]])
 
 (defn konsent-active []
   #_[:a.panel-block (str @(rf/subscribe [:konsent/active]))]
@@ -426,16 +437,8 @@
         [:div.is-divider.mt-6.mb-6 {:data-content "started by with participants"}]
         [short-name-and-problemstatement sn probs]
         [participants ps]
-        [created-by-when (-> k :konsent :owner) (-> k :konsent :timestamp)]
-        [:div.is-divider.mt-6.mb-6 {:data-content "DEBUGGING"}]
-        [:div.columns
-         [:div.column.is-1 "DBUG"]
-         [:div.column.is-11
-          [:pre (str "voters-set = " (k-fsm/voters-set k))]
-          [:pre (str "(not (k-fsm/user-voted? k u)) = " (not (k-fsm/user-voted? k u)))] ; (not (k-fsm/user-voted? k u))
-          [:pre (str "user = " u)]
-          [:pre (str "next-actions = " (k-fsm/next-actions-all-user k))]
-          [:pre (str "konsent = " (with-out-str (cljs.pprint/pprint k)))]]]]
+        [created-by-when (-> k :konsent :owner) (-> k :konsent :timestamp)]]
+        ;[debugging k u]]
 
        [konsent-example-list])]))
 
