@@ -129,7 +129,7 @@
   :common/set-error-from-ajax
   (fn [db [_ data]]
     (println "receiving error from ajax: ")
-    (cljs.pprint/pprint data)
+    ;(cljs.pprint/pprint data)
     (assoc db :common/error (conj (db :common/error)
                                   (or (-> data :response :message)
                                       (-> data :last-error))))))

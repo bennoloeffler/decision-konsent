@@ -74,7 +74,7 @@
 (rf/reg-event-db
   :auth/handle-login-error                                  ; TODO: switch to :common/set-error-from-ajax
   (fn [db [_ data]]
-    (cljs.pprint/pprint data)
+    ;(cljs.pprint/pprint data)
     (assoc db :common/error (conj (db :common/error)
                                   (or (-> data :response :message)
                                       (-> data :last-error))))))
