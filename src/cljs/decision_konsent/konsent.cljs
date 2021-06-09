@@ -101,6 +101,29 @@
 ;;
 
 
+
+(defn  votes [iteration]
+  [:div.columns
+   [:div.column.is-3 "votes:"]
+   [:div.column.is-9
+
+    (for [v (-> iteration :votes)]
+      [:div.card>div.card-content>div.content
+       [:div.columns
+        [:div.column.is-2 (:participant v)]
+        [:div.column.is-2 (:vote v)]
+        [:div.column.is-5 (:text v)]]])]])
+
+
+(defn accepted [k u]
+ [:<>
+  [:div.columns
+   [:div.column.is-3 "decision taken:"]
+   [:div.column.is-9
+    [:div.card>div.card-content>div.content  (-> (k-fsm/active-iteration k) :proposal :text)]]]])
+  ;[votes (k-fsm/active-iteration k)]])
+
+
 (defn big-icon-button [callback tooltip-text icon-name]
   [:div.control>button.button.is-primary.is-outlined
    (into {:type "button" :data-tooltip tooltip-text :class "has-tooltip-arrow"} callback)
@@ -197,33 +220,40 @@
    (for [p ps]
      [:button.button.is-outlined.is-rounded {:key p} p])])
 
+(defn wait-for-everybody-voted [k u]
+  [:div.columns
+   [:div.column.is-3 "Waiting for votes of:"]
+   [:div.column.is-9
+    [:div.card>div.card-content>div.content [participant-list (k-fsm/users-with-missing-votes k)]]]])
+
+
 ; TODO rename to force-incomplete-vote
 (defn force-vote [k u]
   [:div.columns
-   [:div.column.is-3 "Force end?"]
+   [:div.column.is-3 "force end of voting?"]
    [:div.column.is-9
     [:div.card>div.card-content>div.content [participant-list (k-fsm/users-with-missing-votes k)]]
     [:form.box utils/prevent-reload
      [:div.field>div.control
-      [:label.checkbox
+      [:label.checkbox.mr-3
        [:input {:type     "checkbox"
-                :on-click #(rf/dispatch [:konsent/force-incomplete-vote])}] "force end?"]]]]])
+                :on-click #(rf/dispatch [:konsent/force-incomplete-vote])}] " force end?"]]]]])
 
 
 ; TODO: rename to force-all-ready
 (defn force-ready [k u]
   [:div.columns
-   [:div.column.is-3 "Force vote?"]
+   [:div.column.is-3 "force end of asking?"]
    [:div.column.is-9
     [:form.box utils/prevent-reload
-     [:div.field>div.control
+     [:div.field>div.control.mr-3
       [:label.checkbox [:input {:type     "checkbox"
-                                :on-click #(rf/dispatch [:konsent/force-vote])}] "force vote?"]]]]])
+                                :on-click #(rf/dispatch [:konsent/force-vote])}] " force vote?"]]]]])
 
 
 (defn wait-for-ready [k u]
   [:div.columns
-   [:div.column.is-3 "Waiting for:"]
+   [:div.column.is-3 "waiting for ready to vote:"]
    [:div.column.is-9
     [:div.card>div.card-content>div.content [participant-list (k-fsm/users-missing-for-ready-to-vote k)]]]])
 
@@ -258,21 +288,24 @@
        (for [q unanswered]
          [unanswered-question (into q {:key (:idx q)})])]
       [:div.columns
-       [:div.column.is-3 "No Questions..."]
-       [:div.column.is-9 "Users missing ready to vote:"]])))
+       [:div.column.is-3 "questions from other members?"]
+       [:div.column.is-9 "no unanswered questions..."]])))
 
 
 
-(defn ask []
+(defn ask [k]
   (let [fields (r/atom {:text ""})]
     (fn []
       [:div.columns
-       [:div.column.is-3 "Question or ready?"]
+       [:div.column.is-3 "ask another question or signal ready..."]
        [:div.column.is-9
+
         [:form.box utils/prevent-reload
+         [:div "users ready to vote: " [participant-list (k-fsm/users-ready-to-vote k)]]
          [:div.field>div.control
           [:label.checkbox [:input {:type     "checkbox"
-                                    :on-click #(rf/dispatch [:konsent/ready-to-vote])}] "ready to vote!"]]
+                                    :on-click #(rf/dispatch [:konsent/ready-to-vote])}] " ready to vote!"]]
+
          [:div.field>div.control>textarea.textarea
           {:placeholder "I'm not yet done... My question is...ENTER"
            :value       (:text @fields)
@@ -287,7 +320,7 @@
   (let [fields (r/atom {:text ""})]
     (fn []
       [:div.columns
-       [:div.column.is-3 "Discuss:"]
+       [:div.column.is-3 "discuss:"]
        [:div.column
         [:form.box utils/prevent-reload
          [:div.field>div.control>textarea.textarea
@@ -303,7 +336,7 @@
   (let [fields (r/atom {})]
     (fn []
       [:div.columns
-       [:div.column.is-3 "Propose:"]
+       [:div.column.is-3 "propose:"]
        [:div.column
         [:form.box utils/prevent-reload
          [:div.field>div.control>textarea.textarea
@@ -314,15 +347,21 @@
           "create proposal"]]]])))
 
 
-(defn history [k u]
-  (let [active-iteration (k-fsm/active-iteration k)
-        messages         (reverse (:discussion active-iteration))
-        proposal         (:proposal active-iteration)
-        q&a              (seq (reverse (k-fsm/q&a-with-idx k)))] ;TODO do that all by subscriptions
+
+(defn one-iteration [iteration]
+  (print "iteration: " (cljs.pprint/pprint iteration))
+  (let [votes-in-iter            (:votes iteration)
+        ;active-iteration (k-fsm/active-iteration k)
+        messages         (reverse (:discussion iteration))
+        proposal         (:proposal iteration)
+        q&a              (seq (reverse (:q&a iteration)))] ;TODO do that all by subscriptions
     [:div
+     ;(when ())
+     (when votes-in-iter
+      [votes iteration])
      (when q&a
        [:div.columns
-        [:div.column.is-3 "Q&A after Proposal"]
+        [:div.column.is-3 "q&a after proposal"]
         [:div.column
          (for [one-q&a q&a]
            (let [q   (:question one-q&a)
@@ -342,15 +381,15 @@
                       [add-time-user-badge ats ap]
                       (:text a)]
                      [:div.card>div.card-content>div.content "no answer yet"])]]))]])
-     (when (k-fsm/proposal-made? k)
+     (when proposal
        [:div.columns
-        [:div.column.is-3 [:h1.title.is-5 "Proposal:"]]
+        [:div.column.is-3 [:h1.title.is-5 "proposal:"]]
         [:div.column
          [:div.card>div.card-content>div.content
           [add-time-user-badge (:timestamp proposal) (:participant proposal)]
           (:text proposal)]]])
      [:div.columns
-      [:div.column.is-3 "Discussion before Proposal:"]
+      [:div.column.is-3 "discussion before proposal:"]
       [:div.column.is-9
        ;[:div.columns
        (for [message messages]
@@ -361,16 +400,72 @@
             [add-time-user-badge (:timestamp message) (:participant message)]
             (:text message)]]])]]]))
 
+
+#_(defn one-iteration [iteration]
+    (let [
+          votes    (:votes iteration)
+          proposal (:proposal iteration)
+          q&a      (seq (reverse (k-fsm/q&a-with-idx iteration)))
+          messages (reverse (:discussion iteration))]))
+
+;TODO do that all by subscriptions
+
+(defn history [k]
+ ;(println "history" (-> k :konsent :iterations))
+ [:<>
+  (for [i (-> k :konsent :iterations)]
+    ;[:div "one iter"])])
+    [one-iteration i])])
+
+
+
 (defn debugging [k u]
  [:div
   [:div.is-divider.mt-6.mb-6 {:data-content "DEBUGGING"}]
   [:div.columns
-   [:div.column.is-1 "DBUG"]
+   [:div.column.is-1 "DBG"]
    [:div.column.is-11
-    [:pre (str "voters-set = " (k-fsm/voters-set k))]
-    [:pre (str "(not (k-fsm/user-voted? k u)) = " (not (k-fsm/user-voted? k u)))] ; (not (k-fsm/user-voted? k u))
+    ;[:pre (str "wait for = " (k-fsm/wait-for-other-users-to-be-ready k u))]
     [:pre (str "user = " u)]
-    [:pre (str "next-actions = " (k-fsm/next-actions-all-user k))]
+    [:pre (str "next-actions-all-users     = " (k-fsm/next-actions-all-user k))]
+    ;[:pre (str "all-signaled-ready         = " (k-fsm/all-signaled-ready? k))]
+    ;[:pre (str "proposer                   = " (k-fsm/proposer k))]
+    ;[:pre (str "proposal-made?             = " (k-fsm/proposal-made? k))]
+    ;[:pre (str "allowed-proposers          = " (k-fsm/allowed-proposers k))]
+    ;[:pre (str "allowed-to-propose?      u = " (k-fsm/allowed-to-propose? k u))]
+    ;[:pre (str "user-is-proposer?        u = " (k-fsm/user-is-proposer? k u))]
+    ;[:pre (str "votes-set                  = " (k-fsm/votes-set k))]
+    ;[:pre (str "voters-set                 = " (k-fsm/voters-set k))]
+    ;[:pre (str "veto-voters                = " (k-fsm/veto-voters k))]
+    ;[:pre (str "user-ready-to-vote?      u = " (k-fsm/user-ready-to-vote? k u))]
+    ;[:pre (str "user-voted?              u = " (k-fsm/user-voted? k u))]
+    ;[:pre (str "voting-over?               = " (k-fsm/voting-over? k))]
+    ;[:pre (str "veto?                      = " (k-fsm/veto? k))]
+    ;[:pre (str "major?                     = " (k-fsm/major? k))]
+    ;[:pre (str ":ready               = " (-> (k-fsm/active-iteration k) :ready))]
+    ;[:pre (str "all-members        = " (k-fsm/all-members k))]
+    ;[:pre (str "all-mebers = :ready         = " (= (-> (k-fsm/active-iteration k) :ready)
+    ;                                               (set (k-fsm/all-members k))))]
+    ;[:pre (str "all-signaled-ready           = " (k-fsm/all-signaled-ready? k))]
+    [:pre (str " ======================================= ")]
+    [:pre (str "accepted?                  = " (k-fsm/accepted? k))]
+    [:pre (str "voting-started?            = " (k-fsm/voting-started? k))]
+    [:pre (str "incomplete-voting-ongoing? = " (k-fsm/incomplete-voting-ongoing? k))]
+    [:pre (str "wait-for-other-voters?    u = " (k-fsm/wait-for-other-voters? k u))]
+    [:pre (str "next-iteration?            = " (k-fsm/next-iteration? k))]
+    [:pre (str "vote?                     u = " (k-fsm/vote? k u))]
+    [:pre (str "force-incomplete-vote?    u = " (k-fsm/force-incomplete-vote? k u))]
+    [:pre (str "ask?                      u = " (k-fsm/ask? k u))]
+    [:pre (str "answer?                   u = " (k-fsm/answer? k u))]
+    [:pre (str "discuss?                  u = " (k-fsm/discuss? k u))]
+    [:pre (str "propose?                  u = " (k-fsm/propose? k u))]
+    [:pre (str " ======================================= ")]
+    [:pre (str "users-with-missing-votes           = " (k-fsm/users-with-missing-votes k))]
+    [:pre (str "users-missing-for-ready-to-vote    = " (k-fsm/users-missing-for-ready-to-vote k))]
+    [:pre (str "wait-for-other-users-to-be-ready u = " (k-fsm/wait-for-other-users-to-be-ready k u))]
+
+
+    ;[:pre (str "(not (k-fsm/user-voted? k u)) = " (not (k-fsm/user-voted? k u)))] ; (not (k-fsm/user-voted? k u))
     [:pre (str "konsent = " (with-out-str (cljs.pprint/pprint k)))]]]])
 
 (defn konsent-active []
@@ -396,26 +491,48 @@
         ;[:div.is-divider.mt-6.mb-6 {:data-content "ask a question only to understand proposal"}]
         ;[ask]
         ;[:div.is-divider.mt-6.mb-6 {:data-content "free discussion to learn views, feelings, facts, opinions"}]
-        (when (and (k-fsm/voting-started? k) (k-fsm/user-is-proposer? k u))
+        (when (k-fsm/accepted? k)
           [:div
-           [:div.is-divider.mt-6.mb-6 {:data-content "missing votes..."}]
+           [:div.is-divider.mt-6.mb-6 {:data-content "Proposal ACCEPTED"}]
+           [accepted k u]
+           #_(when (k-fsm/user-is-proposer? k u)
+               [force-vote k u])])
+
+        (when (and (k-fsm/voting-started? k) (k-fsm/user-voted? k u) (not (k-fsm/user-is-proposer? k u)) (not (k-fsm/accepted? k)))
+          [:div
+           [:div.is-divider.mt-6.mb-6 {:data-content "waiting for others to vote"}]
+           [wait-for-everybody-voted k u]
+           #_(when (k-fsm/user-is-proposer? k u)
+               [force-vote k u])])
+
+        (when (and (k-fsm/voting-started? k) (k-fsm/user-is-proposer? k u) (not (k-fsm/accepted? k)))
+          [:div
+           [:div.is-divider.mt-6.mb-6 {:data-content "force vote?"}]
            [force-vote k u]])
-        (when (and (k-fsm/voting-started? k) (not (k-fsm/user-voted? k u)))
+
+        (when (and (k-fsm/voting-started? k) (not (k-fsm/user-voted? k u)) (not (k-fsm/accepted? k)))
           [:div
-           [:div.is-divider.mt-6.mb-6 {:data-content "Voting time..."}]
-           [vote-for-konsent k u]])
-        (when (and (k-fsm/wait-for-other-users-to-be-ready k u) (k-fsm/user-is-proposer? k u))
+           [:div.is-divider.mt-6.mb-6 {:data-content "voting time..."}]
+           [vote-for-konsent k u]
+           [wait-for-everybody-voted k u]])
+
+        (when (and (k-fsm/wait-for-other-users-to-be-ready k u)
+                   (k-fsm/user-is-proposer? k u)
+                   (not (k-fsm/voting-started? k)))
           [:div
-           [:div.is-divider.mt-6.mb-6 {:data-content "Go ahead?"}]
+           [:div.is-divider.mt-6.mb-6 {:data-content "go ahead?"}]
+           [wait-for-ready k u]
            [force-ready k u]])
-        (when (and (k-fsm/wait-for-other-users-to-be-ready k u) (not (k-fsm/user-is-proposer? k u)))
+        (when (and (k-fsm/wait-for-other-users-to-be-ready k u)
+                   (not (k-fsm/user-is-proposer? k u))
+                   (not (k-fsm/voting-started? k)))
           [:div
-           [:div.is-divider.mt-6.mb-6 {:data-content "PLEASE WAIT..."}]
+           [:div.is-divider.mt-6.mb-6 {:data-content "please wait"}]
            [wait-for-ready k u]])
         (when (k-fsm/ask? k u)
           [:div
            [:div.is-divider.mt-6.mb-6 {:data-content "understand proposal"}]
-           [ask]])
+           [ask k]])
         (when (k-fsm/answer? k u)
           [:div
            [:div.is-divider.mt-6.mb-6 {:data-content "answer questions regarding your proposal"}]
@@ -433,12 +550,12 @@
         ;[:div.is-divider.mt-6.mb-6 {:data-content "start konsent"}]
         ;[start-konsent]
         [:div.is-divider.mt-6.mb-6 {:data-content "what happend before..."}]
-        [history k u]
+        [history k]
         [:div.is-divider.mt-6.mb-6 {:data-content "started by with participants"}]
         [short-name-and-problemstatement sn probs]
         [participants ps]
-        [created-by-when (-> k :konsent :owner) (-> k :konsent :timestamp)]]
-        ;[debugging k u]]
+        [created-by-when (-> k :konsent :owner) (-> k :konsent :timestamp)]
+        [debugging k u]]
 
        [konsent-example-list])]))
 

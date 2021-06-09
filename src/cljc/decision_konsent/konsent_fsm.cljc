@@ -77,10 +77,11 @@
   (set (conj (-> k :konsent :participants) (-> k :konsent :owner))))
 
 
-(defn all-ready?
-  "are all members ready to vote?"
+
+(defn all-signaled-ready?
+  "did all members signal ready to vote?"
   [k]
-  (= (-> (active-iteration k) :ready)
+  (= (-> (active-iteration k) :ready set)
      (all-members k)))
 
 
@@ -161,7 +162,7 @@
              u))
 
 
-(defn voted?
+(defn voting-over?
   "is voting over - because everybody
    voted or the end of voting is forced?"
   [k]
@@ -186,27 +187,16 @@
 (defn q&a-with-idx
   "returns questions with :idx, representing the
    vector position starting with 0.
-   [{:question {:text \"q1\", :participant \"p2\"}, :idx 0}
+   [{:question {:text \"q1\", :participant \"p2\"},
+     :idx 0}
     {:question {:text \"q2\", :participant \"p2\"},
-     :answer   {:text \"a2\", :participant \"p2\"}, :idx 1}]"
-  [k]
-  (->> (active-iteration k)
+     :answer   {:text \"a2\", :participant \"p2\"},
+     :idx 1}]"
+  [iteration]
+  (->> iteration
        :q&a
        (map #(into %2 {:idx %1}) (range))
        vec))
-
-#_(->> {:q&a [{:question {:text "q1" :participant "p2"}}
-              {:question {:text "q2" :participant "p2"}
-               :answer   {:text "a2" :participant "p2"}}]}
-       :q&a
-       (filter :answer))
-
-#_(->> {:q&a [{:question {:text "q1" :participant "p2"}}
-              {:question {:text "q2" :participant "p2"}
-               :answer   {:text "a2" :participant "p2"}}]}
-       :q&a
-       (map #(into %2 {:idx %1}) (range))
-       vec)
 
 
 (defn q&a-with-answers
@@ -215,16 +205,17 @@
    [{:question {:text \"q2\", :participant \"p2\"},
      :answer   {:text \"a2\", :participant \"p2\"}, :idx 1}]"
   [k]
-  (->> (q&a-with-idx k)
+  (->> (q&a-with-idx (active-iteration k))
        (filter :answer)
        vec))
+
 
 (defn q&a-without-answers
   "returns questions that are not yet answered -
    with index, to be able to save answer.
    [{:question {:text \"q1\", :participant \"p2\"}, :idx 0}]"
   [k]
-  (->> (q&a-with-idx k)
+  (->> (q&a-with-idx (active-iteration k))
        (filter #(not (:answer %)))
        vec))
 
@@ -238,7 +229,7 @@
   "has the proposal been accepted.
    This is the end..."
   [k]
-  (and (voted? k)
+  (and (voting-over? k)
        (not (or (major? k) (veto? k)))))
 
 
@@ -246,7 +237,7 @@
   "either everybody has signaled
    ready or it's started by force"
   [k]
-  (or (all-ready? k)
+  (or (all-signaled-ready? k)
       (-> (active-iteration k) :force-vote)))
 
 
@@ -271,7 +262,7 @@
   "is there a next iteration?"
   [k]
   (or (not (active-iteration k))
-      (and (voted? k)
+      (and (voting-over? k)
            (not (accepted? k)))))
 
 
@@ -354,6 +345,13 @@
     (clojure.set/difference
       (set (all-members k))
       (:ready (active-iteration k)))))
+
+(defn users-ready-to-vote
+  "those users, that have signaled 'ready to vote'"
+  [k]
+  (when (and (proposal-made? k) (not (voting-started? k)))
+    (:ready (active-iteration k))))
+
 
 
 (defn wait-for-other-users-to-be-ready

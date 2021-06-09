@@ -14,7 +14,7 @@
 
 (defn tutorial-text []
   [:div
-   [:label.label "Mini-Tutorial: taking team decisions fast!"]
+   [:label.label "MaxMini-Tutorial: taking team decisions fast!"]
    [:div.mb-6 "Coming from a problem, first discuss possible options.
               Then, somebody suggests a specific solution, actions, etc. She or he is in charge to
               drive the decision.

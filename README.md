@@ -2,9 +2,11 @@
 
 ## prepare
 install npm: https://nodejs.org/en/download/
-install dart-sass or node-sass --> npm install node-sass
 install shadow 
 install lein
+install sass dart-sass or node-sass --> npm install node-sass
+install postgresql (postgresql-13.2-2-windows-x64.exe)
+install pgadmin (pw x...r)
 ## checkout, checkin, running, testing, deploy
 
 run the build tools:
@@ -19,6 +21,7 @@ lein shadow watch app
 
 #### 3 TEST (run tests 
 $env:DATABASE_URL="postgresql://localhost/konsent_test?user=postgres&password=xr600r"
+set DATABASE_URL="postgresql://localhost/konsent_test?user=postgres&password=xr600r"
 lein test-refresh
 
 #### 4 REPL (start, stop, restart - change and reload)
