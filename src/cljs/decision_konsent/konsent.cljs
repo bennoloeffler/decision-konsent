@@ -413,11 +413,11 @@
 (defn history [k]
   ; (println (-> k :konsent :iterations))
   ;(println "history:  " (-> k :konsent :iterations))
-  (let [iter-with-idx (map (fn [iter key] {:key key :iter iter}) (-> k :konsent :iterations) (range))]
-   [:<>
-    (for [i iter-with-idx]
-      ^{:key (:key i)}
-      [one-iteration (:iter i)])]))
+  #_(let [iter-with-idx (map (fn [iter key] {:key key :iter iter}) (-> k :konsent :iterations) (range))]
+     [:<>
+      (for [i iter-with-idx]
+        ^{:key (:key i)}
+        [one-iteration (:iter i)])]))
 
 
 

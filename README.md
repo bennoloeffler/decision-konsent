@@ -53,18 +53,15 @@ migrate and rollback: `heroku run bash | java -jar target/uberjar/decision-konse
 1. ok backend-server with database that creates and saves konsents (save-consent)
 1. ok register as user (if you want to create konsent)
 1. ok login as user (email, password)
-1. validation of forms (client and server)
-1. create a consent (invite participants while creation)
+1. ok create a consent 
 1. ok see all my running kosents 
+1. ok disuss (write a message into a running konsent)
+1. ok start voting (and see, who has voted - but not how)
+1. ok finish voting (even if sombody did not vote)
+1. force https  
+1. validation of email and password (and other forms)
 1. invite participants after creation
 1. use an invitation link to take part in an konsent without registration
-1. ok disuss (write a message into a running konsent)
-1. start voting (and see, who has voted - but not how)
-1. ok finish voting (even if sombody did not vote)
-1. notify invitation per email
-1. emoties in discussions
-1. emoties vor voting
-1.  
 
 ## Prerequisites
 
