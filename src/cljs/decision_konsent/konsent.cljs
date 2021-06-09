@@ -349,7 +349,7 @@
 
 
 (defn one-iteration [iteration]
-  (print "iteration: " (cljs.pprint/pprint iteration))
+  ;(print "iteration: " (cljs.pprint/pprint iteration))
   (let [votes-in-iter            (:votes iteration)
         ;active-iteration (k-fsm/active-iteration k)
         messages         (reverse (:discussion iteration))
@@ -413,11 +413,11 @@
 (defn history [k]
   ; (println (-> k :konsent :iterations))
   ;(println "history:  " (-> k :konsent :iterations))
-  #_(let [iter-with-idx (map (fn [iter key] {:key key :iter iter}) (-> k :konsent :iterations) (range))]
-     [:<>
-      (for [i iter-with-idx]
-        ^{:key (:key i)}
-        [one-iteration (:iter i)])]))
+  (let [iter-with-idx (map (fn [iter key] {:key key :iter iter}) (-> k :konsent :iterations) (range))]
+   [:<>
+    (for [i iter-with-idx]
+      ^{:key (:key i)}
+      [one-iteration (:iter i)])]))
 
 
 
