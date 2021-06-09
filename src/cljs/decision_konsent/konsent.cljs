@@ -46,9 +46,9 @@
                 (if @(rf/subscribe [:auth/user])
                   {:on-click #(rf/dispatch [:konsent/create @fields])}
                   not-logged-in)
-                "create the konsent"]]]]
-       divider
-       [e/all-examples]])))
+                "create the konsent"]]]]])))
+       ;divider])))
+       ;[e/all-examples]])))
 
 
 (defn konsent-example-list []
@@ -554,8 +554,8 @@
         [:div.is-divider.mt-6.mb-6 {:data-content "started by with participants"}]
         [short-name-and-problemstatement sn probs]
         [participants ps]
-        [created-by-when (-> k :konsent :owner) (-> k :konsent :timestamp)]
-        [debugging k u]]
+        [created-by-when (-> k :konsent :owner) (-> k :konsent :timestamp)]]
+        ;[debugging k u]]
 
        [konsent-example-list])]))
 

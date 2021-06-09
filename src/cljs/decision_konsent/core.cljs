@@ -111,7 +111,7 @@
 
 (defn page []
   (if-let [page @(rf/subscribe [:common/page])]
-    [:div.column.is-two-thirds
+    [:div.column ;.is-two-thirds
      [navbar]
      [:div.columns.is-centered>div.column
       [errors-section]
