@@ -411,11 +411,13 @@
 ;TODO do that all by subscriptions
 
 (defn history [k]
- ;(println "history" (-> k :konsent :iterations))
- [:<>
-  (for [i (-> k :konsent :iterations)]
-    ;[:div "one iter"])])
-    [one-iteration i])])
+  ; (println (-> k :konsent :iterations))
+  ;(println "history:  " (-> k :konsent :iterations))
+  (let [iter-with-idx (map (fn [iter key] {:key key :iter iter}) (-> k :konsent :iterations) (range))]
+   [:<>
+    (for [i iter-with-idx]
+      ^{:key (:key i)}
+      [one-iteration (:iter i)])]))
 
 
 
