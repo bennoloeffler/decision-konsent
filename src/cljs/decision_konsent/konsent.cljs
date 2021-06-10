@@ -46,9 +46,9 @@
                 (if @(rf/subscribe [:auth/user])
                   {:on-click #(rf/dispatch [:konsent/create @fields])}
                   not-logged-in)
-                "create the konsent"]]]]])))
+                "create the konsent"]]]]
        ;divider])))
-       ;[e/all-examples]])))
+       #_[e/all-examples]])))
 
 
 (defn konsent-example-list []

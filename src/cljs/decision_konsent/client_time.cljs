@@ -1,6 +1,7 @@
 (ns decision-konsent.client-time
   (:require [re-frame.core :as rf]
-            [ajax.core :refer [GET POST]]))
+            [ajax.core :refer [GET POST]]
+            [decision-konsent.ajax :as ajax]))
 
 
 (defn current-time
@@ -112,10 +113,27 @@
       (assoc db :time-color new-color-value)))              ;; compute and return the new application state
 
 
-(rf/reg-event-db                                            ;; usage:  (dispatch [:timer a-js-Date])
+(rf/reg-event-fx                                            ;; usage:  (dispatch [:timer a-js-Date])
   :timer                                                    ;; every second an event of this kind will be dispatched
-  (fn [db [_ new-time]]                                     ;; note how the 2nd parameter is destructured to obtain the data value
-    (assoc db :timestamp new-time)))                        ;; compute and return the new application state
+  (fn [{:keys [db]} [_ new-time]]                                     ;; note how the 2nd parameter is destructured to obtain the data value
+    {:db (assoc db :timestamp new-time)
+     :dispatch [:ping]}))                        ;; compute and return the new application state
+
+;TODO: ping
+(rf/reg-event-fx
+ :ping
+ (fn [_ _]
+  (println "\n\nsend-ping")
+  {:http-xhrio (ajax/http-xhrio-get
+                 {:uri        "/api/konsent/ping"
+                  ;:params     nil
+                  :on-success [:konsent/handle-ping]
+                  :on-failure [:common/set-error-from-ajax]})}))
+
+(rf/reg-event-db
+  :konsent/handle-ping
+  (fn [_ [_ data]]
+    (println "\n\nhandle-ping: " data)))
 
 
 ;; -- Domino 4 - Query  -------------------------------------------------------
