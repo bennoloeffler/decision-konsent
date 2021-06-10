@@ -116,10 +116,10 @@
 (rf/reg-event-fx                                            ;; usage:  (dispatch [:timer a-js-Date])
   :timer                                                    ;; every second an event of this kind will be dispatched
   (fn [{:keys [db]} [_ new-time]]                                     ;; note how the 2nd parameter is destructured to obtain the data value
-    {:db (assoc db :timestamp new-time)
-     :dispatch [:ping]}))                        ;; compute and return the new application state
+    {:db (assoc db :timestamp new-time)}))
+     ;:dispatch [:ping]}))                        ;; compute and return the new application state
 
-;TODO: ping
+
 (rf/reg-event-fx
  :ping
  (fn [_ _]

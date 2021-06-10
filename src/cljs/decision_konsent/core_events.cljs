@@ -121,8 +121,8 @@
 (rf/reg-event-db
   :common/set-error
   (fn [db [_ error]]
-    (println "set error: ")
-    (cljs.pprint/pprint error)
+    ;(println "set error: ")
+    ;(cljs.pprint/pprint error)
     (assoc db :common/error (conj (db :common/error) error))))
 
 (rf/reg-event-db

@@ -58,6 +58,7 @@ migrate and rollback: `heroku run bash | java -jar target/uberjar/decision-konse
 1. ok disuss (write a message into a running konsent)
 1. ok start voting (and see, who has voted - but not how)
 1. ok finish voting (even if sombody did not vote)
+1. ok keep alive by ping
 1. force https  
 1. validation of email and password (and other forms)
 1. invite participants after creation
