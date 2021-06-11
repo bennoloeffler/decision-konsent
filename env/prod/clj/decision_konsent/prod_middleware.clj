@@ -6,9 +6,10 @@
     [ring.middleware.ssl :refer [wrap-hsts wrap-forwarded-scheme wrap-ssl-redirect]]))
 
 (defn wrap-prod [handler]
-  (-> handler
-      wrap-forwarded-scheme
-      wrap-ssl-redirect))
-      ;(wrap-hsts {:max-age 86400})))
+      (-> handler
+              wrap-hsts))
+;wrap-forwarded-scheme
+;wrap-ssl-redirect))
+;(wrap-hsts {:max-age 86400})))
 
 ;(wrap-forwarded-scheme (wrap-ssl-redirect (wrap-hsts app)))
