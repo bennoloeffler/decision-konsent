@@ -8,7 +8,7 @@
 (defn wrap-prod [handler]
   (-> handler
       wrap-forwarded-scheme
-      wrap-ssl-redirect
-      (wrap-hsts {:max-age 86400})))
+      wrap-ssl-redirect))
+      ;(wrap-hsts {:max-age 86400})))
 
 ;(wrap-forwarded-scheme (wrap-ssl-redirect (wrap-hsts app)))
