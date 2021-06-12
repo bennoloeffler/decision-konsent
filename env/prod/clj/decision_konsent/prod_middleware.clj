@@ -15,12 +15,13 @@
 
 (defn wrap-prod [handler]
       (-> handler
-          (wrap-print-request "new before: hsts")
-          wrap-hsts
-          (wrap-print-request "new before: ssl-redirect")
-          wrap-ssl-redirect
-          (wrap-print-request "new before: forwarded-scheme")
-          wrap-forwarded-scheme))
+          (wrap-print-request "NO wrap")))
+          ;(wrap-print-request "new before: hsts")))
+          ;wrap-hsts
+          ;(wrap-print-request "new before: ssl-redirect")
+          ;wrap-ssl-redirect
+          ;(wrap-print-request "new before: forwarded-scheme")
+          ;wrap-forwarded-scheme))
           ;(wrap-print-request "FINALLY")))
 
 ;(wrap-hsts {:max-age 86400})))
