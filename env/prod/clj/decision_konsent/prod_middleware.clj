@@ -20,8 +20,8 @@
           (wrap-print-request "before: ssl-redirect")
           wrap-ssl-redirect
           (wrap-print-request "before: forwarded-scheme")
-          wrap-forwarded-scheme
-          (wrap-print-request "FINALLY")))
+          wrap-forwarded-scheme))
+          ;(wrap-print-request "FINALLY")))
 
 ;(wrap-hsts {:max-age 86400})))
 
