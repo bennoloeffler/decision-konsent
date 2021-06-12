@@ -3,13 +3,14 @@
     ;[ring.middleware.ssl :refer [wrap-reload]]
     ;[selmer.middleware :refer [wrap-error-page]]
     ;[prone.middleware :refer [wrap-exceptions]]
-    [ring.middleware.ssl :refer [wrap-hsts wrap-forwarded-scheme wrap-ssl-redirect]]))
+    [ring.middleware.ssl :refer [wrap-hsts wrap-forwarded-scheme wrap-ssl-redirect]]
+    [puget.printer :refer [cprint]]))
 
 
 (defn wrap-print-request [handler when]
  (fn [request]
    (println "\n\n --------- " when "----------")
-   (puget.printer/cprint request)
+   (cprint request)
    request))
 
 (defn wrap-prod [handler]
