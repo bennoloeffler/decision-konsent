@@ -9,7 +9,7 @@
     [decision-konsent.config :refer [env]]
     [ring.middleware.flash :refer [wrap-flash]]
     [ring.adapter.undertow.middleware.session :refer [wrap-session]]
-    [ring.middleware.defaults :refer [site-defaults wrap-defaults]]))
+    [ring.middleware.defaults :refer [site-defaults secure-site-defaults wrap-defaults]]))
     ;[ring.middleware.ssl :refer [wrap-hsts wrap-ssl-redirect wrap-forwarded-scheme]]))
 
 
@@ -45,7 +45,7 @@
       wrap-flash
       (wrap-session {:cookie-attrs {:http-only true}})
       (wrap-defaults
-        (-> site-defaults
+        (-> secure-site-defaults ; site-defaults
             (assoc-in [:security :anti-forgery] false)
             (dissoc :session)))
       wrap-internal-error))
