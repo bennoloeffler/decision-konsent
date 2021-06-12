@@ -10,16 +10,18 @@
 (defn wrap-print-request [handler when]
  (fn [request]
    (println "\n\n --------- " when "----------")
-   (cprint request)
+   (clojure.pprint/pprint request)
    request))
 
 (defn wrap-prod [handler]
       (-> handler
-          ;wrap-hsts
-          (wrap-print-request "before ssl-redirect")
+          (wrap-print-request "before: hsts")
+          wrap-hsts
+          (wrap-print-request "before: ssl-redirect")
           wrap-ssl-redirect
-          (wrap-print-request "before after ssl-redirect and before forwarded-scheme")
-          wrap-forwarded-scheme))
+          (wrap-print-request "before: forwarded-scheme")
+          wrap-forwarded-scheme
+          (wrap-print-request "FINALLY")))
 
 ;(wrap-hsts {:max-age 86400})))
 
