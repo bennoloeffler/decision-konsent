@@ -9,4 +9,4 @@
    :stop
    (fn []
      (log/info "\n-=[decision-konsent has shut down successfully]=-"))
-   :middleware wrap-prod}) ;wrap-prod}) ;identity
+   :middleware identity}) ;wrap-prod}) ;wrap-prod}) ;identity

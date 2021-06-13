@@ -39,13 +39,14 @@
       ;; since they're not compatible with this middleware
       ((if (:websocket? request) handler wrapped) request))))
 
+
 (defn wrap-base [handler]
   (-> ((:middleware defaults) handler)
 
       wrap-flash
       (wrap-session {:cookie-attrs {:http-only true}})
       (wrap-defaults
-        (-> secure-site-defaults ; site-defaults
+        (-> (assoc secure-site-defaults :proxy true) ; site-defaults
             (assoc-in [:security :anti-forgery] false)
             (dissoc :session)))
       wrap-internal-error))
