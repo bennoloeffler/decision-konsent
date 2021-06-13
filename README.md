@@ -59,10 +59,26 @@ migrate and rollback: `heroku run bash | java -jar target/uberjar/decision-konse
 1. ok start voting (and see, who has voted - but not how)
 1. ok finish voting (even if sombody did not vote)
 1. ok keep alive by ping
-1. force https  
+1. ok force https
+1. update other clients per websocket or server sent events
+1. show results of itermediate votings in read, if veto or in yellow, if major
+1. show accepted proposal in green
+1. show the potential proposers for everybody  
+1. make backwards / forward buttons functional
+1. ask for cockies
+1. have german law imprint  
 1. validation of email and password (and other forms)
 1. invite participants after creation
 1. use an invitation link to take part in an konsent without registration
+1. validate a users email-adress by clicking an email-link
+1. UNDO 
+
+## technical issues / refactoring / improvements
+1. roles (validated, authenticated, known-guest, anonymous)  
+for different api functions (login, save-konsent, ...)   
+1. tests of all routes
+1. all data as subscription (especially the "active konsent")
+1. remove error after 20 seconds
 
 ## Prerequisites
 
