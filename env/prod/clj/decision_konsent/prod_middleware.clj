@@ -13,7 +13,7 @@
           (clojure.pprint/pprint request)
           request))
 
-(assoc secure-site-defaults :proxy true)
+;(assoc secure-site-defaults :proxy true)
 
 (defn wrap-prod [handler]
       handler
