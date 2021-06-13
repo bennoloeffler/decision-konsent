@@ -2,7 +2,8 @@
   (:require
     [selmer.parser :as parser]
     [clojure.tools.logging :as log]
-    [decision-konsent.dev-middleware :refer [wrap-dev]]))
+    [decision-konsent.dev-middleware :refer [wrap-dev]]
+    [ring.middleware.defaults :refer [site-defaults secure-site-defaults wrap-defaults]]))
 
 (def defaults
   {:init
@@ -12,4 +13,5 @@
    :stop
    (fn []
      (log/info "\n-=[decision-konsent has shut down successfully]=-"))
-   :middleware wrap-dev})
+   :middleware wrap-dev
+   :security-middleware site-defaults})

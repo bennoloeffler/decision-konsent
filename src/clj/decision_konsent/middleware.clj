@@ -9,8 +9,8 @@
     [decision-konsent.config :refer [env]]
     [ring.middleware.flash :refer [wrap-flash]]
     [ring.adapter.undertow.middleware.session :refer [wrap-session]]
-    [ring.middleware.defaults :refer [site-defaults secure-site-defaults wrap-defaults]]))
-    ;[ring.middleware.ssl :refer [wrap-hsts wrap-ssl-redirect wrap-forwarded-scheme]]))
+    [ring.middleware.defaults :refer [site-defaults secure-site-defaults wrap-defaults]]
+    [ring.middleware.ssl :refer [wrap-hsts wrap-ssl-redirect wrap-forwarded-scheme]]))
 
 
 (defn wrap-internal-error [handler]
@@ -22,6 +22,7 @@
         (error-page {:status 500
                      :title "Something very bad has happened!"
                      :message "We've dispatched a team of highly trained gnomes to take care of the problem."})))))
+
 
 (defn wrap-csrf [handler]
   (wrap-anti-forgery
@@ -46,7 +47,7 @@
       wrap-flash
       (wrap-session {:cookie-attrs {:http-only true}})
       (wrap-defaults
-        (-> (assoc secure-site-defaults :proxy true) ; site-defaults
+        (-> (:security-middleware defaults) ; site-defaults ; (assoc secure-site-defaults :proxy true)
             (assoc-in [:security :anti-forgery] false)
             (dissoc :session)))
       wrap-internal-error))
