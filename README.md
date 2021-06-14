@@ -1,18 +1,20 @@
 # decision-konsent
 
 ## prepare
-install npm: https://nodejs.org/en/download/
-install shadow 
-install lein
-install sass dart-sass or node-sass --> npm install node-sass
-install postgresql (postgresql-13.2-2-windows-x64.exe)
-install pgadmin (pw x...r)
+- install npm: https://nodejs.org/en/download/
+- install shadow 
+- install lein
+- install sass dart-sass or node-sass --> npm install node-sass
+- install postgresql (postgresql-13.2-2-windows-x64.exe)
+- install pgadmin (pw x...r)
+
 ## checkout, checkin, running, testing, deploy
 
 run the build tools:
-start console (3x)
-cd \projects\_clj\decision-konsent
+- start console (3x)
+- cd \projects\_clj\decision-konsent (your path...)
 
+then:
 #### 1 SCSS (css rebuild + reload as typed)
 npm run css-watch
 
@@ -20,12 +22,16 @@ npm run css-watch
 lein shadow watch app
 
 #### 3 TEST (run tests 
-$env:DATABASE_URL="postgresql://localhost/konsent_test?user=postgres&password=xr600r"
-set DATABASE_URL="postgresql://localhost/konsent_test?user=postgres&password=xr600r"
+$env:DATABASE_URL="postgresql://localhost/konsent_test?user=postgres&password=xr600r"  
+or  
+set DATABASE_URL="postgresql://localhost/konsent_test?user=postgres&password=xr600r"  
 lein test-refresh
 
-#### 4 REPL (start, stop, restart - change and reload)
-intellij
+#### 4 REPL (start, stop, restart, reset-db)
+in intellij:  
+start repl (server)  
+by right clicking on  
+project.clj
 
 #### 5 Heroku
 ##### deploy
@@ -33,20 +39,44 @@ lein uberjar
 heroku local
 git commit -am "login register messages time"
 git push heroku master
-##### migrate
+
+##### migrate (or rollback)
 `heroku run bash | java -jar target/uberjar/decision-konsent.jar migrate`
 
-create project: `lein new luminus decision-konsent +cljs +swagger +postgres +reagent +re-rame +shadow-cljs`   
-set database env for prod/env locally: `$env:DATABASE_URL="postgresql://localhost/konsent_heroku?user=postgres&password=xr600r"`  
-run locally: `lein run`  
-compile cljs incrementally: `lein shadow watch app`  
-build jar: `lein uberjar`  
-test heroku deploy: `heroku local`  
-continuous test: `lein test-refresh`  
-heroku with buildpack nodejs and clojure  
-scss/sass build and watch: `npm run css-watch` and css-build (see package.json)  
-deploy to heroku: `git commit -am "xyz" | git push heroku master`
-migrate and rollback: `heroku run bash | java -jar target/uberjar/decision-konsent.jar migrate`
+
+### all commands 
+
+create project:  
+`lein new luminus decision-konsent +cljs +swagger +postgres +reagent +re-rame +shadow-cljs`     
+  
+set database env for prod/env locally:  
+`$env:DATABASE_URL="postgresql://localhost/konsent_heroku?user=postgres&password=xr600r"`  
+
+run server locally:  
+`lein run`  
+
+compile cljs incrementally:  
+lein shadow watch app`  
+
+build jar:  
+`lein uberjar`    
+
+test heroku deploy:  
+`heroku local`    
+
+continuous test:  
+`lein test-refresh`    
+
+heroku with buildpack nodejs and clojure      
+
+scss/sass build and watch:  
+`npm run css-watch` and css-build (see package.json)    
+
+deploy to heroku:  
+`git commit -am "xyz" | git push heroku master`  
+
+migrate and rollback:  
+`heroku run bash | java -jar target/uberjar/decision-konsent.jar migrate`  
 
 ## user stories
 1. ok datastructure for a growing konsent, that is used and notified between clients and server

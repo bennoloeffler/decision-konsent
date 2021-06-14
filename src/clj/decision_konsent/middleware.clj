@@ -8,7 +8,7 @@
     [muuntaja.middleware :refer [wrap-format wrap-params]]
     [decision-konsent.config :refer [env]]
     [ring.middleware.flash :refer [wrap-flash]]
-    [ring.adapter.undertow.middleware.session :refer [wrap-session]]
+    ;[ring.adapter.undertow.middleware.session :refer [wrap-session]]
     [ring.middleware.defaults :refer [site-defaults secure-site-defaults wrap-defaults]]
     [ring.middleware.ssl :refer [wrap-hsts wrap-ssl-redirect wrap-forwarded-scheme]]))
 
@@ -45,7 +45,7 @@
   (-> ((:middleware defaults) handler)
 
       wrap-flash
-      (wrap-session {:cookie-attrs {:http-only true}})
+      ;(wrap-session {:cookie-attrs {:http-only true}})
       (wrap-defaults
         (-> (:security-middleware defaults) ; site-defaults ; (assoc secure-site-defaults :proxy true)
             (assoc-in [:security :anti-forgery] false)
