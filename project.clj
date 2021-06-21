@@ -43,6 +43,7 @@
                  [selmer "1.12.33"]
                  [thheller/shadow-cljs "2.12.1" :scope "provided"]
                  [buddy "2.0.0"]
+                 [org.clojure/data.json "2.3.1"]
                  ;DEBUG
                  [philoskim/debux "0.6.5"]            ;dbg debugger
                  [hashp "0.1.1"]                    ;debugging #p

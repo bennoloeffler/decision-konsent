@@ -16,7 +16,9 @@
     [decision-konsent.unix-time :as ut]
     [spec-tools.data-spec :as ds]
     [decision-konsent.db.konsent :as k]
-    [clojure.pprint :as pp])
+    [clojure.pprint :as pp]
+    [puget.printer :refer [cprint]])
+
   (:import (clojure.lang ExceptionInfo)))
 
 (defn service-routes []
@@ -58,23 +60,23 @@
     {:swagger {:tags ["user"]}}
 
     ["/register"
-     {:post {:summary    "create a new user"
-             :parameters {:body {:email string? :password string? :confirm string?}}
-             :responses  {200 {:body {:email string? :message string?}}
-                          400 {:body {:message string?}}
-                          409 {:body {:message string?}}}
-             :handler    (fn [{{{:keys [email password confirm]} :body} :parameters}]
-                           (println "going to register user: " email)
-                           (if-not (= password confirm)
-                             (response/bad-request {:message "Password and confirm do not match."})
-                             (try
-                               (auth/create-user! email password)
-                               (response/ok {:email email :message "User registered. Please login."})
-                               (catch ExceptionInfo e
-                                 (if (= (:decision-konsent/error-id (ex-data e))
-                                        ::auth/duplicate-user)
-                                   (response/conflict {:message "Failed. User already exists."})
-                                   (throw e))))))}}]
+     {:post {:summary   "create a new user"
+             ;:parameters {:body {:email string? :password string? :confirm string?}}
+             :responses {200 {:body {:email string? :message string?}}
+                         400 {:body {:message string?}}
+                         409 {:body {:message string?}}}
+             :handler   (fn [{{:keys [email password confirm]} :body-params}]
+                          ;(println "going to register user: " email)
+                          (if-not (= password confirm)
+                            (response/bad-request {:message "Password and confirm do not match."})
+                            (try
+                              (auth/create-user! email password)
+                              (response/ok {:email email :message "User registered. Please login."})
+                              (catch ExceptionInfo e
+                                (if (= (:decision-konsent/error-id (ex-data e))
+                                       ::auth/duplicate-user)
+                                  (response/conflict {:message "Failed. User already exists."})
+                                  (throw e))))))}}]
 
 
     ["/login"
@@ -82,9 +84,9 @@
              :parameters {:body {:email string? :password string?}}
              :responses  {200 {:body {:identity {:email string?}}}
                           401 {:body {:message string?}}}
-             :handler    (fn [{{{:keys [email password]} :body} :parameters
-                               session                          :session}]
-                           (println "try to login user: " email)
+             :handler    (fn [{{:keys [email password]} :body-params session :session :as data}]
+                           (println "\n\nlogin:\n")
+                           (cprint data)
                            (if-some [user (auth/authenticate-user email password)]
                              (-> (response/ok {:identity user})
                                  (assoc :session (assoc session :identity user)))
@@ -97,14 +99,30 @@
                             (assoc :session nil)))}}]
     ["/session"
      {:get {:parameters {:query {}}
-            :handler    (fn [{{:keys [identity]} :session}]
-                          (println "try to get session")
+            :handler    (fn [{{:keys [identity]} :session :as data}]
+                          (println "\n\nsessions:\n")
+                          (cprint data)
                           (response/ok {:session
                                         {:identity
                                          (not-empty
                                            (select-keys identity [:email]))}}))}}]]
    ["/konsent"
     {:swagger {:tags ["konsent"]}}
+
+    ["/test-ajax"
+     {:get {:summary "test data receiving and replying per ajax"
+            :parameters {:query {:some string?}}
+            :handler (fn [data]
+                         ;(cprint data)
+                         (cprint (:params data))
+                         (response/ok (:params data)))}
+
+      :post {:summary "test data receiving and replying per ajax"
+             :parameters {:body-params {:some string?}}
+             :handler (fn [data]
+                        (cprint data)
+                        (cprint (-> data :body-params))
+                        (response/ok (-> data :body-params)))}}]
 
     ["/unix-time"
      {:get {:summary "returns unix GMT milliseconds of the server"
@@ -120,7 +138,7 @@
              :handler (fn [data]
                         ;(println "data: " data)
                         (let [params (-> data :body-params)]
-                          ;(println "params: " params)
+                          (println "params: " params)
                           (response/ok (k/create-konsent! params))))}}]
 
     ["/save-konsent"
@@ -128,8 +146,8 @@
              :handler (fn [data]
                         ;(println "data: " data)
                         (let [params (-> data :body-params)]
-                          (println "\n\nsaving konsent:")
-                          (pp/pprint params)
+                          ;(println "\n\nsaving konsent:")
+                          ;(pp/pprint params)
                           (response/ok {:message (k/save-konsent! params)})))}}]
 
     ["/delete-konsent"
@@ -143,12 +161,8 @@
     ["/all-konsents-for-user"
      {:get {:summary "A user askes for all konsents he is involved in."
             :handler (fn [data]
-                       (let [;_ (println data)
-                             email  (get-in data [:query-params "email"])
-                             params {:email email}
-                             ;_      (println "params: " params)
+                       (let [params  (:params data)
                              result (k/get-konsents-for-user params)]
-                         ;(println result)
                          (ok result)))}}]
 
     #_["/discuss"
@@ -170,9 +184,10 @@
       :post {:summary    "just send a message to everybody"
              :parameters {:body-params {:message string?}}
              ;:responses {200 {:body {:messages seq?}}}
-             :handler    (fn [input]
-                           (let [{{:keys [message]} :body-params} input]
-                             ;(println "received message: " (:body-params input))
+             :handler    (fn [data]
+                           (let [message (-> data :body-params  :message)]
+                             ;(println "received message: " message)
+                             ;(println "received message: " )
                              ;(println "timestamp: " (ut/current-time))
                              (db/create-message! {:message message :timestamp (ut/current-time)})
                              ;(println "wrote message: " message)

@@ -1,6 +1,7 @@
 (ns decision-konsent.auth-events
   (:require [re-frame.core :as rf]
-            [ajax.core :as ajax]))
+            [ajax.core :as ajax]
+            [decision-konsent.ajax :refer [wrap-post wrap-get]]))
 
 
 
@@ -27,14 +28,10 @@
   :auth/start-register
   (fn [_world [_ fields]]
     ;(println "sending fields: " fields)
-    {:http-xhrio {:method          :post                    ; TODO: switch to http-xhrio-post
-                  :uri             "/api/user/register"
-                  :params          fields
-                  :timeout         5000
-                  :format          (ajax/json-request-format)
-                  :response-format (ajax/json-response-format {:keywords? true})
-                  :on-success      [:auth/handle-register]
-                  :on-failure      [:auth/handle-login-error]}})) ; TODO: switch to :common/set-error-from-ajax
+    {:http-xhrio (wrap-post {:uri        "/api/user/register"
+                             :params     fields
+                             :on-success [:auth/handle-register]
+                             :on-failure [:common/set-error]})}))
 
 
 (rf/reg-event-fx
@@ -44,87 +41,72 @@
     {:db       (-> db (assoc :auth/register-worked email))
      :dispatch [:common/navigate! :login nil nil]}))
 
+
 ;;
 ;; ---------- login -----------
 ;;
+
 
 (rf/reg-event-fx
   :auth/start-login
   (fn [_world [_ fields]]
     ;(println "sending fields: " fields)
-    {:http-xhrio {:method          :post                    ; TODO: switch to http-xhrio-post
-                  :uri             "/api/user/login"
-                  :params          fields
-                  :timeout         5000
-                  :format          (ajax/json-request-format)
-                  :response-format (ajax/json-response-format {:keywords? true})
-                  :on-success      [:auth/handle-login]
-                  :on-failure      [:auth/handle-login-error]}})) ; TODO: switch to :common/set-error-from-ajax
+    {:http-xhrio (wrap-post {:uri        "/api/user/login"
+                             :params     fields
+                             :on-success [:auth/handle-login]
+                             :on-failure [:common/set-error]})}))
 
 
 (rf/reg-event-fx
   :auth/handle-login
   (fn [{:keys [db]} [_ {:keys [identity]}]]
-    ;(println "receiving identity: " identity)
+    (println "\n:auth/handle-login " identity)
     {:db         (assoc db :auth/user identity)
      :dispatch-n [[:konsent/load-list]
                   [:common/navigate! :my-konsents nil nil]]}))
 
-
-(rf/reg-event-db
-  :auth/handle-login-error                                  ; TODO: switch to :common/set-error-from-ajax
-  (fn [db [_ data]]
-    ;(cljs.pprint/pprint data)
-    (assoc db :common/error (conj (db :common/error)
-                                  (or (-> data :response :message)
-                                      (-> data :last-error))))))
 
 ;;
 ;; ---------- logout -----------
 ;;
 
 (rf/reg-event-fx
-  :auth/start-logout                                        ; TODO: switch to http-xhrio-post
+  :auth/start-logout
   (fn [_world [_ fields]]
     ;(println "sending logout: " fields)
-    {:http-xhrio {:method          :post
-                  :uri             "/api/user/logout"
-                  :params          fields
-                  :timeout         5000
-                  :format          (ajax/json-request-format)
-                  :response-format (ajax/json-response-format {:keywords? true})
-                  :on-success      [:auth/handle-logout]
-                  :on-failure      [:auth/handle-login-error]}})) ; TODO: switch to :common/set-error-from-ajax
-
+    {:http-xhrio (wrap-post {:uri        "/api/user/logout"
+                             :params     fields
+                             :on-success [:auth/handle-logout]
+                             :on-failure [:common/set-error]})}))
 
 (rf/reg-event-fx
   :auth/handle-logout
   (fn [{:keys [db]} _]
-    {:db       (dissoc db :auth/user)
+    {:db       (-> db (dissoc :auth/user) (dissoc :konsent/active))
      :dispatch [:common/navigate! :login nil nil]}))
+
 
 ;;
 ;; ---------- session -----------
 ;;
 
+
 (rf/reg-event-fx
   :session/load
   (fn [{:keys [db]} _]
     ;(println "reloading session - at least try...")
-    {:db         (assoc db :session/loading? true)
-     :http-xhrio {:method          :get                     ; TODO: switch to http-xhrio-get
-                  :uri             "/api/user/session"
-                  :timeout         5000
-                  :format          (ajax/json-request-format)
-                  :response-format (ajax/json-response-format {:keywords? true})
-                  :on-success      [:session/set]
-                  :on-failure      [:auth/handle-login-error]}})) ; TODO: ??? switch to :common/set-error-from-ajax
+    {;:db         (assoc db :session/loading? true)
+     :http-xhrio (wrap-get {:uri        "/api/user/session"
+                            :on-success [:session/set]
+                            :on-failure [:common/set-error]})}))
 
 
 (rf/reg-event-fx
   :session/set
   (fn [{:keys [db]} [_ data]]
-    ;(println  "\n\ngot session info: " data)
-    (let [identity   (-> data :session :identity)
-          load-event (if identity {:dispatch [:konsent/load-list]} {})]
-      (into load-event {:db (assoc db :auth/user identity)}))))
+    (println "\n:session/set " data)
+    (let [identity (-> data :session :identity)
+          fx       (if identity
+                     {:dispatch [:konsent/load-list]}
+                     {})]
+      (into fx {:db (assoc db :auth/user identity)}))))

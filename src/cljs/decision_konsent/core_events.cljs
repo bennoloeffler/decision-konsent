@@ -3,71 +3,56 @@
     [re-frame.core :as rf]
     [ajax.core :as ajax]
     [reitit.frontend.easy :as rfe]
-    [ajax.core :refer [GET POST]]
+    ;[ajax.core :refer [GET POST]]
     [reitit.frontend.controllers :as rfc]
     [decision-konsent.client-time :as ct]))
-
 
 
 ;;
 ;; init
 ;;
 
+
 (rf/reg-event-fx
   :initialize
   [(rf/inject-cofx :now)]
   (fn [cofx _]
     ;(println ":initialize event")
-    {:db         {:messages/loading? true :timestamp 0}     ; effects map
+    {;:db         {:messages/loading? true :timestamp 0}     ; effects map
      :dispatch-n [[:timer (:now cofx)]
                   [:set-server-diff-time 0]
                   [:init-server-diff-time]
                   [:messages/load]
                   [:session/load]]}))
 
+
 (rf/reg-cofx
   :now
   (fn [cofx _]
     (assoc cofx :now (ct/current-time))))
+
 
 ;;
 ;; ajax
 ;;
 
 
-(rf/reg-fx ; TODO: switch to :common/set-error-from-ajax
-  :ajax/get
-  (fn [{:keys [url success-event error-event success-path]}]
-    (println "start ajax/get...")
-    (GET url
-         (cond-> {:headers {"Accept" "application/transit+json"}}
-                 success-event (assoc :handler
-                                      #(rf/dispatch
-                                         (conj success-event
-                                               (if success-path
-                                                 (get-in % success-path)
-                                                 %))))
-                 error-event (assoc :error-handler
-                                    #(rf/dispatch
-                                       (conj error-event %)))))))
-
 #_(rf/reg-fx ; TODO: switch to :common/set-error-from-ajax
-    :ajax/post
+    :ajax/get
     (fn [{:keys [url success-event error-event success-path]}]
-      (println "start ajax/post...   url: " url "    path: " success-path)
-      (POST url
-            (cond-> {:headers {"Accept" "application/transit+json"}}
-                    success-event (assoc :handler
-                                         #(do (rf/dispatch
-                                                (conj success-event
-                                                      (if success-path
-                                                        (get-in % success-path)
-                                                        %)))
-                                              (println "got: " %)))
-                    error-event (assoc :error-handler
-                                       #(rf/dispatch
-                                          (conj error-event %)))
-                    true (assoc :params {:message "this is it..."})))))
+      (println "start ajax/get...")
+      (GET url
+           (cond-> {:headers {"Accept" "application/transit+json"}}
+                   success-event (assoc :handler
+                                        #(rf/dispatch
+                                           (conj success-event
+                                                 (if success-path
+                                                   (get-in % success-path)
+                                                   %))))
+                   error-event (assoc :error-handler
+                                      #(rf/dispatch
+                                         (conj error-event %)))))))
+
 
 
 ;;
@@ -118,21 +103,16 @@
   (fn [db [_ _]]
     (dissoc db :common/error)))
 
-(rf/reg-event-db
-  :common/set-error
-  (fn [db [_ error]]
-    ;(println "set error: ")
-    ;(cljs.pprint/pprint error)
-    (assoc db :common/error (conj (db :common/error) error))))
 
 (rf/reg-event-db
-  :common/set-error-from-ajax
+  :common/set-error
   (fn [db [_ data]]
-    (println "receiving error from ajax: ")
+    (println "receiving error from ajax: " data)
     ;(cljs.pprint/pprint data)
     (assoc db :common/error (conj (db :common/error)
                                   (or (-> data :response :message)
-                                      (-> data :last-error))))))
+                                      (-> data :last-error not-empty)
+                                      (str data))))))
 
 (rf/reg-sub
   :common/error

@@ -16,7 +16,9 @@
     [decision-konsent.konsent :as k]
     [ajax.core :refer [GET POST]]
     [decision-konsent.client-time :as ct]
-    [decision-konsent.auth :as l])
+    [decision-konsent.auth :as l]
+    [decision-konsent.websocket :as ws]
+    [decision-konsent.test-button :as tb])
   (:import goog.History))
 
 
@@ -27,13 +29,14 @@
   [:a.button.is-primary {:href "#/login"} #_{:on-click #(reset! logged-in true)} [:span.icon.is-large>i.fas.fa-1x.fa-sign-in-alt] [:span "login"]])
 
 (defn register-button []
-  [:a.button.is-warning.mr-1 {:href "#/register" :on-click #(rf/dispatch [:common/set-error "registration is not yet available - sorry"])} [:span.icon.is-large>i.fas.fa-1x.fa-pen-nib] [:span "register an account and then..."]])
+  [:a.button.is-warning.mr-1 {:href "#/register" :on-click #(rf/dispatch [:messages/load])} [:span.icon.is-large>i.fas.fa-1x.fa-pen-nib] [:span "register an account and then..."]])
 
 (defn logout-button []
   [:button.button.is-primary.is-outlined {:on-click #(rf/dispatch [:auth/start-logout])} [:span.icon.is-large>i.fas.fa-1x.fa-sign-out-alt] [:span "logout"]])
 
 (defn user-indicator []
-  [:button.button.is-primary.is-outlined.mr-1 {:on-click #(rf/dispatch [:common/set-error "profile editing not yet available - sorry"])} [:span.icon.is-large>i.fas.fa-1x.fa-address-card] [:span @(rf/subscribe [:auth/user])]])
+  [:button.button.is-primary.is-outlined.mr-1
+   {:on-click #(ws/send-message! {:data @(rf/subscribe [:auth/user])} #_(rf/dispatch [:common/set-error "profile editing not yet available - sorry"]))} [:span.icon.is-large>i.fas.fa-1x.fa-address-card] [:span @(rf/subscribe [:auth/user])]])
 
 
 (defn nav-link [uri title page]
@@ -63,6 +66,7 @@
                  [nav-link "#/about" "about" :about]]
                 [:div.navbar-end
                  [:div.navbar-item.mr-3
+                  [tb/test-button]
                   (if (not @(rf/subscribe [:auth/user]))
                     [:div.buttons
                      [register-button]
@@ -111,7 +115,7 @@
 
 (defn page []
   (if-let [page @(rf/subscribe [:common/page])]
-    [:div.column ;.is-two-thirds
+    [:div.column.is-two-thirds
      [navbar]
      [:div.columns.is-centered>div.column
       [errors-section]
@@ -165,4 +169,5 @@
   (start-router!)
   (ajax/load-interceptors!)
   (rf/dispatch-sync [:initialize])
+  (ws/init!)
   (mount-components))

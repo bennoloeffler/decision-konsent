@@ -8,3 +8,6 @@
       (clojure.string/split $ #",| |;|\n")
       (remove clojure.string/blank? $)
       (vec $)))
+
+(defn str-or-null [something]
+ (not-empty something))

@@ -101,7 +101,7 @@
   "all users who are allowed to propose in the active iteration"
   [k]
   (let [p (-> (active-iteration k) :allowed-proposers)]
-    (println "allowed proposers: " p)
+    ;(println "allowed proposers: " p)
     (-> (active-iteration k) :allowed-proposers)))
 
 
@@ -461,6 +461,9 @@
 (defn discuss
   "provides a reflection, question, answer, option,... from the user"
   [k u text]
+  (println "user: " u)
+  (println "next-action of user: " (next-actions k u))
+  (println "all actions: " (next-actions-all-user k))
   (assert (contains? (next-actions k u) :discuss))
   (let [current-iteration-idx (-> k :konsent :iterations count dec)]
     (update-in k [:konsent :iterations current-iteration-idx :discussion]

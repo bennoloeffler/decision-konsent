@@ -8,7 +8,8 @@
     [decision-konsent.config :refer [env]]
     [mount.core :as mount]
     [clojure.data.json :as json]
-    [clojure.tools.logging :as log])
+    [clojure.tools.logging :as log]
+    [decision-konsent.unix-time :as ut])
   (:import (java.util Date)))
 
 (def nested [ {:name "Benno"
@@ -45,19 +46,21 @@
            (db/get-user t-conn {:email "sam.smith@example.com"} {})))))
 
 
+
 (deftest test-messages
   (jdbc/with-transaction [t-conn *db* {:rollback-only true}]
     (is (= 1 (db/create-message!
               t-conn
-              {:message      "first message"}
+              {:message      "first message"
+               :timestamp    (ut/current-time)}
               {})))
     (is (= 1 (db/create-message!
               t-conn
-              {:message      "second message"}
+              {:message      "second message"
+               :timestamp    (ut/current-time)}
               {})))
-    (is (= [ {:message      "first message"}
-             {:message      "second message"}]
-           (db/get-messages t-conn {})))))
+    (is (= 2 (count (db/get-messages t-conn {}))))))
+
 
 
 (deftest test-konsent-json-write-read
@@ -75,8 +78,8 @@
     (let [id (db/create-konsent-no-id!
               t-conn
               {:konsent nested}
-              {})
-           _ (log/debug (str "ID: " id))]
+              {})]
+           ;_ (log/debug (str "ID: " id))]
       (is (int? (:id id)))
       (is (= nested
              (:konsent (db/get-konsent t-conn {:id (:id id)} {})))))))

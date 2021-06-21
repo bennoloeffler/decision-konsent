@@ -1,6 +1,6 @@
 (ns decision-konsent.client-time
   (:require [re-frame.core :as rf]
-            [ajax.core :refer [GET POST]]
+            [ajax.core :refer [GET POST]] ; TODO
             [decision-konsent.ajax :as ajax]))
 
 
@@ -20,7 +20,7 @@
   (let [start (current-time)]
     (GET
       "api/konsent/unix-time"
-      {:handler       #(let [end               (.getTime (js/Date.))
+      {:handler       #(let [end               (current-time)
                              took              (- end start)
                              equivalent-client (- end (quot took 2))
                              server-time       (:server-time %)
@@ -31,6 +31,8 @@
                            (.log js/console (str "OK: Server-time and Browser-time synchronized."))))
        :error-handler #((rf/dispatch [:set-server-diff-time 0])
                         (.error js/console (str "ERROR getting server time. Setting diff to ZERO. Error: " %)))})))
+
+
 
 
 (rf/reg-event-fx
@@ -123,17 +125,17 @@
 (rf/reg-event-fx
  :ping
  (fn [_ _]
-  (println "\n\nsend-ping")
-  {:http-xhrio (ajax/http-xhrio-get
+  (println "\n:ping")
+  {:http-xhrio (ajax/wrap-get
                  {:uri        "/api/konsent/ping"
                   ;:params     nil
-                  :on-success [:konsent/handle-ping]
-                  :on-failure [:common/set-error-from-ajax]})}))
+                  :on-success [:handle-ping]
+                  :on-failure [:common/set-error]})}))
 
 (rf/reg-event-db
-  :konsent/handle-ping
+  :handle-ping
   (fn [_ [_ data]]
-    (println "\n\nhandle-ping: " data)))
+    (println "\n:handle-ping: " data)))
 
 
 ;; -- Domino 4 - Query  -------------------------------------------------------

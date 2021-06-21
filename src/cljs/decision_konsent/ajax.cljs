@@ -7,6 +7,7 @@
     [ajax.core :refer [GET POST]]))
 
 (defn local-uri? [{:keys [uri]}]
+  ;(println uri)
   (not (re-find #"^\w+?://" uri)))
 
 (defn default-headers [request]
@@ -32,19 +33,19 @@
 
 
 (defn http-xhrio [xhrio-map method]
-  {:method          method
-   :uri             (:uri xhrio-map)
-   :params          (:params xhrio-map)
-   :timeout         5000
-   :format          (ajax/json-request-format)
-   :response-format (ajax/json-response-format {:keywords? true})
-   :on-success      (:on-success xhrio-map)
-   :on-failure      (:on-failure xhrio-map)})
+ {:method          method
+  :uri             (:uri xhrio-map)
+  :params          (:params xhrio-map)
+  :timeout         5000
+  :format          (ajax/json-request-format)
+  :response-format (ajax/json-response-format {:keywords? true})
+  :on-success      (:on-success xhrio-map)
+  :on-failure      (:on-failure xhrio-map)})
 
 
-(defn http-xhrio-post [xhrio-map]
+(defn wrap-post [xhrio-map]
   (http-xhrio xhrio-map :post))
 
 
-(defn http-xhrio-get [xhrio-map]
+(defn wrap-get [xhrio-map]
   (http-xhrio xhrio-map :get))

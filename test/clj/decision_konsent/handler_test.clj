@@ -28,7 +28,7 @@
     (let [response ((app) (-> (request :post "/api/user/register")
                               (json-body {:email "benno@soso", :password "something", :confirm "something"})))]
       (is (= 200 (:status response)))
-      (is (= {:message "User registered. Please login."} (m/decode-response-body response)))))
+      (is (= {:email "benno@soso" :message "User registered. Please login."} (m/decode-response-body response)))))
   (testing "login ok"
     (let [response ((app) (-> (request :post "/api/user/login")
                               (json-body {:email "benno@soso", :password "something"})))]

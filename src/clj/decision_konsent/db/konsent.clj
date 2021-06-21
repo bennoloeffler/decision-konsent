@@ -1,6 +1,7 @@
 (ns decision-konsent.db.konsent
   (:require [decision-konsent.db.core :as db]
-            [puget.printer :as pp]))
+            [puget.printer :as pp]
+            [decision-konsent.routes.websocket :as ws]))
 
 ;; TODO: timestamp from unix-time namespace
 (defn now []
@@ -19,7 +20,8 @@
                               (db/create-konsent-no-id! t-conn {:konsent konsent})
                               (db/create-konsent-no-id! {:konsent konsent})))
          saved-konsent {:id id :konsent konsent}]
-     (pp/cprint saved-konsent)
+     ;(pp/cprint saved-konsent)
+     (ws/notify-all-clients! {:id (:id saved-konsent)})
      ;(clojure.pprint/pprint saved-konsent)
      saved-konsent)))
 
@@ -33,6 +35,7 @@
    (let [success (if t-conn
                    (db/update-konsent! t-conn id-konsent-map)
                    (db/update-konsent! id-konsent-map))]
+     (ws/notify-all-clients! {:id (:id id-konsent-map)})
      success))
   ([id-konsent-map] (save-konsent! nil id-konsent-map)))
 
@@ -42,6 +45,7 @@
    0 = failed
    1 = success"
   [id-konsent-map]
+  (ws/notify-all-clients! {:id (:id id-konsent-map)})
   (db/delete-konsent! id-konsent-map))
 
 
