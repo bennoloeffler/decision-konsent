@@ -489,80 +489,80 @@
           {:on-click #(rf/dispatch [:konsent/de-activate])}
           not-logged-in)
         "back to all konsents"]]
-      [:div.column.is-9 ""
-       (if u
-         [:div
-          ;[short-name-and-problemstatement sn probs]
-          ;[:div.is-divider.mt-6.mb-6 {:data-content "ask a question only to understand proposal"}]
-          ;[ask]
-          ;[:div.is-divider.mt-6.mb-6 {:data-content "free discussion to learn views, feelings, facts, opinions"}]
-          (when (k-fsm/accepted? k)
-            [:div
-             [:div.is-divider.mt-6.mb-6 {:data-content "Proposal ACCEPTED"}]
-             [accepted k u]
-             #_(when (k-fsm/user-is-proposer? k u)
-                 [force-vote k u])])
+      [:div.column.is-9 ""]]
+     (if u
+       [:div
+        ;[short-name-and-problemstatement sn probs]
+        ;[:div.is-divider.mt-6.mb-6 {:data-content "ask a question only to understand proposal"}]
+        ;[ask]
+        ;[:div.is-divider.mt-6.mb-6 {:data-content "free discussion to learn views, feelings, facts, opinions"}]
+        (when (k-fsm/accepted? k)
+          [:div
+           [:div.is-divider.mt-6.mb-6 {:data-content "Proposal ACCEPTED"}]
+           [accepted k u]
+           #_(when (k-fsm/user-is-proposer? k u)
+               [force-vote k u])])
 
-          (when (and (k-fsm/voting-started? k) (k-fsm/user-voted? k u) (not (k-fsm/user-is-proposer? k u)) (not (k-fsm/accepted? k)))
-            [:div
-             [:div.is-divider.mt-6.mb-6 {:data-content "waiting for others to vote"}]
-             [wait-for-everybody-voted k u]
-             #_(when (k-fsm/user-is-proposer? k u)
-                 [force-vote k u])])
+        (when (and (k-fsm/voting-started? k) (k-fsm/user-voted? k u) (not (k-fsm/user-is-proposer? k u)) (not (k-fsm/accepted? k)))
+          [:div
+           [:div.is-divider.mt-6.mb-6 {:data-content "waiting for others to vote"}]
+           [wait-for-everybody-voted k u]
+           #_(when (k-fsm/user-is-proposer? k u)
+               [force-vote k u])])
 
-          (when (and (k-fsm/voting-started? k) (k-fsm/user-is-proposer? k u) (not (k-fsm/accepted? k)))
-            [:div
-             [:div.is-divider.mt-6.mb-6 {:data-content "force vote?"}]
-             [force-vote k u]])
+        (when (and (k-fsm/voting-started? k) (k-fsm/user-is-proposer? k u) (not (k-fsm/accepted? k)))
+          [:div
+           [:div.is-divider.mt-6.mb-6 {:data-content "force vote?"}]
+           [force-vote k u]])
 
-          (when (and (k-fsm/voting-started? k) (not (k-fsm/user-voted? k u)) (not (k-fsm/accepted? k)))
-            [:div
-             [:div.is-divider.mt-6.mb-6 {:data-content "voting time..."}]
-             [vote-for-konsent k u]
-             [wait-for-everybody-voted k u]])
+        (when (and (k-fsm/voting-started? k) (not (k-fsm/user-voted? k u)) (not (k-fsm/accepted? k)))
+          [:div
+           [:div.is-divider.mt-6.mb-6 {:data-content "voting time..."}]
+           [vote-for-konsent k u]
+           [wait-for-everybody-voted k u]])
 
-          (when (and (k-fsm/wait-for-other-users-to-be-ready k u)
-                     (k-fsm/user-is-proposer? k u)
-                     (not (k-fsm/voting-started? k)))
-            [:div
-             [:div.is-divider.mt-6.mb-6 {:data-content "go ahead?"}]
-             [wait-for-ready k u]
-             [force-ready k u]])
-          (when (and (k-fsm/wait-for-other-users-to-be-ready k u)
-                     (not (k-fsm/user-is-proposer? k u))
-                     (not (k-fsm/voting-started? k)))
-            [:div
-             [:div.is-divider.mt-6.mb-6 {:data-content "please wait"}]
-             [wait-for-ready k u]])
-          (when (k-fsm/ask? k u)
-            [:div
-             [:div.is-divider.mt-6.mb-6 {:data-content "understand proposal"}]
-             [ask k]])
-          (when (k-fsm/answer? k u)
-            [:div
-             [:div.is-divider.mt-6.mb-6 {:data-content "answer questions regarding your proposal"}]
-             [answer k]])
-          (when (k-fsm/propose? k u)
-            [:div
-             [:div.is-divider.mt-6.mb-6 {:data-content "create proposal"}]
-             [propose]])
-          (when (k-fsm/discuss? k u)
-            [:div
-             [:div.is-divider.mt-6.mb-6 {:data-content "free discussion to learn views, feelings, facts, opinions"}]
-             [discuss]])
-          ;[:div.is-divider.mt-6.mb-6 {:data-content "or start a konsent by suggesting"}]
-          ;[vote-for-konsent]
-          ;[:div.is-divider.mt-6.mb-6 {:data-content "start konsent"}]
-          ;[start-konsent]
-          [:div.is-divider.mt-6.mb-6 {:data-content "what happend before..."}]
-          [history k]
-          [:div.is-divider.mt-6.mb-6 {:data-content "started by with participants"}]
-          [short-name-and-problemstatement sn probs]
-          [participants ps]
-          [created-by-when (-> k :konsent :owner) (-> k :konsent :timestamp)]
-          [debugging k u]
-          [:div "XYZ"]]
-         [konsent-example-list])]]]))
+        (when (and (k-fsm/wait-for-other-users-to-be-ready k u)
+                   (k-fsm/user-is-proposer? k u)
+                   (not (k-fsm/voting-started? k)))
+          [:div
+           [:div.is-divider.mt-6.mb-6 {:data-content "go ahead?"}]
+           [wait-for-ready k u]
+           [force-ready k u]])
+        (when (and (k-fsm/wait-for-other-users-to-be-ready k u)
+                   (not (k-fsm/user-is-proposer? k u))
+                   (not (k-fsm/voting-started? k)))
+          [:div
+           [:div.is-divider.mt-6.mb-6 {:data-content "please wait"}]
+           [wait-for-ready k u]])
+        (when (k-fsm/ask? k u)
+          [:div
+           [:div.is-divider.mt-6.mb-6 {:data-content "understand proposal"}]
+           [ask k]])
+        (when (k-fsm/answer? k u)
+          [:div
+           [:div.is-divider.mt-6.mb-6 {:data-content "answer questions regarding your proposal"}]
+           [answer k]])
+        (when (k-fsm/propose? k u)
+          [:div
+           [:div.is-divider.mt-6.mb-6 {:data-content "create proposal"}]
+           [propose]])
+        (when (k-fsm/discuss? k u)
+          [:div
+           [:div.is-divider.mt-6.mb-6 {:data-content "free discussion to learn views, feelings, facts, opinions"}]
+           [discuss]])
+        ;[:div.is-divider.mt-6.mb-6 {:data-content "or start a konsent by suggesting"}]
+        ;[vote-for-konsent]
+        ;[:div.is-divider.mt-6.mb-6 {:data-content "start konsent"}]
+        ;[start-konsent]
+        [:div.is-divider.mt-6.mb-6 {:data-content "what happend before..."}]
+        [history k]
+        [:div.is-divider.mt-6.mb-6 {:data-content "started by with participants"}]
+        [short-name-and-problemstatement sn probs]
+        [participants ps]
+        [created-by-when (-> k :konsent :owner) (-> k :konsent :timestamp)]]
+        ;[debugging k u]]
+       [konsent-example-list])]))
+
 
 
 

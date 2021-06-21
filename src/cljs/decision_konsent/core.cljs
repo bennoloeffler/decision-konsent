@@ -66,7 +66,7 @@
                  [nav-link "#/about" "about" :about]]
                 [:div.navbar-end
                  [:div.navbar-item.mr-3
-                  [tb/test-button]
+                  ;[tb/test-button]
                   (if (not @(rf/subscribe [:auth/user]))
                     [:div.buttons
                      [register-button]
