@@ -8,11 +8,34 @@
             [decision-konsent.client-time :as ct]
             [decision-konsent.konsent-fsm :as k-fsm]))
 
+
+(defn time-gone-by [t]
+  (let [localtime   @(rf/subscribe [:timestamp])
+        server-diff @(rf/subscribe [:server-diff-time])
+        gone-by     (ct/human-duration-sd t localtime server-diff)]
+    ;(println "t: " t)
+    ;(println "gone-by: " gone-by)
+    ;(println "local: " localtime)
+    [:small (str "~ " gone-by)]))
+
+
+(defn add-time-badge [t]
+  [:span.badge.is-info [time-gone-by t]])
+
+
+(defn add-time-user-badge [t u]
+  [:span.badge.is-info u " " [time-gone-by t]])
+
 (def login-to-start "first login.\nthen start.")
+
+
 (def not-logged-in {:data-tooltip login-to-start
                     :class        [:has-tooltip-warning :has-tooltip-active :has-tooltip-arrow]
                     :disabled     true})
+
+
 (def divider [:div.is-divider.mt-6.mb-6 {:data-content "OR"}])
+
 
 (defn value [element]
   (-> element .-target .-value))
@@ -113,9 +136,10 @@
       [:div.card {:key (:participant v)}
        [:div.card-content>div.content
         [:div.columns
-         [:div.column.is-2 (:vote v)]
-         [:div.column.is-3 (:participant v)]
-         [:div.column>div.card>div.card-content>div.content (:text v)]]]])]])
+         [:div.column.is-1 (:vote v)]
+         ;[:div.column.is-3 (:participant v)]
+         [:div.column>div.card>div.card-content>div.content
+           [add-time-user-badge (:timestamp v) (:participant v)] (:text v)]]]])]])
 
 
 (defn accepted [k u]
@@ -177,21 +201,7 @@
       [decision-konsent.home/tutorial-buttons]]])
 
 
-(defn time-gone-by [t]
-  (let [localtime   @(rf/subscribe [:timestamp])
-        server-diff @(rf/subscribe [:server-diff-time])
-        gone-by     (ct/human-duration-sd t localtime server-diff)]
-    ;(println "t: " t)
-    ;(println "gone-by: " gone-by)
-    ;(println "local: " localtime)
-    [:small (str "~ " gone-by)]))
 
-
-(defn add-time-badge [t]
-  [:span.badge.is-info [time-gone-by t]])
-
-(defn add-time-user-badge [t u]
-  [:span.badge.is-info u " " [time-gone-by t]])
 
 
 (defn owner-started [o t]
