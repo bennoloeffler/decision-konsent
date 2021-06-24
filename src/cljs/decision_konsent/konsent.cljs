@@ -113,9 +113,9 @@
       [:div.card {:key (:participant v)}
        [:div.card-content>div.content
         [:div.columns
-         [:div.column.is-2 (:participant v)]
          [:div.column.is-2 (:vote v)]
-         [:div.column.is-5 (:text v)]]]])]])
+         [:div.column.is-3 (:participant v)]
+         [:div.column>div.card>div.card-content>div.content (:text v)]]]])]])
 
 
 (defn accepted [k u]
