@@ -114,7 +114,7 @@
           user     (-> db :auth/user :email)
           text     (fields :text)
           new-k    (k-fsm/discuss active-k user text)]
-      ;(println fields)
+      (println fields)
       ;(println "created konsent cljc: " (k-fsm/create-konsent "" "" "" []))
       {:http-xhrio (ajax/wrap-post
                      {:uri        "/api/konsent/save-konsent"

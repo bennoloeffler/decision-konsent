@@ -86,7 +86,7 @@
                           401 {:body {:message string?}}}
              :handler    (fn [{{:keys [email password]} :body-params session :session :as data}]
                            (println "\n\nlogin:\n")
-                           (cprint data)
+                           ;(cprint data)
                            (if-some [user (auth/authenticate-user email password)]
                              (-> (response/ok {:identity user})
                                  (assoc :session (assoc session :identity user)))
@@ -148,7 +148,7 @@
              :handler (fn [data]
                         ;(println "data: " data)
                         (let [params (-> data :body-params)]
-                          ;(println "\n\nsaving konsent:")
+                          (println "\n\nsaving konsent:")
                           ;(pp/pprint params)
                           (response/ok {:message (k/save-konsent! params)})))}}]
 

@@ -55,11 +55,3 @@
     (.log js/console "try socket connection to: " url-ws)
     (connect! url-ws handle-response!)))
 
-#_(defn init! []
-      (try
-        (if-let [chan (js/WebSocket. (str "wss://" (.-host js/location) "/ws"))]
-          (do (println "SUCCESS" (.-host js/location))
-              (println (str chan)))
-          (do (println "FAILED")))
-        ;(println (str chan))))
-        (catch :default e (println "FAILED: " e))))

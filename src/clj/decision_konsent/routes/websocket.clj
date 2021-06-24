@@ -19,7 +19,7 @@
 
 ; TODO: create a queue and do async
 (defn notify-all-clients! [data]
-  (println "notify: " data)
+  (log/info "websocket notify: " data)
   (doseq [channel @channels]
     (http-kit/send! channel (json/write-str data)))) ;TODO, remove the invalid channels
 
