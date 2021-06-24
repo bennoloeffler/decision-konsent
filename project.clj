@@ -76,7 +76,8 @@
      :asset-path "/js"
      :modules {:app {:entries [decision-konsent.app]}}
      :devtools
-     {:watch-dir "resources/public" :preloads [day8.re-frame-10x.preload]} ; re-frisk.preload
+     {:watch-dir "resources/public" :preloads [re-frisk.preload]} ; [re-frisk.preload] ; [day8.re-frame-10x.preload]
+
      :dev
      {:closure-defines {"re_frame.trace.trace_enabled_QMARK_" true}}}
     :test
@@ -104,7 +105,7 @@
                                  [cider/piggieback "0.5.2"]
                                  [pjstadig/humane-test-output "0.11.0"]
                                  [prone "2020-01-17"]
-                                 [day8.re-frame/re-frame-10x "0.7.0"];[re-frisk "1.4.0"]
+                                 [re-frisk "1.4.0"];[day8.re-frame/re-frame-10x "0.7.0"];[re-frisk "1.4.0"]
                                  [ring/ring-devel "1.9.2"]
                                  [ring/ring-mock "0.4.0"]]
                   :plugins      [[com.jakemccrary/lein-test-refresh "0.24.1"]

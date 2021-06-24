@@ -1,6 +1,8 @@
 (ns decision-konsent.websocket
   (:require [cljs.reader :as edn]
-            [re-frame.core :as rf]))
+            [re-frame.core :as rf]
+            [clojure.string :as str]))
+;(:import [java.lang Exception]))
 ;[clojure.data.json :as json]))
 
 
@@ -10,14 +12,14 @@
 (defn connect! [url receive-handler]
   (if-let [chan (js/WebSocket. url)]
     (do
-      (.log js/console "websocket connected!")
       (set! (.-onmessage chan) #(as-> % message
                                       (.-data message)
                                       ;edn/read-string
                                       (.parse js/JSON message)
                                       (js->clj message :keywordize-keys true)
                                       (receive-handler message)))
-      (reset! channel chan))
+      (reset! channel chan)
+      (.log js/console "websocket connected!"))
     (throw (ex-info "Websocket Connection Failed!"
                     {:url url}))))
 
@@ -45,5 +47,19 @@
 
 
 (defn init! []
-  (connect! (str "ws://" (.-host js/location) "/ws")
-            handle-response!))
+  (let [host     (.-host js/location)
+        ;_ (println host)
+        protocol (if (str/starts-with? host "localhost") "ws" "wss")
+        url-ws   (str protocol "://" host "/ws")]
+        ;_        (println "url: " url-ws)]
+    (.log js/console "try socket connection to: " url-ws)
+    (connect! url-ws handle-response!)))
+
+#_(defn init! []
+      (try
+        (if-let [chan (js/WebSocket. (str "wss://" (.-host js/location) "/ws"))]
+          (do (println "SUCCESS" (.-host js/location))
+              (println (str chan)))
+          (do (println "FAILED")))
+        ;(println (str chan))))
+        (catch :default e (println "FAILED: " e))))

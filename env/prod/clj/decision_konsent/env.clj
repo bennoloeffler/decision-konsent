@@ -11,4 +11,5 @@
    (fn []
      (log/info "\n-=[decision-konsent has shut down successfully]=-"))
    :middleware identity
-   :security-middleware (assoc secure-site-defaults :proxy true)}) ;wrap-prod}) ;wrap-prod}) ;identity
+   :security-middleware (assoc secure-site-defaults :proxy true)})
+    ;wrap-prod}) ;wrap-prod}) ;identity

@@ -15,3 +15,4 @@
      (log/info "\n-=[decision-konsent has shut down successfully]=-"))
    :middleware wrap-dev
    :security-middleware site-defaults})
+

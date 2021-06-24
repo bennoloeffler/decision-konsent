@@ -100,8 +100,10 @@
     ["/session"
      {:get {:parameters {:query {}}
             :handler    (fn [{{:keys [identity]} :session :as data}]
-                          (println "\n\nsessions:\n")
-                          (cprint data)
+                          ;(println "\n\nsessions:\n")
+                          ;(cprint data)
+                          ; TODO fix missing middleware (problem started by changing undertow to http-kit
+                          ; TODO find for http-kit;(wrap-session {:cookie-attrs {:http-only true}})
                           (response/ok {:session
                                         {:identity
                                          (not-empty
