@@ -361,7 +361,7 @@
 
 
 
-(defn one-iteration [iteration]
+(defn one-iteration [iteration i]
   ;(print "iteration: " (cljs.pprint/pprint iteration))
   (let [votes-in-iter (:votes iteration)
         ;active-iteration (k-fsm/active-iteration k)
@@ -369,6 +369,7 @@
         proposal      (:proposal iteration)
         q&a           (seq (reverse (:q&a iteration)))]     ;TODO do that all by subscriptions
     [:div
+     [:div.is-divider.mt-6.mb-6 {:data-content (str "Iteration " i)}]
      ;(when ())
      (when votes-in-iter
        [votes iteration])
@@ -426,11 +427,12 @@
 (defn history [k]
   ; (println (-> k :konsent :iterations))
   ;(println "history:  " (-> k :konsent :iterations))
+
   (let [iter-with-idx (map (fn [iter key] {:key key :iter iter}) (-> k :konsent :iterations) (range))]
     [:<>
-     (for [i iter-with-idx]
+     (for [i (reverse iter-with-idx)]
        ^{:key (:key i)}
-       [one-iteration (:iter i)])]))
+       [one-iteration (:iter i) (inc (:key i))])]))
 
 
 
@@ -564,7 +566,7 @@
         ;[vote-for-konsent]
         ;[:div.is-divider.mt-6.mb-6 {:data-content "start konsent"}]
         ;[start-konsent]
-        [:div.is-divider.mt-6.mb-6 {:data-content "what happend before..."}]
+        ;[:div.is-divider.mt-6.mb-6 {:data-content "what happend before..."}]
         [history k]
         [:div.is-divider.mt-6.mb-6 {:data-content "started by with participants"}]
         [short-name-and-problemstatement sn probs]

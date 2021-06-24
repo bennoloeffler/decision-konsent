@@ -148,7 +148,7 @@
              :handler (fn [data]
                         ;(println "data: " data)
                         (let [params (-> data :body-params)]
-                          (println "\n\nsaving konsent:")
+                          ;(println "\n\nsaving konsent:")
                           ;(pp/pprint params)
                           (response/ok {:message (k/save-konsent! params)})))}}]
 
