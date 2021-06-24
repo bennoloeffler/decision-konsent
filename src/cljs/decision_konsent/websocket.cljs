@@ -19,6 +19,7 @@
                                       (js->clj message :keywordize-keys true)
                                       (receive-handler message)))
       (reset! channel chan)
+      ;(.send chan (clj->js {:init "websocket"}))
       (.log js/console "websocket connected!"))
     (throw (ex-info "Websocket Connection Failed!"
                     {:url url}))))
@@ -26,7 +27,7 @@
 
 (defn send-message! [msg]
   (if-let [chan @channel]
-    (.send chan (pr-str msg))                               ; TODO, try and handle: "WebSocket is already in CLOSING or CLOSED state."
+    ;(.send chan (pr-str msg))                               ; TODO, try and handle: "WebSocket is already in CLOSING or CLOSED state."
     (throw (ex-info "Couldn't send message, channel isn't open!"
                     {:message msg}))))
 
