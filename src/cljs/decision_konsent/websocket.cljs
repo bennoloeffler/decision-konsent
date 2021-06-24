@@ -40,8 +40,10 @@
       (rf/dispatch [:common/set-error errors])
       (println "socket error: " (str errors)))
     (do
-      (println "socket update data: " response)
-      (rf/dispatch [:konsent/load-list]))))
+      (if (:id response)
+        (rf/dispatch [:konsent/load-list]))
+      (.log js/console (str "socket update data: " response)))))
+
 
 ;(rf/dispatch [:message/add response])
 ;(rf/dispatch [:form/clear-fields response]))))

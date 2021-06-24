@@ -136,7 +136,7 @@
       [:div.card {:key (:participant v)}
        [:div.card-content>div.content
         [:div.columns
-         [:div.column.is-1 (:vote v)]
+         [:div.column.is-2 (:vote v)]
          ;[:div.column.is-3 (:participant v)]
          [:div.column>div.card>div.card-content>div.content
            [add-time-user-badge (:timestamp v) (:participant v)] (:text v)]]]])]])
