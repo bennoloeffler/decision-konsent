@@ -74,7 +74,7 @@
                   not-logged-in)
                 "create the konsent"]]]]
        ;divider])))
-       #_[e/all-examples]])))
+       [e/all-examples]])))
 
 
 (defn konsent-example-list []
@@ -139,7 +139,7 @@
          [:div.column.is-2 (:vote v)]
          ;[:div.column.is-3 (:participant v)]
          [:div.column>div.card>div.card-content>div.content
-           [add-time-user-badge (:timestamp v) (:participant v)] (:text v)]]]])]])
+          [add-time-user-badge (:timestamp v) (:participant v)] (:text v)]]]])]])
 
 
 (defn accepted [k u]
@@ -231,7 +231,7 @@
 (defn participant-list [ps]
   [:div.buttons.are-small
    (for [p ps]
-     [:button.button.is-outlined.is-rounded {:key p} p])])
+     [:button.button.is-outlined.is-rounded {:key p :disabled true} p])])
 
 (defn wait-for-everybody-voted [k u]
   [:div.columns
@@ -243,14 +243,14 @@
 ; TODO rename to force-incomplete-vote
 (defn force-vote [k u]
   [:div.columns
-   [:div.column.is-3 "force end of voting?"]
+   [:div.column.is-3 "force end? waiting for:"]
    [:div.column.is-9
     [:div.card>div.card-content>div.content [participant-list (k-fsm/users-with-missing-votes k)]]
     [:form.box utils/prevent-reload
      [:div.field>div.control
-      [:label.checkbox.mr-3
-       [:input {:type     "checkbox"
-                :on-click #(rf/dispatch [:konsent/force-incomplete-vote])}] " force end?"]]]]])
+      [:button.button
+       {;:type     "checkbox"
+        :on-click #(rf/dispatch [:konsent/force-incomplete-vote])} "force end of voting?"]]]]])
 
 
 ; TODO: rename to force-all-ready
@@ -260,8 +260,8 @@
    [:div.column.is-9
     [:form.box utils/prevent-reload
      [:div.field>div.control.mr-3
-      [:label.checkbox [:input {:type     "checkbox"
-                                :on-click #(rf/dispatch [:konsent/force-vote])}] " force vote?"]]]]])
+      [:button.button {;:type     "checkbox"
+                       :on-click #(rf/dispatch [:konsent/force-vote])} "force vote?"]]]]])
 
 
 (defn wait-for-ready [k u]
@@ -314,19 +314,21 @@
        [:div.column.is-9
 
         [:form.box utils/prevent-reload
-         [:div "users ready to vote: " [participant-list (k-fsm/users-ready-to-vote k)]]
-         [:div.field>div.control
-          [:label.checkbox [:input {:type     "checkbox"
-                                    :on-click #(rf/dispatch [:konsent/ready-to-vote])}] " ready to vote!"]]
+         [:div.buttons.are-small [:div.mr-4 "ready to vote are:"] [participant-list (k-fsm/users-ready-to-vote k)]]
+
 
          [:div.field>div.control>textarea.textarea
           {:placeholder "I'm not yet done... My question is...ENTER"
            :value       (:text @fields)
            :on-change   #(swap! fields assoc :text (value %))}]
-         [:div.field>div.control>button.button
-          {:on-click #(do (rf/dispatch [:konsent/ask @fields]) (reset! fields {}))}
-          ;)}
-          "ask"]]]])))
+         [:div.field>div.control
+          [:div.buttons
+           [:button.button
+            {:on-click #(do (rf/dispatch [:konsent/ask @fields]) (reset! fields {}))}
+            ;)}
+            "ask"]
+           [:button.button {;:type     "checkbox"
+                            :on-click #(rf/dispatch [:konsent/ready-to-vote])} "no more questions - ready to vote!"]]]]]])))
 
 
 (defn discuss []
@@ -360,8 +362,26 @@
           "create proposal"]]]])))
 
 
+(defn voters-set
+  "returns the set of all voters of THIS iteration.
+   e.g. in order to check, if everybody voted."
+  [iteration]
+  (->> iteration
+       :votes
+       (map :participant)
+       set))
 
-(defn one-iteration [iteration i]
+
+(defn voting-over?
+  "is voting over for iteration - because everybody
+   voted or the end of voting is forced?"
+  [iteration k]
+  (or (= (voters-set iteration)
+         (decision-konsent.konsent-fsm/all-members k))
+      (iteration :force-incomplete-vote)))
+
+
+(defn one-iteration [iteration i k]
   ;(print "iteration: " (cljs.pprint/pprint iteration))
   (let [votes-in-iter (:votes iteration)
         ;active-iteration (k-fsm/active-iteration k)
@@ -371,7 +391,7 @@
     [:div
      [:div.is-divider.mt-6.mb-6 {:data-content (str "Iteration " i)}]
      ;(when ())
-     (when votes-in-iter
+     (when (and votes-in-iter (voting-over? iteration k))
        [votes iteration])
      (when q&a
        [:div.columns
@@ -432,7 +452,7 @@
     [:<>
      (for [i (reverse iter-with-idx)]
        ^{:key (:key i)}
-       [one-iteration (:iter i) (inc (:key i))])]))
+       [one-iteration (:iter i) (inc (:key i)) k])]))
 
 
 
@@ -572,7 +592,7 @@
         [short-name-and-problemstatement sn probs]
         [participants ps]
         [created-by-when (-> k :konsent :owner) (-> k :konsent :timestamp)]]
-        ;[debugging k u]]
+       ;[debugging k u]]
        [konsent-example-list])]))
 
 
