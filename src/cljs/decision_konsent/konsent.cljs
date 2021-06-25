@@ -72,9 +72,9 @@
                 (if @(rf/subscribe [:auth/user])
                   {:on-click #(rf/dispatch [:konsent/create @fields])}
                   not-logged-in)
-                "create the konsent"]]]]
+                "create the konsent"]]]]])))
        ;divider])))
-       [e/all-examples]])))
+       ;[e/all-examples]])))
 
 
 (defn konsent-example-list []
@@ -130,7 +130,7 @@
 (defn votes [iteration]
   [:div.columns
    [:div.column.is-3 "votes:"]
-   [:div.column.is-9
+   [:div.column.is-8
 
     (for [v (-> iteration :votes)]
       [:div.card {:key (:participant v)}
@@ -146,7 +146,7 @@
   [:<>
    [:div.columns
     [:div.column.is-3 "decision taken:"]
-    [:div.column.is-9
+    [:div.column.is-8
      [:div.card>div.card-content>div.content (-> (k-fsm/active-iteration k) :proposal :text)]]]])
 ;[votes (k-fsm/active-iteration k)]])
 
@@ -185,7 +185,7 @@
     (fn []
       [:div.columns
        [:div.column.is-3 "my vote"]
-       [:div.column.is-9
+       [:div.column.is-8
         [:form.box utils/prevent-reload
          [:div.field>div.control>textarea.textarea
           {:placeholder "Your comment here...\nminor-concern - please hear me.\nmajor-concern - needs be built into proposal.\nveto - I will do next proposal."
@@ -236,7 +236,7 @@
 (defn wait-for-everybody-voted [k u]
   [:div.columns
    [:div.column.is-3 "Waiting for votes of:"]
-   [:div.column.is-9
+   [:div.column.is-8
     [:div.card>div.card-content>div.content [participant-list (k-fsm/users-with-missing-votes k)]]]])
 
 
@@ -244,7 +244,7 @@
 (defn force-vote [k u]
   [:div.columns
    [:div.column.is-3 "force end? waiting for:"]
-   [:div.column.is-9
+   [:div.column.is-8
     [:div.card>div.card-content>div.content [participant-list (k-fsm/users-with-missing-votes k)]]
     [:form.box utils/prevent-reload
      [:div.field>div.control
@@ -257,7 +257,7 @@
 (defn force-ready [k u]
   [:div.columns
    [:div.column.is-3 "force end of asking?"]
-   [:div.column.is-9
+   [:div.column.is-8
     [:form.box utils/prevent-reload
      [:div.field>div.control.mr-3
       [:button.button {;:type     "checkbox"
@@ -267,7 +267,7 @@
 (defn wait-for-ready [k u]
   [:div.columns
    [:div.column.is-3 "waiting for ready to vote:"]
-   [:div.column.is-9
+   [:div.column.is-8
     [:div.card>div.card-content>div.content [participant-list (k-fsm/users-missing-for-ready-to-vote k)]]]])
 
 
@@ -279,7 +279,7 @@
     (fn []
       [:div.columns {:key idx}
        [:div.column.is-3 "Please answer:"]
-       [:div.column.is-9
+       [:div.column.is-8
         [:form.box utils/prevent-reload
          [:div.card>div.card-content>div.content
           [add-time-user-badge ts p]
@@ -302,7 +302,7 @@
          [unanswered-question (into q {:key (:idx q)})])]
       [:div.columns
        [:div.column.is-3 "questions from other members?"]
-       [:div.column.is-9 "no unanswered questions..."]])))
+       [:div.column.is-8 "no unanswered questions..."]])))
 
 
 
@@ -311,7 +311,7 @@
     (fn []
       [:div.columns
        [:div.column.is-3 "ask another question or signal ready..."]
-       [:div.column.is-9
+       [:div.column.is-8
 
         [:form.box utils/prevent-reload
          [:div.buttons.are-small [:div.mr-4 "ready to vote are:"] [participant-list (k-fsm/users-ready-to-vote k)]]
@@ -336,7 +336,7 @@
     (fn []
       [:div.columns
        [:div.column.is-3 "discuss:"]
-       [:div.column
+       [:div.column.is-8
         [:form.box utils/prevent-reload
          [:div.field>div.control>textarea.textarea
           {:placeholder "discuss perspectives, options, questions..."
@@ -352,7 +352,7 @@
     (fn []
       [:div.columns
        [:div.column.is-3 "propose:"]
-       [:div.column
+       [:div.column.is-8
         [:form.box utils/prevent-reload
          [:div.field>div.control>textarea.textarea
           {:placeholder "create a proposal for voting"
@@ -396,7 +396,7 @@
      (when q&a
        [:div.columns
         [:div.column.is-3 "q&a after proposal"]
-        [:div.column
+        [:div.column.is-8
          (for [one-q&a q&a]
            (let [q   (:question one-q&a)
                  a   (:answer one-q&a)
@@ -418,13 +418,13 @@
      (when proposal
        [:div.columns
         [:div.column.is-3 [:h1.title.is-5 "proposal:"]]
-        [:div.column
+        [:div.column.is-8
          [:div.card>div.card-content>div.content
           [add-time-user-badge (:timestamp proposal) (:participant proposal)]
           (:text proposal)]]])
      [:div.columns
       [:div.column.is-3 "discussion before proposal:"]
-      [:div.column.is-9
+      [:div.column.is-8
        ;[:div.columns
        (for [message messages]
          ;[:div.box {:key (:timestamp message)}]
