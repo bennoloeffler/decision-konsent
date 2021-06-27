@@ -11,12 +11,12 @@
 
 
 (defn connect! [channel]
-  (log/info "Channel opened")
+  ;(log/info "Channel opened")
   (swap! channels conj channel))
 
 
 (defn disconnect! [channel status]
-  (log/info "Channel closed: " status)
+  ;(log/info "Channel closed: " status)
   (swap! channels disj channel))
 
 ; TODO: create a queue and do async

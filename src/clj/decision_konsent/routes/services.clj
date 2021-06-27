@@ -85,7 +85,7 @@
              :responses  {200 {:body {:identity {:email string?}}}
                           401 {:body {:message string?}}}
              :handler    (fn [{{:keys [email password]} :body-params session :session :as data}]
-                           (println "\n\nlogin:\n")
+                           ;(println "\n\nlogin:\n")
                            ;(cprint data)
                            (if-some [user (auth/authenticate-user email password)]
                              (-> (response/ok {:identity user})
@@ -128,7 +128,7 @@
 
     ["/unix-time"
      {:get {:summary "returns unix GMT milliseconds of the server"
-            :handler (fn [_] (println "get current time") (ok {:server-time (+ 0000 (ut/current-time))}))}}]
+            :handler (fn [_] #_(println "get current time") (ok {:server-time (+ 0000 (ut/current-time))}))}}]
 
     ["/ping"
      {:get {:summary "just see the konsent app living..."

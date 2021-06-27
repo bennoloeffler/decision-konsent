@@ -108,15 +108,15 @@
 
 (defn konsent-list-page []
   [:nav.panel
-   [:p.panel-heading
-    [:div.columns
-     [:div.column.is-3
-      [:button.button.is-primary
+   [:div.panel-heading
+    [:div.buttons
+     ;[:div.column.is-3
+      [:button.button.is-primary.mr-5
        (if @(rf/subscribe [:auth/user])
          {:on-click #(rf/dispatch [:common/navigate! :new-konsent nil nil])}
          not-logged-in)
-       "create new"]]
-     [:div.column.is-9 "all my-konsents"]]]
+       "create new"]
+     [:div  "all my-konsents"]]]
    (if @(rf/subscribe [:auth/user])
      [konsents-of-user]
      [konsent-example-list])])

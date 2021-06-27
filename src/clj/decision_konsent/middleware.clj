@@ -9,6 +9,7 @@
     [decision-konsent.config :refer [env]]
     [ring.middleware.flash :refer [wrap-flash]]
     ;[ring.adapter.undertow.middleware.session :refer [wrap-session]]
+    [ring-ttl-session.core :refer [ttl-memory-store]]
     [ring.middleware.defaults :refer [site-defaults secure-site-defaults wrap-defaults]]
     [ring.middleware.ssl :refer [wrap-hsts wrap-ssl-redirect wrap-forwarded-scheme]]))
 
@@ -49,5 +50,6 @@
       (wrap-defaults
         (-> (:security-middleware defaults) ; site-defaults ; (assoc secure-site-defaults :proxy true)
             (assoc-in [:security :anti-forgery] false)
-            (dissoc :session)))
+            (assoc-in [:session :store] (ttl-memory-store (* 60 30)))))
+            ;(dissoc :session)))
       wrap-internal-error))
