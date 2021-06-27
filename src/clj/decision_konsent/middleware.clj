@@ -9,9 +9,12 @@
     [decision-konsent.config :refer [env]]
     [ring.middleware.flash :refer [wrap-flash]]
     ;[ring.adapter.undertow.middleware.session :refer [wrap-session]]
+    [ring.middleware.session :refer [wrap-session]]
+    [ring.middleware.session.cookie :refer [cookie-store]]
     [ring-ttl-session.core :refer [ttl-memory-store]]
     [ring.middleware.defaults :refer [site-defaults secure-site-defaults wrap-defaults]]
-    [ring.middleware.ssl :refer [wrap-hsts wrap-ssl-redirect wrap-forwarded-scheme]]))
+    [ring.middleware.ssl :refer [wrap-hsts wrap-ssl-redirect wrap-forwarded-scheme]])
+  (:import (javassist.bytecode ByteArray)))
 
 
 (defn wrap-internal-error [handler]
@@ -47,9 +50,10 @@
 
       wrap-flash
       ;(wrap-session {:cookie-attrs {:http-only true}})
+      (wrap-session {:store (cookie-store {:key (byte-array [12 2 45 32 34 3 4 6 7 8 32 98 36 23 56 12])})})
       (wrap-defaults
         (-> (:security-middleware defaults) ; site-defaults ; (assoc secure-site-defaults :proxy true)
-            (assoc-in [:security :anti-forgery] false)
-            (assoc-in [:session :store] (ttl-memory-store (* 60 30)))))
+            (assoc-in [:security :anti-forgery] false)))
+            ;(assoc-in [:session :store] (ttl-memory-store (* 60 60 8)))))
             ;(dissoc :session)))
       wrap-internal-error))
