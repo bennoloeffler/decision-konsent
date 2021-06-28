@@ -27,7 +27,7 @@
 
 (defn send-message! [msg]
   (if-let [chan @channel]
-    ;(.send chan (pr-str msg))                               ; TODO, try and handle: "WebSocket is already in CLOSING or CLOSED state."
+    (.send chan (.stringify js/JSON (clj->js msg)))                               ; TODO, try and handle: "WebSocket is already in CLOSING or CLOSED state."
     (throw (ex-info "Couldn't send message, channel isn't open!"
                     {:message msg}))))
 
@@ -40,9 +40,10 @@
       (rf/dispatch [:common/set-error errors])
       (println "socket error: " (str errors)))
     (do
-      (if (:id response)
-        (rf/dispatch [:konsent/load-list]))
-      (.log js/console (str "socket update data: " response)))))
+      (cond
+        (:id response) (rf/dispatch [:konsent/load-list])
+        (:keep-alive response) (send-message! {:random-keep-alive (rand-int 1000000)})
+        :default (.log js/console (str "socket received UNEXPECTED data: " response))))))
 
 
 ;(rf/dispatch [:message/add response])
@@ -54,7 +55,7 @@
         ;_ (println host)
         protocol (if (str/starts-with? host "localhost") "ws" "wss")
         url-ws   (str protocol "://" host "/ws")]
-        ;_        (println "url: " url-ws)]
+    ;_        (println "url: " url-ws)]
     (.log js/console "try socket connection to: " url-ws)
     (connect! url-ws handle-response!)))
 

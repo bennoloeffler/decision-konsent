@@ -100,10 +100,8 @@
     ["/session"
      {:get {:parameters {:query {}}
             :handler    (fn [{{:keys [identity]} :session :as data}]
-                          ;(println "\n\nsessions:\n")
+                          ;(println "\n\nsession:\n")
                           ;(cprint data)
-                          ; TODO fix missing middleware (problem started by changing undertow to http-kit
-                          ; TODO find for http-kit;(wrap-session {:cookie-attrs {:http-only true}})
                           (response/ok {:session
                                         {:identity
                                          (not-empty
@@ -116,7 +114,7 @@
             :parameters {:query {:some string?}}
             :handler (fn [data]
                          ;(cprint data)
-                         (cprint (:params data))
+                         ;(cprint (:params data))
                          (response/ok (:params data)))}
 
       :post {:summary "test data receiving and replying per ajax"
@@ -140,7 +138,8 @@
              :handler (fn [data]
                         ;(println "data: " data)
                         (let [params (-> data :body-params)]
-                          (println "params: " params)
+                          ;(println "params: ")
+                          ;(cprint params)
                           (response/ok (k/create-konsent! params))))}}]
 
     ["/save-konsent"
@@ -148,8 +147,8 @@
              :handler (fn [data]
                         ;(println "data: " data)
                         (let [params (-> data :body-params)]
-                          ;(println "\n\nsaving konsent:")
-                          ;(pp/pprint params)
+                          (println "\n\n/save-konsent:")
+                          (cprint params)
                           (response/ok {:message (k/save-konsent! params)})))}}]
 
     ["/delete-konsent"

@@ -90,24 +90,30 @@ migrate and rollback:
 1. ok finish voting (even if sombody did not vote)
 1. ok keep alive by ping
 1. ok force https
+1. ok update other clients per websocket or server sent events
+1. ok show results of itermediate votings in read, if veto or in yellow, if major
+1. ok show accepted proposal in green
+1. ok Button for "force vote" and "force ready"
+1. german translation
+1. validation of email and password (and other forms)
+1. show the potential proposers for everybody  
+1. Confirm dialog for "delete"
+1. List and current konsent in one page
+1. make backwards / forward buttons functional (list of k / current k in one page)
 1. archive konsents - but show them below the "active list"
 1. have an archive button in the active list. have an delete button in the archived list.
-1. update other clients per websocket or server sent events
-1. show results of itermediate votings in read, if veto or in yellow, if major
-1. show accepted proposal in green
-1. show the potential proposers for everybody  
-1. make backwards / forward buttons functional
-1. ask for cockies
-1. have german law imprint  
-1. validation of email and password (and other forms)
 1. invite participants after creation
 1. use an invitation link to take part in an konsent without registration
 1. validate a users email-adress by clicking an email-link
-1. UNDO 
-1. Button for "force vote" and "force ready"
-1. Confirm dialog for "delete"
-1. List and current konsent in one page
+1. make an change your password.
+1. make an "forgot your password"
+1. ask for cockies
+1. have german law imprint  
+1. UNDO (see functional tv)
 1. notifications (changes indicators - in the sense of "waiting for you")
+1. Profile-pictures (rund)
+1. make it like a chat application
+
 
 ## technical issues / refactoring / improvements
 1. roles (validated, authenticated, known-guest, anonymous)  
@@ -115,8 +121,8 @@ for different api functions (login, save-konsent, ...)
 1. tests of all routes
 1. all data as subscription (especially the "active konsent")
 1. remove error after 20 seconds
-1. provide a websocket notify api that is easy to implement in other languages: json  
-   {"id" 17}
+1. ok provide a websocket notify api that is easy to implement in other languages: json  
+   ok {"id" 17}
 1. provide spec for API (swagger)
 1. provide spec for konsent data 
    

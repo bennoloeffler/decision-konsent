@@ -73,8 +73,8 @@
                   {:on-click #(rf/dispatch [:konsent/create @fields])}
                   not-logged-in)
                 "create the konsent"]]]]])))
-       ;divider])))
-       ;[e/all-examples]])))
+;divider])))
+;[e/all-examples]])))
 
 
 (defn konsent-example-list []
@@ -111,12 +111,12 @@
    [:div.panel-heading
     [:div.buttons
      ;[:div.column.is-3
-      [:button.button.is-primary.mr-5
-       (if @(rf/subscribe [:auth/user])
-         {:on-click #(rf/dispatch [:common/navigate! :new-konsent nil nil])}
-         not-logged-in)
-       "create new"]
-     [:div  "all my-konsents"]]]
+     [:button.button.is-primary.mr-5
+      (if @(rf/subscribe [:auth/user])
+        {:on-click #(rf/dispatch [:common/navigate! :new-konsent nil nil])}
+        not-logged-in)
+      "create new"]
+     [:div "all my-konsents"]]]
    (if @(rf/subscribe [:auth/user])
      [konsents-of-user]
      [konsent-example-list])])
@@ -136,7 +136,13 @@
       [:div.card {:key (:participant v)}
        [:div.card-content>div.content
         [:div.columns
-         [:div.column.is-2 (:vote v)]
+         [:div.column.is-2 [:span {:style
+                                   {:color (case (:vote v)
+                                             "yes" :lightgreen
+                                             "minor-concern" :orange
+                                             "major-concern" :darkred
+                                             "veto" :red
+                                             :lightgray)}} (:vote v)]]
          ;[:div.column.is-3 (:participant v)]
          [:div.column>div.card>div.card-content>div.content
           [add-time-user-badge (:timestamp v) (:participant v)] (:text v)]]]])]])
@@ -145,7 +151,7 @@
 (defn accepted [k u]
   [:<>
    [:div.columns
-    [:div.column.is-3 "decision taken:"]
+    [:div.column.is-3 [:span {:style {:color :lightgreen :font-weight :bold}} "decision taken:"]]
     [:div.column.is-8
      [:div.card>div.card-content>div.content (-> (k-fsm/active-iteration k) :proposal :text)]]]])
 ;[votes (k-fsm/active-iteration k)]])
