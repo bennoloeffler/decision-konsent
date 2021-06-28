@@ -22,6 +22,7 @@
          saved-konsent {:id id :konsent konsent}]
      ;(pp/cprint saved-konsent)
      (ws/notify-all-clients! {:id (:id saved-konsent)})
+     ;TODO write email to everybody...
      ;(clojure.pprint/pprint saved-konsent)
      saved-konsent)))
 

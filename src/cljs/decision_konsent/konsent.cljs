@@ -139,8 +139,8 @@
          [:div.column.is-2 [:span {:style
                                    {:color (case (:vote v)
                                              "yes" :lightgreen
-                                             "minor-concern" :orange
-                                             "major-concern" :darkred
+                                             "minor-concern" :green
+                                             "major-concern" :orange
                                              "veto" :red
                                              :lightgray)}} (:vote v)]]
          ;[:div.column.is-3 (:participant v)]

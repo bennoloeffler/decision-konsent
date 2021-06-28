@@ -126,6 +126,8 @@ for different api functions (login, save-konsent, ...)
 1. provide spec for API (swagger)
 1. provide spec for konsent data 
    
+## email invitation and roles
+:authenticated :invited :no-auth 
 
 ## Prerequisites
 
