@@ -17,9 +17,30 @@
     [spec-tools.data-spec :as ds]
     [decision-konsent.db.konsent :as k]
     [clojure.pprint :as pp]
-    [puget.printer :refer [cprint]])
+    [puget.printer :refer [cprint]]
+    [decision-konsent.email :as email])
 
   (:import (clojure.lang ExceptionInfo)))
+
+
+(def color-scheme {; syntax elements
+                   :delimiter       [:bold :red]
+                   :tag             [:red]
+
+                   ; primitive values
+                   :nil             [:bold :black]
+                   :boolean         [:green]
+                   :number          [:cyan]
+                   :string          [:bold :magenta]
+                   :character       [:bold :magenta]
+                   :keyword         [:bold :orange]
+                   :symbol          nil
+
+                   ; special types
+                   :function-symbol [:bold :blue]
+                   :class-delimiter [:blue]
+                   :class-name      [:bold :blue]})
+
 
 (defn service-routes []
   ["/api"
@@ -88,7 +109,7 @@
                            ;(println "\n\nlogin:\n")
                            ;(cprint data)
                            (if-some [user (auth/authenticate-user email password)]
-                             (-> (response/ok {:identity user})
+                             (-> (response/ok {:identity (assoc user :auth-type :auth)})
                                  (assoc :session (assoc session :identity user)))
                              (response/unauthorized {:message "Incorrect login or password."})))}}]
 
@@ -105,24 +126,24 @@
                           (response/ok {:session
                                         {:identity
                                          (not-empty
-                                           (select-keys identity [:email]))}}))}}]]
+                                           (select-keys identity [:email :auth-type]))}}))}}]]
    ["/konsent"
     {:swagger {:tags ["konsent"]}}
 
     ["/test-ajax"
-     {:get {:summary "test data receiving and replying per ajax"
-            :parameters {:query {:some string?}}
-            :handler (fn [data]
-                         ;(cprint data)
-                         ;(cprint (:params data))
-                         (response/ok (:params data)))}
+     {:get  {:summary    "test data receiving and replying per ajax"
+             :parameters {:query {:some string?}}
+             :handler    (fn [data]
+                           ;(cprint data)
+                           ;(cprint (:params data))
+                           (response/ok (:params data)))}
 
-      :post {:summary "test data receiving and replying per ajax"
+      :post {:summary    "test data receiving and replying per ajax"
              :parameters {:body-params {:some string?}}
-             :handler (fn [data]
-                        (cprint data)
-                        (cprint (-> data :body-params))
-                        (response/ok (-> data :body-params)))}}]
+             :handler    (fn [data]
+                           (cprint data)
+                           (cprint (-> data :body-params))
+                           (response/ok (-> data :body-params)))}}]
 
     ["/unix-time"
      {:get {:summary "returns unix GMT milliseconds of the server"
@@ -136,19 +157,52 @@
      {:post {:summary "An owner (o) starts an konsent - with short-name problem-description and participants (p). An id will be created."
              ;:parameters {:body {:email string? :password string?}}
              :handler (fn [data]
-                        ;(println "data: " data)
-                        (let [params (-> data :body-params)]
-                          ;(println "params: ")
-                          ;(cprint params)
-                          (response/ok (k/create-konsent! params))))}}]
+                        ;(cprint data)
+                        (let [params  (-> data :body-params)
+                              konsent (k/create-konsent! params)
+                              konsent (email/create-invitations
+                                        konsent
+                                        (:server-name data)
+                                        (:server-port data))]
+
+                          (assert (= 1 (k/save-konsent! konsent)))
+                          (println "\n\n/create-konsent ")
+                          (cprint konsent)
+                          (email/send-invitations! konsent)
+                          (response/ok konsent)))}}]
+
+
+    ["/xinvitation/:invitation-id/:konsent-id"
+     {:get (fn [a] (-> (response/ok (with-out-str (puget.printer/cprint (:path-params a) {:color-markup :html-inline :color-scheme color-scheme})))
+                       (response/header "Content-Type" "text/html; charset=utf-8")))}]
+
+    ["/invitation/:invitation-id/:konsent-id"
+     {:get (fn [a] (let [konsent-id    (Integer/valueOf (-> a :path-params :konsent-id))
+                         invitation-id (keyword (-> a :path-params :invitation-id))
+                         konsent       (db/get-konsent {:id konsent-id})
+                         invitation    (-> konsent :konsent :invitations invitation-id)
+                         session       (:session a)]
+
+                     ; insert user into session (see login - but as :guest TODO change user in session
+                     (puget.printer/cprint session)
+                     (if invitation
+                       (-> (response/found "/#/my-konsents"); {:identity {:email (:guest-email invitation)}})
+                           (assoc-in [:session :identity] {:email (:guest-email invitation) :auth-type :guest}))
+                       (response/unauthorized {:message "Did not find invitation."}))))}]
+
+
+
 
     ["/save-konsent"
      {:post {:summary "user saves a konsent"
              :handler (fn [data]
                         ;(println "data: " data)
                         (let [params (-> data :body-params)]
-                          (println "\n\n/save-konsent:")
+                          (println "\n\n/save-konsent (:body-params):")
                           (cprint params)
+                          ;(println "\n\n/save-konsent (all DATA):")
+                          ;(cprint data)
+
                           (response/ok {:message (k/save-konsent! params)})))}}]
 
     ["/delete-konsent"
@@ -162,9 +216,16 @@
     ["/all-konsents-for-user"
      {:get {:summary "A user askes for all konsents he is involved in."
             :handler (fn [data]
-                       (let [params  (:params data)
+                       (let [params (:params data)
                              result (k/get-konsents-for-user params)]
                          (ok result)))}}]
+
+    #_["/invitation/:invitation-id/:konsent-id"
+       {:get {:summary "A guest uses his invitation"
+              :handler (fn [data]
+                         (let [params (:params data)]
+                           (println params)
+                           (ok "invitation accepted")))}}]
 
     #_["/discuss"
        {:get {:parameters {:query {:text string?}}
@@ -186,7 +247,7 @@
              :parameters {:body-params {:message string?}}
              ;:responses {200 {:body {:messages seq?}}}
              :handler    (fn [data]
-                           (let [message (-> data :body-params  :message)]
+                           (let [message (-> data :body-params :message)]
                              ;(println "received message: " message)
                              ;(println "received message: " )
                              ;(println "timestamp: " (ut/current-time))

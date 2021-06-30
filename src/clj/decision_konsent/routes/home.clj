@@ -23,11 +23,15 @@
   (response/ok {:result (db/rollback!)}))
 
 
+
+
 (defn home-routes []
   [""
    {:middleware [middleware/wrap-csrf
                  middleware/wrap-formats]}
    ["/" {:get home-page}]
+   #_["/invitation/:invitation-id/:konsent-id" {:get (fn [a]  (-> (response/ok (with-out-str (puget.printer/cprint (:path-params a) {:color-markup :html-inline :color-scheme color-scheme})))
+                                                                  (response/header "Content-Type" "text/html; charset=utf-8")))}]
    ["/adduser" {:get add-rand-user!}]
    ["/allusers" {:get get-users}]
    ["/migrate" {:get migrate!}] ; TODO find a better solution

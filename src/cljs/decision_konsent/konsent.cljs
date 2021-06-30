@@ -92,14 +92,16 @@
 
 (defn konsents-of-user []
   "show all konsents for user based on data [{:id 12 :short-name 'abc' :timestamp :changes} ...]"
-  (let [konsents @(rf/subscribe [:konsent/list])]
+  ;(println @(rf/subscribe [:auth/guest?]))
+  (let [konsents @(rf/subscribe [:konsent/list])
+        guest?   @(rf/subscribe [:auth/guest?])]
     [:div
      (for [konsent-info konsents]
        [:a.panel-block
         {:key (:id konsent-info)}
         [:span.panel-icon
-         {:on-click     #(rf/dispatch [:konsent/delete konsent-info])
-          :data-tooltip "delete?"
+         {:on-click     #(if guest? (println "not allowed") (rf/dispatch [:konsent/delete konsent-info]))
+          :data-tooltip (if guest? "you are not allowed\nto delete.\nPlease register as user." "delete?")
           :class        [:has-tooltip-warning :has-tooltip-arrow]}
          [:i.fas.fa-trash]]
         [:span {:on-click #(rf/dispatch [:konsent/activate konsent-info])}
@@ -107,19 +109,23 @@
 
 
 (defn konsent-list-page []
-  [:nav.panel
-   [:div.panel-heading
-    [:div.buttons
-     ;[:div.column.is-3
-     [:button.button.is-primary.mr-5
-      (if @(rf/subscribe [:auth/user])
-        {:on-click #(rf/dispatch [:common/navigate! :new-konsent nil nil])}
-        not-logged-in)
-      "create new"]
-     [:div "all my-konsents"]]]
-   (if @(rf/subscribe [:auth/user])
-     [konsents-of-user]
-     [konsent-example-list])])
+  (let [guest?   @(rf/subscribe [:auth/guest?])]
+    [:nav.panel
+     [:div.panel-heading
+      [:div.buttons
+       ;[:div.column.is-3
+       [:button.button.is-primary.mr-5
+        (if @(rf/subscribe [:auth/user])
+          {:on-click #(rf/dispatch [:common/navigate! :new-konsent nil nil])
+           :disabled guest?
+           :data-tooltip (if guest? "You are guest.\nPlease login to create konsents." "well - there is no explanation needed...")
+           :class [ :has-tooltip-arrow]}
+          not-logged-in)
+        "create new konsent"]
+       [:div "all my-konsents"]]]
+     (if @(rf/subscribe [:auth/user])
+       [konsents-of-user]
+       [konsent-example-list])]))
 
 
 ;;

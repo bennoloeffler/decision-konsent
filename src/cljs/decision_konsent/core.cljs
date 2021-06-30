@@ -35,8 +35,12 @@
   [:button.button.is-primary.is-outlined {:on-click #(rf/dispatch [:auth/start-logout])} [:span.icon.is-large>i.fas.fa-1x.fa-sign-out-alt] [:span "logout"]])
 
 (defn user-indicator []
-  [:button.button.is-primary.is-outlined.mr-1
-   {:on-click #(ws/send-message! {:data @(rf/subscribe [:auth/user])} #_(rf/dispatch [:common/set-error "profile editing not yet available - sorry"]))} [:span.icon.is-large>i.fas.fa-1x.fa-address-card] [:span @(rf/subscribe [:auth/user])]])
+ (let [guest?   @(rf/subscribe [:auth/guest?])]
+  [:button.button.is-primary.is-outlined.mr-5
+   {:on-click #(rf/dispatch [:common/set-error "profile editing not yet available - sorry"])}
+   [:span.icon.is-large>i.fas.fa-1x.fa-address-card]
+   [:span @(rf/subscribe [:auth/user])]
+   (when guest? [:span.badge.is-info "GUEST"])]))
 
 
 (defn nav-link [uri title page]
@@ -47,33 +51,34 @@
 
 
 (defn navbar []
-  (r/with-let [expanded? (r/atom false)]
-              [:nav.navbar.is-light>div.container
-               [:div.navbar-brand.
-                ;[:a.navbar-item [:img {:src "img/logo-100x100-gelb-trans.png" :alt "konsent"}]]
-                [:a.navbar-item.ml-3 {:href "/" :style {:font-weight :bold}} [:img {:src "img/logo-100x100-gelb-trans.png" :alt "konsent"}]]
-                [:span.navbar-burger.burger
-                 {:data-target :nav-menu
-                  :on-click    #(swap! expanded? not)
-                  :class       (when @expanded? :is-active)}
-                 [:span] [:span] [:span]]]
-               [:div#nav-menu.navbar-menu
-                {:class (when @expanded? :is-active)}
-                [:div.navbar-start
-                 [nav-link "#/" "home" :home]
-                 [nav-link "#/my-konsents" "my-konsents" :my-konsents]
-                 [nav-link "#/new-konsent" "new-konsent" :new-konsent]
-                 [nav-link "#/about" "about" :about]]
-                [:div.navbar-end
-                 [:div.navbar-item.mr-3
-                  ;[tb/test-button]
-                  (if (not @(rf/subscribe [:auth/user]))
-                    [:div.buttons
-                     [register-button]
-                     [login-button]]
-                    [:div.buttons
-                     [user-indicator]
-                     [logout-button]])]]]]))
+  (let [guest? @(rf/subscribe [:auth/guest?])]
+   (r/with-let [expanded? (r/atom false)]
+               [:nav.navbar.is-light>div.container
+                [:div.navbar-brand.
+                 ;[:a.navbar-item [:img {:src "img/logo-100x100-gelb-trans.png" :alt "konsent"}]]
+                 [:a.navbar-item.ml-3 {:href "/" :style {:font-weight :bold}} [:img {:src "img/logo-100x100-gelb-trans.png" :alt "konsent"}]]
+                 [:span.navbar-burger.burger
+                  {:data-target :nav-menu
+                   :on-click    #(swap! expanded? not)
+                   :class       (when @expanded? :is-active)}
+                  [:span] [:span] [:span]]]
+                [:div#nav-menu.navbar-menu
+                 {:class (when @expanded? :is-active)}
+                 [:div.navbar-start
+                  [nav-link "#/" "home" :home]
+                  [nav-link "#/my-konsents" "my-konsents" :my-konsents]
+                  (when-not guest? [nav-link "#/new-konsent" "new-konsent" :new-konsent])
+                  [nav-link "#/about" "about" :about]]
+                 [:div.navbar-end
+                  [:div.navbar-item.mr-3
+                   ;[tb/test-button]
+                   (if (not @(rf/subscribe [:auth/user]))
+                     [:div.buttons
+                      [register-button]
+                      [login-button]]
+                     [:div.buttons
+                      [user-indicator]
+                      [logout-button]])]]]])))
 
 
 (defn about-page []

@@ -111,8 +111,11 @@ migrate and rollback:
 1. have german law imprint  
 1. UNDO (see functional tv)
 1. notifications (changes indicators - in the sense of "waiting for you")
-1. Profile-pictures (rund)
+1. Profile-pictures (round)
 1. make it like a chat application
+
+## nice to have and later
+1. change email adress
 
 
 ## technical issues / refactoring / improvements
@@ -125,6 +128,7 @@ for different api functions (login, save-konsent, ...)
    ok {"id" 17}
 1. provide spec for API (swagger)
 1. provide spec for konsent data 
+1. UUID as user id - email as parameter
    
 ## email invitation and roles
 :authenticated :invited :no-auth 

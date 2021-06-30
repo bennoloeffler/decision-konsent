@@ -16,6 +16,12 @@
 
 
 (rf/reg-sub
+  :auth/guest?
+  (fn [db _]
+    (and (-> db :auth/user :email)
+         (= "guest" (-> db :auth/user :auth-type)))))
+
+(rf/reg-sub
   :auth/register-worked
   (fn [db _]
     (-> db :auth/register-worked)))
