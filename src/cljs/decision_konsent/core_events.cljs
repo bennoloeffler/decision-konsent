@@ -23,7 +23,8 @@
                   [:set-server-diff-time 0]
                   [:init-server-diff-time]
                   [:messages/load]
-                  [:session/load]]}))
+                  [:session/load]
+                  [:gui-language :de]]}))
 
 
 (rf/reg-cofx

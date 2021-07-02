@@ -6,7 +6,8 @@
             [decision-konsent.modal :as m]
             [decision-konsent.bulma-examples :as e]
             [decision-konsent.client-time :as ct]
-            [decision-konsent.konsent-fsm :as k-fsm]))
+            [decision-konsent.konsent-fsm :as k-fsm]
+            [decision-konsent.i18n :refer [tr]]))
 
 
 (defn time-gone-by [t]
@@ -26,15 +27,13 @@
 (defn add-time-user-badge [t u]
   [:span.badge.is-info u " " [time-gone-by t]])
 
-(def login-to-start "first login.\nthen start.")
+
+(defn not-logged-in [] {:data-tooltip (tr [:k/login-then-start])
+                        :class        [:has-tooltip-warning :has-tooltip-active :has-tooltip-arrow]
+                        :disabled     true})
 
 
-(def not-logged-in {:data-tooltip login-to-start
-                    :class        [:has-tooltip-warning :has-tooltip-active :has-tooltip-arrow]
-                    :disabled     true})
-
-
-(def divider [:div.is-divider.mt-6.mb-6 {:data-content "OR"}])
+(def divider [:div.is-divider.mt-6.mb-6 {:data-content (tr [:k/or-divider])}])
 
 
 (defn value [element]
@@ -47,32 +46,32 @@
       [:section.section>div.container>div.content
        [:div.field
         [:form.box utils/prevent-reload
-         [:h1.title.is-4 "create new konsent"]
+         [:h1.title.is-4 (tr [:k/new])]
          [:div.field
-          [:label.label "short name"]
+          [:label.label (tr [:k/short-name])]
           [:div.control
            [:input.input {:type        "text"
-                          :placeholder "e.g. old coffee machine broke - new, which?"
+                          :placeholder "e.g.    our old and loved coffee machine broke - what now?"
                           :on-change   #(swap! fields assoc :short-name (value %))}]]]
          [:div.field
-          [:label.label "problem & background"]
+          [:label.label (tr [:k/problem-description])]
           [:div.control
            [:textarea.textarea {:type        "text"
-                                :placeholder "e.g. there are plenty of options and plenty of price options - and nobody really knows the read needs, habbis of the group. Even if there should be a common coffee machine."
+                                :placeholder "e.g.\nIt broke. Repairing seems impossible.\nThere are plenty of options and unlimited prices and even more opinions.\nIts even unclear, if there is a real need for a coffee machine. So we need to take a decision and focus back on real topics."
                                 :on-change   #(swap! fields assoc :problem-statement (value %))}]]]
          [:div.field
-          [:label.label "participants"]
+          [:label.label (tr [:k/participants])]
           [:div.control
            [:textarea.textarea {:type        "text"
-                                :placeholder "e.g. hugo.huelsensack@the-company.com\nbruno.banani@the-same-company.com\nmarc.more@the-company.com"
+                                :placeholder "e.g.\nhugo.huelsensack@the-company.com\nbruno.banani@the-same-company.com\nmarc.more@the-company.com\n\nseparated by space, comma, semicolon, return"
                                 :rows        "10"
                                 :on-change   #(swap! fields assoc :participants (value %))}]]]
 
          [:div [:button.button.is-primary.mt-3.has-tooltip-right
                 (if @(rf/subscribe [:auth/user])
                   {:on-click #(rf/dispatch [:konsent/create @fields])}
-                  not-logged-in)
-                "create the konsent"]]]]])))
+                  (not-logged-in))
+                (tr [:k/create-and-start])]]]]])))
 ;divider])))
 ;[e/all-examples]])))
 
@@ -81,27 +80,28 @@
   [:div
    [:a.panel-block
     [:span.panel-icon
-     [:i.fas.fa-book {:aria-hidden "true"}]] "new bib - or not..."]
+     [:i.fas.fa-book {:aria-hidden "true"}]] (tr [:k/example-bib])]
    [:a.panel-block
     [:span.panel-icon
-     [:i.fas.fa-bomb {:aria-hidden "true"}]] "konsent about the new coffee machine"]
+     [:i.fas.fa-bomb {:aria-hidden "true"}]] (tr [:k/example-coffee-machine])]
    [:a.panel-block
     [:span.panel-icon
-     [:i.fas.fa-fighter-jet {:aria-hidden "true"}]] "decision regarding new traveling rules"]])
+     [:i.fas.fa-fighter-jet {:aria-hidden "true"}]] (tr [:k/example-travel-rules])]])
 
 
 (defn konsents-of-user []
   "show all konsents for user based on data [{:id 12 :short-name 'abc' :timestamp :changes} ...]"
   ;(println @(rf/subscribe [:auth/guest?]))
   (let [konsents @(rf/subscribe [:konsent/list])
-        guest?   @(rf/subscribe [:auth/guest?])]
+        guest?   @(rf/subscribe [:auth/guest?])
+        tooltip  (if guest? (tr [:k/guest-not-allowed-to-del]) (tr [:k/delete?]))]
     [:div
      (for [konsent-info konsents]
        [:a.panel-block
         {:key (:id konsent-info)}
         [:span.panel-icon
          {:on-click     #(if guest? (println "not allowed") (rf/dispatch [:konsent/delete konsent-info]))
-          :data-tooltip (if guest? "you are not allowed\nto delete.\nPlease register as user." "delete?")
+          :data-tooltip tooltip
           :class        [:has-tooltip-warning :has-tooltip-arrow]}
          [:i.fas.fa-trash]]
         [:span {:on-click #(rf/dispatch [:konsent/activate konsent-info])}
@@ -109,20 +109,22 @@
 
 
 (defn konsent-list-page []
-  (let [guest?   @(rf/subscribe [:auth/guest?])]
+  (let [guest? @(rf/subscribe [:auth/guest?])]
     [:nav.panel
      [:div.panel-heading
       [:div.buttons
        ;[:div.column.is-3
        [:button.button.is-primary.mr-5
         (if @(rf/subscribe [:auth/user])
-          {:on-click #(rf/dispatch [:common/navigate! :new-konsent nil nil])
-           :disabled guest?
-           :data-tooltip (if guest? "You are guest.\nPlease login to create konsents." "well - there is no explanation needed...")
-           :class [ :has-tooltip-arrow]}
-          not-logged-in)
-        "create new konsent"]
-       [:div "all my-konsents"]]]
+          {:on-click     #(rf/dispatch [:common/navigate! :new-konsent nil nil])
+           :disabled     guest?
+           :data-tooltip (when guest?
+                           (tr [:k/guest-login-to-create-konsent]))
+
+           :class        [:has-tooltip-arrow]}
+          (not-logged-in))
+        (when guest? [:span.badge.is-info (tr [:k/guest])]) (tr [:k/create])]
+       [:div (tr [:k/all-my-konsents] "all my konsents")]]]
      (if @(rf/subscribe [:auth/user])
        [konsents-of-user]
        [konsent-example-list])]))

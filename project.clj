@@ -50,7 +50,8 @@
                  [hashp "0.1.1"]                    ;debugging #p
                  [erdos.assert "0.1.0"] ;; power assert and examine
                  [org.clojure/tools.trace "0.7.10"] ;; tracing
-                 [mvxcvi/puget "1.2.1"]] ;; color print
+                 [mvxcvi/puget "1.2.1"] ;; color print
+                 [com.taoensso/tempura "1.2.1"]]; i18n
 
   :min-lein-version "2.0.0"
   

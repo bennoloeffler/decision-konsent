@@ -22,7 +22,7 @@
 
   (:import (clojure.lang ExceptionInfo)))
 
-
+;; make it readable as html
 (def color-scheme {; syntax elements
                    :delimiter       [:bold :red]
                    :tag             [:red]
@@ -177,19 +177,18 @@
                        (response/header "Content-Type" "text/html; charset=utf-8")))}]
 
     ["/invitation/:invitation-id/:konsent-id"
-     {:get (fn [a] (let [konsent-id    (Integer/valueOf (-> a :path-params :konsent-id))
-                         invitation-id (keyword (-> a :path-params :invitation-id))
-                         konsent       (db/get-konsent {:id konsent-id})
-                         invitation    (-> konsent :konsent :invitations invitation-id)
-                         session       (:session a)]
-
-                     ; insert user into session (see login - but as :guest TODO change user in session
-                     (puget.printer/cprint session)
+     {:get (fn [a] (let [konsent-id-str (-> a :path-params :konsent-id)
+                         konsent-id     (Integer/valueOf konsent-id-str)
+                         invitation-id  (keyword (-> a :path-params :invitation-id))
+                         konsent        (db/get-konsent {:id konsent-id})
+                         invitation     (-> konsent :konsent :invitations invitation-id)
+                         real-user      (db/get-user {:email (:guest-email invitation)})]
+                     ;(puget.printer/cprint real-user)
                      (if invitation
-                       (-> (response/found "/#/my-konsents"); {:identity {:email (:guest-email invitation)}})
-                           (assoc-in [:session :identity] {:email (:guest-email invitation) :auth-type :guest}))
-                       (response/unauthorized {:message "Did not find invitation."}))))}]
-
+                       (-> (response/found "/#/my-konsents")
+                           (assoc-in [:session :identity] {:email (:guest-email invitation) :auth-type (if real-user :auth :guest)}))
+                       (-> (response/unauthorized "ERROR: Did not find invitation. Sorry...")
+                           (response/header "Content-Type" "text/html; charset=utf-8")))))}]
 
 
 

@@ -94,15 +94,18 @@ migrate and rollback:
 1. ok show results of itermediate votings in read, if veto or in yellow, if major
 1. ok show accepted proposal in green
 1. ok Button for "force vote" and "force ready"
+1. ok invite participants after creation
 1. german translation
 1. validation of email and password (and other forms)
 1. show the potential proposers for everybody  
 1. Confirm dialog for "delete"
-1. List and current konsent in one page
+1. List and current konsent in one page  
+
+--> BETA 1
+
 1. make backwards / forward buttons functional (list of k / current k in one page)
 1. archive konsents - but show them below the "active list"
 1. have an archive button in the active list. have an delete button in the archived list.
-1. invite participants after creation
 1. use an invitation link to take part in an konsent without registration
 1. validate a users email-adress by clicking an email-link
 1. make an change your password.
@@ -129,6 +132,9 @@ for different api functions (login, save-konsent, ...)
 1. provide spec for API (swagger)
 1. provide spec for konsent data 
 1. UUID as user id - email as parameter
+1. make the invitations an own field in konsent (id konsent invitations)  
+   that way, it would be save from beeing manipulated by clients.
+1. sdfsdf
    
 ## email invitation and roles
 :authenticated :invited :no-auth 
