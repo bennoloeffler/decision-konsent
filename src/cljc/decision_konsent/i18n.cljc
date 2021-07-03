@@ -8,23 +8,71 @@
 (def my-tempura-dictionary
   {:de {:missing missing-txt                                ; Fallback for missing resources
         ;; k=konsent
-        :k       {:new                           "neuen Konsent erstellen"
-                  :login-then-start              "Erst einloggen.\nDann loslegen!"
-                  :or-divider                    "ODER"
-                  :short-name                    "Kurzbezeichnung"
-                  :problem-description           "Problembeschreibung & Hintergrund-Infos"
-                  :participants                  "Teilnehmer (E-Mails)"
-                  :create-and-start              "Konsent erstellen und starten"
-                  :create                        "neuen Konsent erstellen"
-                  :all-my-konsents               "alle meine Konsents"
-                  :example-bib                   "neue Bibliothek - oder nicht?"
-                  :example-travel-rules          "Reisekosten Abrechnung - strikter oder freier?"
-                  :example-coffee-machine        "Kaffee-Maschine defekt. Tausend Interessen. Entscheidung!"
-                  :guest-not-allowed-to-del      "Sie sind als Gast eingeloggt.\nUm zu löschen brauchen Sie einen Account."
-                  :delete?                       "Konsent\nlöschen?"
-                  :guest                         "GAST"
-                  :guest-login-to-create-konsent "Sie sind als Gast eingeloggt.\nUm Konsents zu erstellen, brauchen Sie einen Account\n"
-                  :unused                        ""}
+        :k       {:new                             "neuen Konsent erstellen"
+                  :login-then-start                "Erst einloggen.\nDann loslegen!"
+                  :or-divider                      "ODER"
+                  :short-name                      "Kurzbezeichnung"
+                  :problem-description             "Problembeschreibung & Hintergrund-Infos"
+                  :participants-mail               "Teilnehmer (E-Mails)"
+                  :create-and-start                "Konsent erstellen und starten"
+                  :create                          "neuen Konsent erstellen"
+                  :all-my-konsents                 "alle meine Konsents"
+                  :example-bib                     "neue Bibliothek - oder nicht?"
+                  :example-travel-rules            "Reisekosten Abrechnung - strikter oder freier?"
+                  :example-coffee-machine          "Kaffee-Maschine defekt. Tausend Interessen. Entscheidung!"
+                  :guest-not-allowed-to-del        "Sie sind als Gast eingeloggt.\nUm zu löschen brauchen Sie einen Account."
+                  :delete?                         "Konsent\nlöschen?"
+                  :guest                           "GAST"
+                  :guest-login-to-create-konsent   "Sie sind als Gast eingeloggt.\nUm Konsents zu erstellen, brauchen Sie einen Account\n"
+                  :btn-back-to-all                 "zurück zur Liste aller Konsents"
+                  :decision-taken                  "Entscheidung getroffen:"
+                  :votes                           "Stimmen:"
+                  :proposal                        "Vorschlag:"
+                  :q&a                             "Fragen & Antworten:"
+                  :discussion                      "Diskussion:"
+                  :discuss                         "diskutieren:"
+                  :participants                    "Teilnehmer:"
+                  :creator                         "Ersteller:"
+                  :questions-from-others           "Fragen zum Vorschlag:"
+                  :force-end-of-asking             "Abstimmung trotzdem beginnen?"
+                  :btn-force-vote                  "Abstimmung starten"
+                  :waiting-for-ready-to-vote       "Noch nicht bereit für Abstimmung:"
+                  :no-questions                    "keine"
+                  :waiting-for-votes-of            "Warten auf Stimmen von:"
+                  :my-vote                         "Meine Stimme:"
+                  :force-end-wait-for              "Stimmen fehlen. Beenden?"
+                  :ready-to-vote-are               "bereit zur Abstimmung sind:"
+                  :ask-or-ready                    "Weitere Fragen oder bereit?"
+                  :btn-ask                         "Frage stellen"
+                  :btn-no-more-questions           "Keine Fragen mehr. Bitte abstimmen!"
+                  :btn-force-end-of-voting         "Abstimmung trotzdem beenden"
+                  :create-proposal                 "Vorschlag machen:"
+                  :btn-send-proposal               "Vorschlag abschicken"
+                  :please-answer                   "Bitte beantworten:"
+                  :btn-answer                      "beantworten"
+                  :go-ahead?                       "weiter - trotz fehlender Stimmen?"
+                  :answer-questions                "Fragen zum Vorschlag beantworten"
+                  :please-wait                     "Bitte warten"
+                  :started-by-with-participants    "Konsent: Name, Beschreibung und Teilnehmer"
+                  :iteration                       "Iteration "
+                  :force-end-of-voting             "Abstimmung beenden?"
+                  :voting-time                     "bitte abstimmen"
+                  :free-discussion                 "offene Discussion: Perspektiven, Gefühle, Fakten, Meinungen..."
+                  :sep-create-proposal             "konkreter Vorschlag"
+
+                  :proposal-accepted               "Vorschlag angenommen"
+                  :div-wainting-for-others-to-vote "warten auf die Stimmen der anderen"
+
+                  :inp-coffee-sn                   "z.B.:    die alte Kaffee-Maschine ist total kaputt - was jetzt?"
+                  :inp-coffee-pd                   "z.B.:\nSie ist kaputt. Reparatur aussichtslos.\nViele Optionen, astronomische Preise und unendlich viele Meinungen.\nVielleicht brauchen wir gar keine neue. Auf jeden Fall muss eine Entscheidung her, damit wir wieder arbeiten können ;-)."
+                  :inp-coffee-part                 "z.B.:\nhugo.huelsensack@the-company.com\nbruno.banani@the-same-company.com\nmarc.more@the-company.com\n\ngetrennt durch Leertaste, Komma, Strichpunkt oder neue Zeile."
+
+                  :pla-vote-comments               "Ihr Kommentar zur Abstimmung..\nleichter Einwand - das wollte ich nochmal sagen.\nschwerwer Einwand - soll in Vorschlag eingearbeitet werden.\nVeto - Ich mache den nächsten Vorschlag."
+
+
+
+                  :unused                          ""}
+
         ;; n=navigation in core
         :n       {:home         "Home"
                   :new-konsent  "Konsent erstellen"
@@ -42,30 +90,114 @@
                   :txt-register          "Account anlegen"
                   :lbl-register-password "Passwort wiederholen"
                   :btn-register-now      "Account jetzt anlegen"
+                  :txt-you-are-logged-in "schon eingeloggt :-)"
                   :unused                ""}
+
+        :h       {:lbl-tutorial          "Mini-Tutorial: schnelle und gute Teamentscheidungen. So geht's:"
+                  :txt-tutorial          "Ein Team diskutiert ein Problem. Perspektiven, Ideen, Optionen und Widersprüche entstehen werden erörtert.
+                                 Irgendwann macht jemand aus dem Team einen konkreten Vorschlag, der dann zur Entscheidung ansteht.
+                                 Nun wird nicht mehr diskutiert. Reihum kann nun jeder klärende Fragen stellen um den Vorschlag besser zu verstehen.
+                                 Es geht nicht darum, seine Zustimmung oder Ablehnung zu zeigen. Nur verstehen.
+                                 Sobald jeder den Vorschlag verstanden hat gibt jeder gleichzeitig eines der folgenden Signale:
+
+                                 1 Daumen hoch: ich bin dabei.
+                                 2 Daumen zur Seite: ich bin dabei, obwohl ich noch einen leichten Einwand loswerden möchte.
+                                 3 Daumen runter: ich habe einen schweren Einwand. Der muss in den Vorschlag eingearbeitet werden. Dann wäre ich dabei.
+                                 4 Veto: Ich sehe große Risiken und Schaden. Das können wir so nicht machen. Ich werde einen anderen Vorschlag machen.
+                                 5 Enthaltung: Kann nichts zur Entscheidung beitragen. Alles was rauskommt werde ich akzeptieren.
+
+                                 Wenn es nur Zustimmung oder leichte Einwände gibt ist die Entscheidung getroffen.
+                                 Wenn es schwere Einwände gibt, dann ist es die Pflicht des Vorschlagenden und der Gruppe diesen Einwand in den Vorschlag einzuarbeiten.
+                                 Bei einem Veto übernimmt die Veto-Person die den nächsten Vorschlag."
+
+                  :txt-try-buttons-below " Probieren sie mal die Buttons..."
+                  :inp-concerns-here     "Einwand oder Veto hier..."
+                  :too-no-concern        "Kein Einwand.\nBin dabei!"
+                  :too-minor             "Leichter Einwand!\nWill ich loswerden.\nBin aber dabei."
+                  :too-major             "Schwerer Einwand!\nIch möchte, dass er berücksichtigt wird.\nDann wäre ich dabei,\nIch bitte also um einen verbesserten Vorschlag."
+                  :too-veto              "VETO.\nIch sehe Gefahr beim aktuellen Vorschlag\nIch werde den nächsten Vorschlag machen.\nBedenke: Ein Veto gilt als ultima ratio..."
+                  :too-abstain           "Enthaltung.\nIch habe keine Einschätzung,\nkann nichts beitragen und\nwerde jede Entscheidung mitgehen."
+                  :txt-feedback-comments "Feedback, Wünsche & Kommentare"
+                  :btn-send              "abschicken"
+                  :too-leave-a-comment   "Lassen Sie einen Kommentar da. Gerne Kritik, Lob oder Verbesserungsvorschläge..."
+                  :unused                ""}
+
+        :v       {:yes           "bin dabei!"
+                  :minor-concern "leichter Einwand"
+                  :major-concern "schwerer Einwand"
+                  :veto          "Veto"
+                  :abstain       "Enthaltung"}
+
+        :about   {:header   "Über"
+                  :message  "Im Team im Konsent asynchron Entscheidungen treffen - das geht mit dieser kleinen App hier."
+                  :see-more "Mehr über Konsent erfahren."
+                  :who      "Gebaut von: Armin and Benno"}
+
 
         :example {:greet "Good day %1!"}}                   ; Note Clojure fn-style %1 args
 
 
    :en {:missing missing-txt
 
-        :k       {:new                           "create new konsent"
-                  :login-then-start              "first login.\nthen start."
-                  :or-divider                    "OR"
-                  :short-name                    "short name"
-                  :problem-description           "problem & background"
-                  :participants                  "participants (emails)"
-                  :create-and-start              "create and start the konsent"
-                  :create                        "create new konsent"
-                  :all-my-konsents               "all my konsents"
-                  :example-bib                   "new bib - or not..."
-                  :example-travel-rules          "decision regarding new traveling rules"
-                  :example-coffee-machine        "konsent about the new coffee machine"
-                  :guest-not-allowed-to-del      "As guest, you are not\n allowed to delete.\nPlease register and login as user."
-                  :delete?                       "delete\nkonsent?"
-                  :guest                         "GUEST"
-                  :guest-login-to-create-konsent "You are logged in as guest.\nPlease login to your account to create konsents.\n"
-                  :unused                        ""}
+        :k       {:new                             "create new konsent"
+                  :login-then-start                "first login.\nthen start."
+                  :or-divider                      "OR"
+                  :short-name                      "short name"
+                  :problem-description             "problem & background"
+                  :participants-mail               "participants (emails)"
+                  :create-and-start                "create and start the konsent"
+                  :create                          "create new konsent"
+                  :all-my-konsents                 "all my konsents"
+                  :example-bib                     "new bib - or not..."
+                  :example-travel-rules            "decision regarding new traveling rules"
+                  :example-coffee-machine          "konsent about the new coffee machine"
+                  :guest-not-allowed-to-del        "As guest, you are not\n allowed to delete.\nPlease register and login as user."
+                  :delete?                         "delete\nkonsent?"
+                  :guest                           "GUEST"
+                  :guest-login-to-create-konsent   "You are logged in as guest.\nPlease login to your account to create konsents.\n"
+                  :btn-back-to-all                 "back to all konsents"
+                  :decision-taken                  "decision taken:"
+                  :votes                           "votes:"
+                  :proposal                        "proposal:"
+                  :discussion                      "discussion:"
+                  :discuss                         "help the discussion:"
+                  :q&a                             "q&a:"
+                  :participants                    "participants:"
+                  :creator                         "creator:"
+                  :questions-from-others           "questions regarding proposal:"
+                  :force-end-of-asking             "force end of asking?"
+                  :btn-force-vote                  "force vote?"
+                  :waiting-for-ready-to-vote       "waiting for ready to vote:"
+                  :no-questions                    "no questions"
+                  :waiting-for-votes-of            "Waiting for votes of:"
+                  :my-vote                         "my vote:"
+                  :force-end-wait-for              "force end? waiting for:"
+                  :ready-to-vote-are               "ready to vote are:"
+                  :ask-or-ready                    "ask another question or signal ready..."
+                  :btn-ask                         "ask"
+                  :btn-no-more-questions           "I'm ready to vote!"
+                  :btn-force-end-of-voting         "force end of voting"
+                  :create-proposal                 "propose:"
+                  :btn-send-proposal               "send proposal"
+                  :please-answer                   "please answer:"
+                  :btn-answer                      "answer"
+                  :go-ahead?                       "go ahead?"
+                  :answer-questions                "answer questions regarding your proposal"
+                  :please-wait                     "please wait"
+                  :started-by-with-participants    "konsent: name, description and participants"
+                  :iteration                       "iteration "
+                  :force-end-of-voting             "force end of voting?"
+                  :voting-time                     "voting time..."
+                  :free-discussion                 "free discussion to learn views, feelings, facts, opinions"
+                  :sep-create-proposal             "create proposal"
+                  :proposal-accepted               "Proposal ACCEPTED"
+                  :div-wainting-for-others-to-vote "waiting for others to vote"
+                  :pla-vote-comments               "Your comment here...\nminor-concern - please hear me.\nmajor-concern - needs be built into proposal.\nveto - I will do next proposal."
+
+                  :inp-coffee-sn                   "e.g.    our old and loved coffee machine broke - what now?"
+                  :inp-coffee-pd                   "e.g.\nIt broke. Repairing seems impossible.\nThere are plenty of options and unlimited prices and even more opinions.\nIts even unclear, if there is a real need for a coffee machine. So we need to take a decision and focus back on real topics."
+                  :inp-coffee-part                 "e.g.\nhugo.huelsensack@the-company.com\nbruno.banani@the-same-company.com\nmarc.more@the-company.com\n\nseparated by space, comma, semicolon, return"
+                  :unused                          ""}
 
         :n       {:home         "home"
                   :new-konsent  "new konsent"
@@ -84,10 +216,42 @@
                   :txt-register-email-password "register with a valid email and choose a password"
                   :lbl-register-password       "confirm password"
                   :btn-register-now            "create your account now"
+                  :txt-you-are-logged-in       "you are logged in :-)"
+
 
                   :unused                      ""}
 
+        :h       {:lbl-tutorial          "Mini-Tutorial: taking team decisions fast!"
+                  :txt-tutorial          "Coming from a problem, first discuss possible options.
+                                 Then, somebody suggests a specific solution, actions, etc. She or he is in charge to
+                                 drive the decision.
+                                 Now everybody can ask questions in order to understand the proposal.Don't start again discussing
+                                 contradictions, your standpoint or feelings. As soon as everybody
+                                 understand the details of the proposal, everybody gives hers or his agreement,
+                                 concern or veto. If there are (only) agreements and minor concerns, the decision is taken.
+                                 Perfect! If there are major concerns, they are spoken out and are worked into the proposal.
+                                 In case of a veto, the person that issued the veto places the next proposal."
+                  :txt-try-buttons-below " Please try the buttons below..."
+                  :inp-concerns-here     "your concerns here..."
+                  :too-no-concern        "No concern.\nLet's do it."
+                  :too-minor             "Minor concern!\nHave to say them.\nBut then: Let's do it."
+                  :too-major             "Major concern!\nThey need to be reflected.\nOnly if they are reflected,\nI could go with this suggestion."
+                  :too-veto              "VETO.\nI would like to take responsibility\nand make a next suggestion.\nYou should consider: This is really ultima ratio..."
+                  :too-abstain           "Abstain from voting this time.\nI can live with whatever will be decided."
+                  :txt-feedback-comments "feedbacks & comments"
+                  :btn-send              "send"
+                  :unused                ""}
 
+        :v       {:yes           "yes!"
+                  :minor-concern "minor concern"
+                  :major-concern "major concern"
+                  :veto          "veto"
+                  :abstain       "abstain"}
+
+        :about   {:header   "about"
+                  :message  "Taking decisions as team by konsent - asynchronously with an app."
+                  :see-more "See for more info."
+                  :who      "Brought to you by: Armin and Benno"}
 
 
         :example
@@ -128,10 +292,6 @@
 (def show-dev-strings true)
 
 ;(def tr (partial tempura/tr opts [(or @(rf/subscribe [:gui-language]) :en)]))
-
-
-
-
 (defn tr
   "first of all, searches for re-frame subscription [:gui-language]
     - if this is not available, then -> use :en
@@ -148,7 +308,7 @@
                     ;(str (first default-string) " | **DEFAULT**")
                     (str key " -> missing..."))
                   string)]
-    (println "i18n: " final)
+    ;(println "i18n: " final)
     final))
 
 (comment (tr [:konsent/create-new]))

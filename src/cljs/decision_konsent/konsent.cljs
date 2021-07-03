@@ -51,19 +51,19 @@
           [:label.label (tr [:k/short-name])]
           [:div.control
            [:input.input {:type        "text"
-                          :placeholder "e.g.    our old and loved coffee machine broke - what now?"
+                          :placeholder (tr [:k/inp-coffee-sn] "e.g.    our old and loved coffee machine broke - what now?")
                           :on-change   #(swap! fields assoc :short-name (value %))}]]]
          [:div.field
           [:label.label (tr [:k/problem-description])]
           [:div.control
            [:textarea.textarea {:type        "text"
-                                :placeholder "e.g.\nIt broke. Repairing seems impossible.\nThere are plenty of options and unlimited prices and even more opinions.\nIts even unclear, if there is a real need for a coffee machine. So we need to take a decision and focus back on real topics."
+                                :placeholder (tr [:k/inp-coffee-pd] "e.g.\nIt broke. Repairing seems impossible.\nThere are plenty of options and unlimited prices and even more opinions.\nIts even unclear, if there is a real need for a coffee machine. So we need to take a decision and focus back on real topics.")
                                 :on-change   #(swap! fields assoc :problem-statement (value %))}]]]
          [:div.field
-          [:label.label (tr [:k/participants])]
+          [:label.label (tr [:k/participants-mail])]
           [:div.control
            [:textarea.textarea {:type        "text"
-                                :placeholder "e.g.\nhugo.huelsensack@the-company.com\nbruno.banani@the-same-company.com\nmarc.more@the-company.com\n\nseparated by space, comma, semicolon, return"
+                                :placeholder (tr [:k/inp-coffee-part] "e.g.\nhugo.huelsensack@the-company.com\nbruno.banani@the-same-company.com\nmarc.more@the-company.com\n\nseparated by space, comma, semicolon, return")
                                 :rows        "10"
                                 :on-change   #(swap! fields assoc :participants (value %))}]]]
 
@@ -71,7 +71,9 @@
                 (if @(rf/subscribe [:auth/user])
                   {:on-click #(rf/dispatch [:konsent/create @fields])}
                   (not-logged-in))
-                (tr [:k/create-and-start])]]]]])))
+                [:span.icon.is-large>i.fas.fa-1x.fa-door-open]
+                [:div (tr [:k/create-and-start])]]]]]])))
+
 ;divider])))
 ;[e/all-examples]])))
 
@@ -115,6 +117,7 @@
       [:div.buttons
        ;[:div.column.is-3
        [:button.button.is-primary.mr-5
+
         (if @(rf/subscribe [:auth/user])
           {:on-click     #(rf/dispatch [:common/navigate! :new-konsent nil nil])
            :disabled     guest?
@@ -123,7 +126,11 @@
 
            :class        [:has-tooltip-arrow]}
           (not-logged-in))
-        (when guest? [:span.badge.is-info (tr [:k/guest])]) (tr [:k/create])]
+
+        (when guest? [:span.badge.is-info (tr [:k/guest])])
+        [:div (tr [:k/create])]
+        [:span.icon.is-large>i.fas.fa-1x.fa-plus-circle]]
+
        [:div (tr [:k/all-my-konsents] "all my konsents")]]]
      (if @(rf/subscribe [:auth/user])
        [konsents-of-user]
@@ -135,31 +142,34 @@
 ;;
 
 
+
 (defn votes [iteration]
   [:div.columns
-   [:div.column.is-3 "votes:"]
+   [:div.column.is-3 (tr [:k/votes] "votes:")]
    [:div.column.is-8
-
-    (for [v (-> iteration :votes)]
-      [:div.card {:key (:participant v)}
-       [:div.card-content>div.content
-        [:div.columns
-         [:div.column.is-2 [:span {:style
-                                   {:color (case (:vote v)
-                                             "yes" :lightgreen
-                                             "minor-concern" :green
-                                             "major-concern" :orange
-                                             "veto" :red
-                                             :lightgray)}} (:vote v)]]
-         ;[:div.column.is-3 (:participant v)]
-         [:div.column>div.card>div.card-content>div.content
-          [add-time-user-badge (:timestamp v) (:participant v)] (:text v)]]]])]])
+     (doall ; otherwise - error
+      (for [v (-> iteration :votes)]
+       (let [color  (case (:vote v)
+                     "yes" :lightgreen
+                     "minor-concern" :green
+                     "major-concern" :orange
+                     "veto" :red
+                     :lightgray)
+             vote-text (tr [(keyword (str "v/" (:vote v)))])]
+        [:div.card {:key (:participant v)}
+         [:div.card-content>div.content
+          [:div.columns
+           [:div.column.is-2 [:span {:style
+                                     {:color color}} vote-text]]
+           ;[:div.column.is-3 (:participant v)]
+           [:div.column>div.card>div.card-content>div.content
+            [add-time-user-badge (:timestamp v) (:participant v)] (:text v)]]]])))]])
 
 
 (defn accepted [k u]
   [:<>
    [:div.columns
-    [:div.column.is-3 [:span {:style {:color :lightgreen :font-weight :bold}} "decision taken:"]]
+    [:div.column.is-3 [:span {:style {:color :lightgreen :font-weight :bold}} (tr [:k/decision-taken] "decision taken:")]]
     [:div.column.is-8
      [:div.card>div.card-content>div.content (-> (k-fsm/active-iteration k) :proposal :text)]]]])
 ;[votes (k-fsm/active-iteration k)]])
@@ -177,32 +187,32 @@
       [:input.input {:type "text" :placeholder "your concerns here..."}]]
    [big-icon-button
     {:on-click #(do (println "yes") (rf/dispatch [:konsent/vote (into @fields {:vote :yes})]) (reset! fields {}))}
-    "No concern.\nLet's do it." "fa-arrow-alt-circle-up"]
+    (tr [:h/too-no-concern] "No concern.\nLet's do it.") "fa-arrow-alt-circle-up"]
    [big-icon-button
     {:on-click #(do (println "minor") (rf/dispatch [:konsent/vote (into @fields {:vote :minor-concern})]) (reset! fields {}))}
-    "Minor concern!\nHave to say them.\nBut then: Let's do it." "fa-arrow-alt-circle-right"]
+    (tr [:h/too-minor] "Minor concern!\nHave to say it.\nBut then: Let's do it.") "fa-arrow-alt-circle-right"]
    [big-icon-button
     {:on-click #(do (println "major") (rf/dispatch [:konsent/vote (into @fields {:vote :major-concern})]) (reset! fields {}))}
-    "Major concern!\nThey need to be reflected.\nOnly if they are reflected,\nI could go with
-    this suggestion." "fa-arrow-alt-circle-down"]
+    (tr [:h/too-major] "Major concern!\nThey need to be reflected.\nOnly if they are reflected,\nI could go with
+     this suggestion.") "fa-arrow-alt-circle-down"]
    [big-icon-button
     {:on-click #(do (println "veto") (rf/dispatch [:konsent/vote (into @fields {:vote :veto})]) (reset! fields {}))}
-    "VETO.\nI would like to take responsibility\nand make a next suggestion.\nYou should consider:
-    This is really ultima ratio..." "fa-bolt"]
+    (tr [:h/too-veto] "VETO.\nI would like to take responsibility\nand make a next suggestion.\nYou should consider:
+     This is really ultima ratio...") "fa-bolt"]
    [big-icon-button
     {:on-click #(do (println "abstain") (rf/dispatch [:konsent/vote (into @fields {:vote :abstain})]) (reset! fields {}))}
-    "Abstain from voting this time.\nI can live with whatever will be decided." "fa-comment-slash"]])
+    (tr [:h/too-abstain] "Abstain from voting this time.\nI can live with whatever will be decided.") "fa-comment-slash"]])
 
 
 (defn vote-for-konsent [k u]
   (let [fields (r/atom {:text ""})]
     (fn []
       [:div.columns
-       [:div.column.is-3 "my vote"]
+       [:div.column.is-3 (tr [:k/my-vote] "my vote")]
        [:div.column.is-8
         [:form.box utils/prevent-reload
          [:div.field>div.control>textarea.textarea
-          {:placeholder "Your comment here...\nminor-concern - please hear me.\nmajor-concern - needs be built into proposal.\nveto - I will do next proposal."
+          {:placeholder (tr [:k/pla-vote-comments] "Your comment here...\nminor-concern - please hear me.\nmajor-concern - needs be built into proposal.\nveto - I will do next proposal.")
            :value       (:text @fields)
            :on-change   #(swap! fields assoc :text (value %))}]
          [:div.field [tutorial-buttons fields]
@@ -226,7 +236,7 @@
 
 (defn participants [ps]
   [:div.columns
-   [:div.column.is-3 "participants:"]
+   [:div.column.is-3 (tr [:k/participants] "participants:")]
    [:div.column
     [:div.buttons.are-small
      (for [p ps]
@@ -234,7 +244,7 @@
 
 (defn created-by-when [owner timestamp]
   [:div.columns
-   [:div.column.is-3 "created by: "]
+   [:div.column.is-3 (tr [:k/creator] "created by: ")]
    [:div.column [owner-started owner timestamp]]])
 
 (defn short-name-and-problemstatement [sn ps]
@@ -249,7 +259,7 @@
 
 (defn wait-for-everybody-voted [k u]
   [:div.columns
-   [:div.column.is-3 "Waiting for votes of:"]
+   [:div.column.is-3 (tr [:k/waiting-for-votes-of] "Waiting for votes of:")]
    [:div.column.is-8
     [:div.card>div.card-content>div.content [participant-list (k-fsm/users-with-missing-votes k)]]]])
 
@@ -257,30 +267,30 @@
 ; TODO rename to force-incomplete-vote
 (defn force-vote [k u]
   [:div.columns
-   [:div.column.is-3 "force end? waiting for:"]
+   [:div.column.is-3 (tr [:k/force-end-wait-for] "force end? waiting for:")]
    [:div.column.is-8
     [:div.card>div.card-content>div.content [participant-list (k-fsm/users-with-missing-votes k)]]
     [:form.box utils/prevent-reload
      [:div.field>div.control
       [:button.button
-       {;:type     "checkbox"
-        :on-click #(rf/dispatch [:konsent/force-incomplete-vote])} "force end of voting?"]]]]])
+       {:on-click #(rf/dispatch [:konsent/force-incomplete-vote])}
+       (tr [:k/btn-force-end-of-voting] "force end of voting?")]]]]])
 
 
 ; TODO: rename to force-all-ready
 (defn force-ready [k u]
   [:div.columns
-   [:div.column.is-3 "force end of asking?"]
+   [:div.column.is-3 (tr [:k/force-end-of-asking] "force end of asking?")]
    [:div.column.is-8
     [:form.box utils/prevent-reload
      [:div.field>div.control.mr-3
       [:button.button {;:type     "checkbox"
-                       :on-click #(rf/dispatch [:konsent/force-vote])} "force vote?"]]]]])
+                       :on-click #(rf/dispatch [:konsent/force-vote])} (tr [:k/btn-force-vote] "force vote?")]]]]])
 
 
 (defn wait-for-ready [k u]
   [:div.columns
-   [:div.column.is-3 "waiting for ready to vote:"]
+   [:div.column.is-3 (tr [:k/waiting-for-ready-to-vote] "waiting for ready to vote:")]
    [:div.column.is-8
     [:div.card>div.card-content>div.content [participant-list (k-fsm/users-missing-for-ready-to-vote k)]]]])
 
@@ -292,7 +302,7 @@
         idx    (-> q :idx)]
     (fn []
       [:div.columns {:key idx}
-       [:div.column.is-3 "Please answer:"]
+       [:div.column.is-3 (tr [:k/please-answer] "Please answer:")]
        [:div.column.is-8
         [:form.box utils/prevent-reload
          [:div.card>div.card-content>div.content
@@ -305,7 +315,7 @@
          [:div.field>div.control>button.button
           {:on-click #(do (rf/dispatch [:konsent/answer (assoc @fields :idx idx)]) (reset! fields {}))}
           ;)}
-          "answer"]]]])))
+          (tr [:k/btn-answer] "answer")]]]])))
 
 
 (defn answer [k]
@@ -315,8 +325,8 @@
        (for [q unanswered]
          [unanswered-question (into q {:key (:idx q)})])]
       [:div.columns
-       [:div.column.is-3 "questions from other members?"]
-       [:div.column.is-8 "no unanswered questions..."]])))
+       [:div.column.is-3 (tr [:k/questions-from-others] "questions from other members?")]
+       [:div.column.is-8 (tr [:k/no-questions] "no unanswered questions...")]])))
 
 
 
@@ -324,11 +334,11 @@
   (let [fields (r/atom {:text ""})]
     (fn []
       [:div.columns
-       [:div.column.is-3 "ask another question or signal ready..."]
+       [:div.column.is-3 (tr [:k/ask-or-ready] "ask another question or signal ready...")]
        [:div.column.is-8
 
         [:form.box utils/prevent-reload
-         [:div.buttons.are-small [:div.mr-4 "ready to vote are:"] [participant-list (k-fsm/users-ready-to-vote k)]]
+         [:div.buttons.are-small [:div.mr-4 (tr [:k/ready-to-vote-are] "ready to vote are:")] [participant-list (k-fsm/users-ready-to-vote k)]]
 
 
          [:div.field>div.control>textarea.textarea
@@ -340,16 +350,17 @@
            [:button.button
             {:on-click #(do (rf/dispatch [:konsent/ask @fields]) (reset! fields {}))}
             ;)}
-            "ask"]
-           [:button.button {;:type     "checkbox"
-                            :on-click #(rf/dispatch [:konsent/ready-to-vote])} "no more questions - ready to vote!"]]]]]])))
+            (tr [:k/btn-ask] "ask")]
+           [:button.button
+             {:on-click #(rf/dispatch [:konsent/ready-to-vote])}
+            (tr [:k/btn-no-more-questions] "no more questions - ready to vote!")]]]]]])))
 
 
 (defn discuss []
   (let [fields (r/atom {:text ""})]
     (fn []
       [:div.columns
-       [:div.column.is-3 "discuss:"]
+       [:div.column.is-3 (tr [:k/discuss] "discuss:")]
        [:div.column.is-8
         [:form.box utils/prevent-reload
          [:div.field>div.control>textarea.textarea
@@ -358,14 +369,14 @@
            :on-change   #(swap! fields assoc :text (value %))}]
          [:div.field>div.control>button.button
           {:on-click #(do (rf/dispatch [:konsent/discuss @fields]) (reset! fields {}))}
-          "send"]]]])))
+          (tr [:h/btn-send] "send")]]]])))
 
 
 (defn propose []
   (let [fields (r/atom {})]
     (fn []
       [:div.columns
-       [:div.column.is-3 "propose:"]
+       [:div.column.is-3 (tr [:k/create-proposal] "propose:")]
        [:div.column.is-8
         [:form.box utils/prevent-reload
          [:div.field>div.control>textarea.textarea
@@ -373,7 +384,7 @@
            :on-change   #(swap! fields assoc :text (value %))}]
          [:div.field>div.control>button.button
           {:on-click #(rf/dispatch [:konsent/propose @fields])}
-          "create proposal"]]]])))
+          (tr [:k/btn-send-proposal] "create proposal")]]]])))
 
 
 (defn voters-set
@@ -403,13 +414,13 @@
         proposal      (:proposal iteration)
         q&a           (seq (reverse (:q&a iteration)))]     ;TODO do that all by subscriptions
     [:div
-     [:div.is-divider.mt-6.mb-6 {:data-content (str "Iteration " i)}]
+     [:div.is-divider.mt-6.mb-6 {:data-content (str (tr [:k/iteration] "Iteration ") i)}]
      ;(when ())
      (when (and votes-in-iter (voting-over? iteration k))
        [votes iteration])
      (when q&a
        [:div.columns
-        [:div.column.is-3 "q&a after proposal"]
+        [:div.column.is-3 (tr [:k/q&a] "q&a after proposal")]
         [:div.column.is-8
          (for [one-q&a q&a]
            (let [q   (:question one-q&a)
@@ -431,13 +442,13 @@
                      [:div.card>div.card-content>div.content "no answer yet"])]]))]])
      (when proposal
        [:div.columns
-        [:div.column.is-3 [:h1.title.is-5 "proposal:"]]
+        [:div.column.is-3 [:h1.title.is-5 (tr [:k/proposal] "proposal:")]]
         [:div.column.is-8
          [:div.card>div.card-content>div.content
           [add-time-user-badge (:timestamp proposal) (:participant proposal)]
           (:text proposal)]]])
      [:div.columns
-      [:div.column.is-3 "discussion before proposal:"]
+      [:div.column.is-3 (tr [:k/discussion] "discussion before proposal:")]
       [:div.column.is-8
        ;[:div.columns
        (for [message messages]
@@ -534,7 +545,9 @@
         (if u
           {:on-click #(rf/dispatch [:konsent/de-activate])}
           not-logged-in)
-        "back to all konsents"]]
+        [:span.icon.is-large>i.fas.fa-1x.fa-arrow-alt-circle-left]
+        [:div (tr [:k/btn-back-to-all] "back to all konsents")]]]
+
       [:div.column.is-9 ""]]
      (if u
        [:div
@@ -544,26 +557,26 @@
         ;[:div.is-divider.mt-6.mb-6 {:data-content "free discussion to learn views, feelings, facts, opinions"}]
         (when (k-fsm/accepted? k)
           [:div
-           [:div.is-divider.mt-6.mb-6 {:data-content "Proposal ACCEPTED"}]
+           [:div.is-divider.mt-6.mb-6 {:data-content (tr [:k/proposal-accepted] "Proposal ACCEPTED")}]
            [accepted k u]
            #_(when (k-fsm/user-is-proposer? k u)
                [force-vote k u])])
 
         (when (and (k-fsm/voting-started? k) (k-fsm/user-voted? k u) (not (k-fsm/user-is-proposer? k u)) (not (k-fsm/accepted? k)))
           [:div
-           [:div.is-divider.mt-6.mb-6 {:data-content "waiting for others to vote"}]
+           [:div.is-divider.mt-6.mb-6 {:data-content (tr [:k/div-wainting-for-others-to-vote] "waiting for others to vote")}]
            [wait-for-everybody-voted k u]
            #_(when (k-fsm/user-is-proposer? k u)
                [force-vote k u])])
 
         (when (and (k-fsm/voting-started? k) (k-fsm/user-is-proposer? k u) (not (k-fsm/accepted? k)))
           [:div
-           [:div.is-divider.mt-6.mb-6 {:data-content "force vote?"}]
+           [:div.is-divider.mt-6.mb-6 {:data-content (tr [:k/force-end-of-voting] "force end of voting?")}]
            [force-vote k u]])
 
         (when (and (k-fsm/voting-started? k) (not (k-fsm/user-voted? k u)) (not (k-fsm/accepted? k)))
           [:div
-           [:div.is-divider.mt-6.mb-6 {:data-content "voting time..."}]
+           [:div.is-divider.mt-6.mb-6 {:data-content (tr [:k/voting-time] "voting time...")}]
            [vote-for-konsent k u]
            [wait-for-everybody-voted k u]])
 
@@ -571,14 +584,14 @@
                    (k-fsm/user-is-proposer? k u)
                    (not (k-fsm/voting-started? k)))
           [:div
-           [:div.is-divider.mt-6.mb-6 {:data-content "go ahead?"}]
+           [:div.is-divider.mt-6.mb-6 {:data-content (tr [:k/go-ahead?] "go ahead?")}]
            [wait-for-ready k u]
            [force-ready k u]])
         (when (and (k-fsm/wait-for-other-users-to-be-ready k u)
                    (not (k-fsm/user-is-proposer? k u))
                    (not (k-fsm/voting-started? k)))
           [:div
-           [:div.is-divider.mt-6.mb-6 {:data-content "please wait"}]
+           [:div.is-divider.mt-6.mb-6 {:data-content (tr [:k/please-wait] "please wait")}]
            [wait-for-ready k u]])
         (when (k-fsm/ask? k u)
           [:div
@@ -586,15 +599,15 @@
            [ask k]])
         (when (k-fsm/answer? k u)
           [:div
-           [:div.is-divider.mt-6.mb-6 {:data-content "answer questions regarding your proposal"}]
+           [:div.is-divider.mt-6.mb-6 {:data-content (tr [:k/answer-questions] "answer questions regarding your proposal")}]
            [answer k]])
         (when (k-fsm/propose? k u)
           [:div
-           [:div.is-divider.mt-6.mb-6 {:data-content "create proposal"}]
+           [:div.is-divider.mt-6.mb-6 {:data-content (tr [:k/sep-create-proposal] "create proposal")}]
            [propose]])
         (when (k-fsm/discuss? k u)
           [:div
-           [:div.is-divider.mt-6.mb-6 {:data-content "free discussion to learn views, feelings, facts, opinions"}]
+           [:div.is-divider.mt-6.mb-6 {:data-content (tr [:k/free-discussion] "free discussion to learn views, feelings, facts, opinions")}]
            [discuss]])
         ;[:div.is-divider.mt-6.mb-6 {:data-content "or start a konsent by suggesting"}]
         ;[vote-for-konsent]
@@ -602,7 +615,7 @@
         ;[start-konsent]
         ;[:div.is-divider.mt-6.mb-6 {:data-content "what happend before..."}]
         [history k]
-        [:div.is-divider.mt-6.mb-6 {:data-content "started by with participants"}]
+        [:div.is-divider.mt-6.mb-6 {:data-content (tr [:k/started-by-with-participants] "started by with participants")}]
         [short-name-and-problemstatement sn probs]
         [participants ps]
         [created-by-when (-> k :konsent :owner) (-> k :konsent :timestamp)]]

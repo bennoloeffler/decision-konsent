@@ -4,7 +4,8 @@
             [re-frame.core :as rf]
             [decision-konsent.home-events]
             [decision-konsent.client-time :as ct]
-            [decision-konsent.utils :as utils]))
+            [decision-konsent.utils :as utils]
+            [decision-konsent.i18n :refer [tr]]))
 
 
 (defn big-icon-button [tooltip-text icon-name]
@@ -14,30 +15,22 @@
 
 (defn tutorial-text []
   [:div
-   [:label.label "Mini-Tutorial: taking team decisions fast!"]
-   [:div.mb-6 "Coming from a problem, first discuss possible options.
-              Then, somebody suggests a specific solution, actions, etc. She or he is in charge to
-              drive the decision.
-              Now everybody can ask questions in order to understand the proposal.Don't start again discussing
-              contradictions, your standpoint or feelings. As soon as everybody
-              understand the details of the proposal, everybody gives hers or his agreement,
-              concern or veto. If there are (only) agreements and minor concerns, the decision is taken.
-              Perfect! If there are major concerns, they are spoken out and are worked into the proposal.
-              In case of a veto, the person that issued the veto places the next proposal."
-    [:strong " Please try the buttons below..."]]])
+   [:label.label (tr [:h/lbl-tutorial] "Mini-Tutorial: taking team decisions fast!")]
+   [:div.mb-6 (tr [:h/txt-tutorial] "")
+    [:strong (tr [:h/txt-try-buttons-below] " Please try the buttons below...")]]])
 
 
 (defn tutorial-buttons []
   [:div.field.has-addons
    [:div.control
-    [:input.input {:type "text" :placeholder "your concerns here..."}]]
-   [big-icon-button "No concern.\nLet's do it." "fa-arrow-alt-circle-up"]
-   [big-icon-button "Minor concern!\nHave to say them.\nBut then: Let's do it." "fa-arrow-alt-circle-right"]
-   [big-icon-button "Major concern!\nThey need to be reflected.\nOnly if they are reflected,\nI could go with
-     this suggestion." "fa-arrow-alt-circle-down"]
-   [big-icon-button "VETO.\nI would like to take responsibility\nand make a next suggestion.\nYou should consider:
-     This is really ultima ratio..." "fa-bolt"]
-   [big-icon-button "Abstain from voting this time.\nI can live with whatever will be decided." "fa-comment-slash"]])
+    [:input.input {:type "text" :placeholder (tr [:h/inp-concerns-here] "your concerns here...")}]]
+   [big-icon-button (tr [:h/too-no-concern] "No concern.\nLet's do it.") "fa-arrow-alt-circle-up"]
+   [big-icon-button (tr [:h/too-minor] "Minor concern!\nHave to say it.\nBut then: Let's do it.") "fa-arrow-alt-circle-right"]
+   [big-icon-button (tr [:h/too-major] "Major concern!\nThey need to be reflected.\nOnly if they are reflected,\nI could go with
+     this suggestion.") "fa-arrow-alt-circle-down"]
+   [big-icon-button (tr [:h/too-veto] "VETO.\nI would like to take responsibility\nand make a next suggestion.\nYou should consider:
+     This is really ultima ratio...") "fa-bolt"]
+   [big-icon-button (tr [:h/too-abstain] "Abstain from voting this time.\nI can live with whatever will be decided.") "fa-comment-slash"]])
 
 
 (defn tutorial []
@@ -64,7 +57,7 @@
         localtime   @(rf/subscribe [:timestamp])
         server-diff @(rf/subscribe [:server-diff-time])]
     [:nav.panel
-     [:p.panel-heading "feedbacks & comments"]
+     [:p.panel-heading (tr [:h/txt-feedback-comments] "feedbacks & comments")]
      (for [message messages]
        ^{:key (:id message)}
        [:a.panel-block
@@ -86,12 +79,12 @@
     (fn []
       [:div
        [:form.box utils/prevent-reload
-        [:div.field.has-addons {:data-tooltip "leave a message, give feedback, suggest improvements..."}
+        [:div.field.has-addons {:data-tooltip (tr [:h/too-leave-a-comment] "leave a message, give feedback, suggest improvements...")}
 
          [:input.button.is-outlined.is-primary.mr-1
           {;:class  (if @(rf/subscribe [:messages/loading?])  "is-primary" "is-loading")
            :type     :button
-           :value    "send"
+           :value    (tr [:h/btn-send] "send")
            :on-click #(save-message!)}]                             ;#(send-message! fields)}]
          [:input.input
           {:type        :text

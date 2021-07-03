@@ -102,16 +102,15 @@
    [:div.column.is-one-third
     [:article.message.is-primary
      [:div.message-header
-      [:p "about..."] [:div.card
-                       [:div.card-image
-                        [:figure.image.is-3by3
-                         [:img {:src "img/logo-100x100-gelb-trans.png" :alt "Placeholder image"}]]]]
+      [:div (tr [:about/header] "about...")] [:div.card]
+                         #_[:div.card-image
+                            [:figure.image.is-3by3
+                             [:img {:src "img/logo-100x100-gelb-trans.png" :alt "Placeholder image"}]]]
       #_[:button.delete {:aria-label "delete"}]]
-     [:div.message-body "konsent with a K -
-     neither 'to consent' nor consensus.
-     Basically, it's decision making based on the absence of objections or major concerns. "
-      [:a {:href "https://thedecider.app/consent-decision-making"} "See here for more info."]
-      " Made be Armin and Benno."]]]])
+     [:div.message-body (tr [:about/message] "konsent with a K...")
+      [:div [:a {:href "https://thedecider.app/consent-decision-making"} (tr [:about/see-more] "See here for more info.")]]
+      [:br]
+      [:div (tr [:about/who] "Made be Armin and Benno.")]]]]])
 
 
 (defn home-page []

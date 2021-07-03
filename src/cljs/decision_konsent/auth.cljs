@@ -35,7 +35,8 @@
         [:div
          [:button.button.is-primary.mr-1.mt-3
           {:on-click #(rf/dispatch [:auth/start-register @fields])}
-          (tr [:a/btn-register-now] "register your account now")]
+          [:span.icon.is-large>i.fas.fa-1x.fa-pen-nib]
+          [:div (tr [:a/btn-register-now] "register your account now")]]
          (when-let [registered @(rf/subscribe [:auth/register-worked])] [:h2.subtitle.is-6 (str "you sucessfully registered: " registered)])]]])))
 
 
@@ -57,13 +58,14 @@
          [:label.label (tr [:a/lbl-login-password] "password")]
          [:div.control
           [:input.input {:type        "password"
-                         :placeholder "X3$-smallLetters"
+                         :placeholder "********"
                          :on-change   #(swap! fields assoc :password (-> % .-target .-value))}]]]
 
 
         (if (not @(rf/subscribe [:auth/user]))
           [:button.button.is-primary.mr-1.mt-3
            {:on-click #(rf/dispatch [:auth/start-login @fields])}
-           (tr [:a/btn-login-now])]
+           [:span.icon.is-large>i.fas.fa-1x.fa-sign-in-alt]
+           [:div (tr [:a/btn-login-now])]]
           [:h2.subtitle.is-6 (tr [:a/txt-you-are-logged-in] "you are logged in :-)")])]])))
 

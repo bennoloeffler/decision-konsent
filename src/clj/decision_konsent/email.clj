@@ -68,13 +68,18 @@
 (comment (create-invitations {:id 17 :konsent {:participants ["bel@soso" "karl@immutant.de"]}}
                              "dec-kon.com" 8080))
 
+(defn check-email [email]
+ (clojure.string/includes? email "@"))
+
 (defn send-invitation! [invitation owner]
   ;(println "invitation: " invitation)
+ (if (check-email (:guest-email invitation))
   (send-mail! (str "<html><head> </head><body><h1>this is the link to the konsent,<br> you have been invited by: "
                    owner "</h1><p>" (:invitation-url invitation) "</p></body></html>")
               "Please enable html to see the invitation!"
               "Please contribute to decision"
-              (:guest-email invitation)))
+              (:guest-email invitation))
+  (println "WARNING: ignoring email: " (:guest-email invitation))))
 
 (comment (send-invitation! (create-invitation "benno.loeffler@gmx.de" "konsent-app.com" nil 27) "hugo.h@gmx.de"))
 
