@@ -99,7 +99,7 @@
 
 (defn about-page []
   [:section.section>div.container.is-vertical.is-flexible
-   [:div.column.is-one-third
+   [:div.column.is-two-thirds
     [:article.message.is-primary
      [:div.message-header
       [:div (tr [:about/header] "about...")] [:div.card]
@@ -110,7 +110,22 @@
      [:div.message-body (tr [:about/message] "konsent with a K...")
       [:div [:a {:href "https://thedecider.app/consent-decision-making"} (tr [:about/see-more] "See here for more info.")]]
       [:br]
-      [:div (tr [:about/who] "Made be Armin and Benno.")]]]]])
+      [:div (tr [:about/who] "Made be Armin and Benno.")]
+      [:br]
+      [:div (tr [:about/thanks] "Thanks to the people involved in those projects, we build upon:")]
+      [:br]
+      [:div "clojure"]
+      [:div "shadow-cljs"]
+      [:div "http-kit"]
+      [:div "ring"]
+      [:div "luminus"]
+      [:div "re-frame"]
+      [:div "postgres"]
+      [:div "heroku"]
+      [:div "bulma"]
+      [:div "buddy"]
+      [:div "tempura"]
+      [:div "java"]]]]])
 
 
 (defn home-page []

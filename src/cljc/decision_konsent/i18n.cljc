@@ -143,7 +143,9 @@
         :about   {:header   "Über"
                   :message  "Im Team im Konsent asynchron Entscheidungen treffen - das geht mit dieser kleinen App hier."
                   :see-more "Mehr über Konsent erfahren."
-                  :who      "Gebaut von: Armin and Benno"}
+                  :who      "Gebaut von: Armin and Benno"
+                  :thanks   "Danke an alle Open Source Projekte und Dienste, die wir nutzen:"
+                  :unused   ""}
 
 
         :example {:greet "Good day %1!"}}                   ; Note Clojure fn-style %1 args
@@ -265,7 +267,10 @@
         :about   {:header   "about"
                   :message  "Taking decisions as team by konsent - asynchronously with an app."
                   :see-more "See for more info."
-                  :who      "Brought to you by: Armin and Benno"}
+                  :who      "Brought to you by: Armin and Benno"
+                  :thanks   "Thanks to all the open source projects and services we build upon:"
+                  :unused   ""}
+
 
 
         :example
