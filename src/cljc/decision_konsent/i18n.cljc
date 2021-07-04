@@ -104,21 +104,21 @@
 
         ;; home
         :h       {:lbl-tutorial          "Mini-Tutorial: schnelle und gute Teamentscheidungen. So geht's:"
-                  :txt-tutorial          "Ein Team diskutiert ein Problem. Perspektiven, Ideen, Optionen und Widersprüche entstehen werden erörtert.
-                                 Irgendwann macht jemand aus dem Team einen konkreten Vorschlag, der dann zur Entscheidung ansteht.
-                                 Nun wird nicht mehr diskutiert. Reihum kann nun jeder klärende Fragen stellen um den Vorschlag besser zu verstehen.
-                                 Es geht nicht darum, seine Zustimmung oder Ablehnung zu zeigen. Nur verstehen.
-                                 Sobald jeder den Vorschlag verstanden hat gibt jeder gleichzeitig eines der folgenden Signale:
-
-                                 1 Daumen hoch: ich bin dabei.
-                                 2 Daumen zur Seite: ich bin dabei, obwohl ich noch einen leichten Einwand loswerden möchte.
-                                 3 Daumen runter: ich habe einen schweren Einwand. Der muss in den Vorschlag eingearbeitet werden. Dann wäre ich dabei.
-                                 4 Veto: Ich sehe große Risiken und Schaden. Das können wir so nicht machen. Ich werde einen anderen Vorschlag machen.
-                                 5 Enthaltung: Kann nichts zur Entscheidung beitragen. Alles was rauskommt werde ich akzeptieren.
-
-                                 Wenn es nur Zustimmung oder leichte Einwände gibt ist die Entscheidung getroffen.
-                                 Wenn es schwere Einwände gibt, dann ist es die Pflicht des Vorschlagenden und der Gruppe diesen Einwand in den Vorschlag einzuarbeiten.
-                                 Bei einem Veto übernimmt die Veto-Person die den nächsten Vorschlag."
+                  :txt-tutorial          [:div "Ein Team diskutiert ein Problem. Perspektiven, Ideen, Optionen und Widersprüche entstehen werden erörtert.
+                                                Irgendwann macht jemand aus dem Team einen konkreten Vorschlag, der dann zur Entscheidung ansteht.
+                                                Nun wird nicht mehr diskutiert. Reihum kann nun jeder klärende Fragen stellen um den Vorschlag besser zu verstehen.
+                                                Es geht nicht darum, seine Zustimmung oder Ablehnung zu zeigen. Nur verstehen.
+                                                Sobald jeder den Vorschlag verstanden hat gibt jeder gleichzeitig eines der folgenden Signale:"
+                                            [:ol
+                                                [:li "Daumen hoch: ich bin dabei."]
+                                                [:li"Daumen zur Seite: ich bin dabei, obwohl ich noch einen leichten Einwand loswerden möchte."]
+                                                [:li"Daumen runter: ich habe einen schweren Einwand. Der muss in den Vorschlag eingearbeitet werden. Dann wäre ich dabei."]
+                                                [:li"Veto: Ich sehe große Risiken und Schaden. Das können wir so nicht machen. Ich werde einen anderen Vorschlag machen."]
+                                                [:li "Enthaltung: Kann nichts zur Entscheidung beitragen. Alles was rauskommt werde ich akzeptieren."]]
+                                            [:br]
+                                            "Wenn es nur Zustimmung oder leichte Einwände gibt ist die Entscheidung getroffen.
+                                             Wenn es schwere Einwände gibt, dann ist es die Pflicht des Vorschlagenden und der Gruppe diesen Einwand in den Vorschlag einzuarbeiten.
+                                             Bei einem Veto übernimmt die Veto-Person den nächsten Vorschlag. Ein Veto ohne konstruktiven Vorschlag gilt nicht als Veto."]
 
                   :txt-try-buttons-below " Probieren sie mal die Buttons..."
                   :inp-concerns-here     "Einwand oder Veto hier..."

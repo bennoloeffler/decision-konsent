@@ -17,6 +17,7 @@
   [:div
    [:label.label (tr [:h/lbl-tutorial] "Mini-Tutorial: taking team decisions fast!")]
    [:div.mb-6 (tr [:h/txt-tutorial] "")
+    [:br]
     [:strong (tr [:h/txt-try-buttons-below] " Please try the buttons below...")]]])
 
 
