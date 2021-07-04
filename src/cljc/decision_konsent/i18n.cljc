@@ -7,6 +7,10 @@
 
 (def my-tempura-dictionary
   {:de {:missing missing-txt                                ; Fallback for missing resources
+
+        ;; common
+        :com     {:e-g-mail "z.B. max.muster@beispiel.de"}
+
         ;; k=konsent
         :k       {:new                             "neuen Konsent erstellen"
                   :login-then-start                "Erst einloggen.\nDann loslegen!"
@@ -81,18 +85,24 @@
                   :btn-register "Account erstellen und dann..."
                   :unused       ""}
 
-        :a       {:txt-login             "In Account einloggen"
-                  :btn-login             "einloggen"
-                  :txt-email-password    "mit E-Mail und Passwort"
-                  :lbl-login-email       "E-Mail"
-                  :lbl-login-password    "Passwort"
-                  :btn-login-now         "jetzt einloggen"
-                  :txt-register          "Account anlegen"
-                  :lbl-register-password "Passwort wiederholen"
-                  :btn-register-now      "Account jetzt anlegen"
-                  :txt-you-are-logged-in "schon eingeloggt :-)"
-                  :unused                ""}
+        ;; auth
+        :a       {:txt-login                   "In Account einloggen"
+                  :btn-login                   "einloggen"
+                  :txt-email-password          "mit E-Mail und Passwort"
+                  :lbl-login-email             "E-Mail"
+                  :lbl-login-password          "Passwort"
+                  :btn-login-now               "jetzt einloggen"
+                  :txt-register                "Account anlegen"
+                  :lbl-register-password       "Passwort wiederholen"
+                  :txt-register-email-password "mit gültiger E-Mail und Passwort registrieren"
+                  :btn-register-now            "Account jetzt anlegen"
+                  :txt-you-are-logged-in       "schon eingeloggt :-)"
+                  :inp-10-letters-min          "10 Buchstaben mindestens"
+                  :sucessfully-registered      "erfogreich registriert:"
 
+                  :unused                      ""}
+
+        ;; home
         :h       {:lbl-tutorial          "Mini-Tutorial: schnelle und gute Teamentscheidungen. So geht's:"
                   :txt-tutorial          "Ein Team diskutiert ein Problem. Perspektiven, Ideen, Optionen und Widersprüche entstehen werden erörtert.
                                  Irgendwann macht jemand aus dem Team einen konkreten Vorschlag, der dann zur Entscheidung ansteht.
@@ -122,11 +132,13 @@
                   :too-leave-a-comment   "Lassen Sie einen Kommentar da. Gerne Kritik, Lob oder Verbesserungsvorschläge..."
                   :unused                ""}
 
+        ;; vote
         :v       {:yes           "bin dabei!"
                   :minor-concern "leichter Einwand"
                   :major-concern "schwerer Einwand"
                   :veto          "Veto"
                   :abstain       "Enthaltung"}
+
 
         :about   {:header   "Über"
                   :message  "Im Team im Konsent asynchron Entscheidungen treffen - das geht mit dieser kleinen App hier."
@@ -138,6 +150,8 @@
 
 
    :en {:missing missing-txt
+
+        :com     {:e-g-mail "e.g. alex@company.com"}
 
         :k       {:new                             "create new konsent"
                   :login-then-start                "first login.\nthen start."
@@ -217,8 +231,8 @@
                   :lbl-register-password       "confirm password"
                   :btn-register-now            "create your account now"
                   :txt-you-are-logged-in       "you are logged in :-)"
-
-
+                  :inp-10-letters-min          "10 letters minimum"
+                  :sucessfully-registered      "you sucessfully registered:"
                   :unused                      ""}
 
         :h       {:lbl-tutorial          "Mini-Tutorial: taking team decisions fast!"

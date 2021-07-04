@@ -51,7 +51,8 @@
                  [erdos.assert "0.1.0"] ;; power assert and examine
                  [org.clojure/tools.trace "0.7.10"] ;; tracing
                  [mvxcvi/puget "1.2.1"] ;; color print
-                 [com.taoensso/tempura "1.2.1"]]; i18n
+                 [com.taoensso/tempura "1.2.1"] ; i18n
+                 [valip "0.2.0"]] ;predicates for validation of html-forms
 
   :min-lein-version "2.0.0"
   

@@ -95,7 +95,7 @@ migrate and rollback:
 1. ok show accepted proposal in green
 1. ok Button for "force vote" and "force ready"
 1. ok invite participants after creation
-1. german translation
+1. ok german translation
 1. validation of email and password (and other forms)
 1. show the potential proposers for everybody  
 1. Confirm dialog for "delete"

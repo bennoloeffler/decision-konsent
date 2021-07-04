@@ -4,7 +4,20 @@
             [re-frame.core :as rf]
             [decision-konsent.auth-events]
             [decision-konsent.utils :as utils]
-            [decision-konsent.i18n :as i18n :refer [tr]]))
+            [decision-konsent.i18n :as i18n :refer [tr]]
+            [decision-konsent.validation :as v]))
+
+(defn is-password
+  [pw] (> (count pw) 9))
+
+(defn email?
+  [email] (v/email? email))
+
+(defn register-data-complete
+  [{:keys [password confirm email]}]
+  (and (is-password password)
+       (email? email)
+       (= confirm password)))
 
 
 (defn register []
@@ -18,26 +31,40 @@
          [:label.label (tr [:a/lbl-login-email] "email")]
          [:div.control
           [:input.input {:type        "email"
-                         :placeholder "e.g. alex@example.com"
-                         :on-change   #(swap! fields assoc :email (-> % .-target .-value))}]]]
+                         :placeholder (str (tr [:com/e-g-mail] "e.g. alex@example.com"))
+                         :on-change   #(swap! fields assoc :email (-> % .-target .-value))}]
+          (if (email? (:email @fields))
+            [:span.badge.is-info.is-top-left "ok"]
+            [:span.badge.is-warning.is-top-left "?"])]]
         [:div.field
          [:label.label (tr [:a/lbl-login-password] "password")]
          [:div.control
           [:input.input {:type        "password"
-                         :placeholder "********"
-                         :on-change   #(swap! fields assoc :password (-> % .-target .-value))}]]]
+                         :placeholder (tr [:a/inp-10-letters-min] "10 letters minimum")
+                         :on-change   #(swap! fields assoc :password (-> % .-target .-value))}]
+          (if (is-password (:password @fields))
+              [:span.badge.is-info.is-top-left "ok"]
+              [:span.badge.is-warning.is-top-left "?"])]]
         [:div.field
-         [:label.label (tr [:a/lbl-register-password] "confirm password")]
+         [:label.label  (tr [:a/lbl-register-password] "confirm password")]
          [:div.control
-          [:input.input {:type        "Password"
-                         :placeholder "********"
-                         :on-change   #(swap! fields assoc :confirm (-> % .-target .-value))}]]]
+          [:input.input  {:type        "Password"
+                          :placeholder "**********"
+                          :on-change   #(swap! fields assoc :confirm (-> % .-target .-value))}]
+
+          (when (is-password (:password @fields))
+            (if (= (:password @fields) (:confirm @fields))
+              [:span.badge.is-info.is-top-left "ok"]
+              [:span.badge.is-warning.is-top-left "?"]))]]
+
         [:div
          [:button.button.is-primary.mr-1.mt-3
-          {:on-click #(rf/dispatch [:auth/start-register @fields])}
+          {:on-click #(rf/dispatch [:auth/start-register @fields])
+           :disabled (not (register-data-complete @fields))}
           [:span.icon.is-large>i.fas.fa-1x.fa-pen-nib]
           [:div (tr [:a/btn-register-now] "register your account now")]]
-         (when-let [registered @(rf/subscribe [:auth/register-worked])] [:h2.subtitle.is-6 (str "you sucessfully registered: " registered)])]]])))
+         (when-let [registered @(rf/subscribe [:auth/register-worked])]
+           [:h2.subtitle.is-6 (str (tr [:a/sucessfully-registered] (str "you sucessfully registered: ")) " " registered)])]]])))
 
 
 (defn login []
@@ -52,7 +79,7 @@
          [:div.control
           [:input.input {:type        "email"
                          :value       (:email @fields)
-                         :placeholder "e.g. alex@example.com"
+                         :placeholder (str (tr [:com/e-g-mail] "e.g. alex@example.com"))
                          :on-change   #(swap! fields assoc :email (-> % .-target .-value))}]]]
         [:div.field
          [:label.label (tr [:a/lbl-login-password] "password")]
