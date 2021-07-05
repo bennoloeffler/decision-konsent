@@ -1,7 +1,8 @@
 (ns decision-konsent.client-time
   (:require [re-frame.core :as rf]
-            [ajax.core :refer [GET POST]] ; TODO
-            [decision-konsent.ajax :as ajax]))
+            [ajax.core :refer [GET POST]]                   ; TODO
+            [decision-konsent.ajax :as ajax]
+            [decision-konsent.websocket :as ws]))
 
 
 (defn current-time
@@ -117,20 +118,30 @@
 
 (rf/reg-event-fx                                            ;; usage:  (dispatch [:timer a-js-Date])
   :timer                                                    ;; every second an event of this kind will be dispatched
-  (fn [{:keys [db]} [_ new-time]]                                     ;; note how the 2nd parameter is destructured to obtain the data value
-    {:db (assoc db :timestamp new-time)}))
-     ;:dispatch [:ping]}))                        ;; compute and return the new application state
+  (fn [{:keys [db]} [_ new-time]]                           ;; note how the 2nd parameter is destructured to obtain the data value
+    {:db (assoc db :timestamp new-time)
+     :dispatch [:ws-try-and-reconnect]}))                        ;; compute and return the new application state
+
 
 
 (rf/reg-event-fx
- :ping
- (fn [_ _]
-  (println "\n:ping")
-  {:http-xhrio (ajax/wrap-get
-                 {:uri        "/api/konsent/ping"
-                  ;:params     nil
-                  :on-success [:handle-ping]
-                  :on-failure [:common/set-error]})}))
+  :ping
+  (fn [_ _]
+    (println "\n:ping")
+    {:http-xhrio (ajax/wrap-get
+                   {:uri        "/api/konsent/ping"
+                    ;:params     nil
+                    :on-success [:handle-ping]
+                    :on-failure [:common/set-error]})}))
+
+(rf/reg-event-fx
+  :ws-try-and-reconnect
+  (fn [_ _]
+    ;(println "\n::ws-try-and-reconnect")
+    (try
+      (ws/send-message! {:random-keep-alive (rand-int 1000000)})
+      (catch :default e (do (println "try reconnect due to ERROR: " e) (ws/init!))))))
+
 
 (rf/reg-event-db
   :handle-ping

@@ -27,7 +27,7 @@
 
 
 (defn handle-message! [channel ws-message]
-  ;(println "received data on socket: " (json/read-str ws-message))
+  (println "received data on socket: " (json/read-str ws-message))
   #_(let [message  (edn/read-string ws-message)
           #_response #_(try
                          (println "socket raw received: "  ws-message)
@@ -62,7 +62,7 @@
   (println "init ping-loop")
   (go-loop []
     (do
-      (when @ping-is-running (notify-all-clients! {:keep-alive "from server"}))
+      ;(when @ping-is-running (notify-all-clients! {:keep-alive "from server"}))
       ;(println ping-is-running)
       (<! (timeout 5000))
       (recur))))

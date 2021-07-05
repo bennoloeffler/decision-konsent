@@ -96,29 +96,33 @@ migrate and rollback:
 1. ok Button for "force vote" and "force ready"
 1. ok invite participants after creation
 1. ok german translation
-1. validation of email and password (and other forms)
-1. show the potential proposers for everybody  
-1. Confirm dialog for "delete"
-1. List and current konsent in one page  
-
+1. ok validation of email and password (and other forms)
+1. use an invitation link to take part in an konsent without registration
 --> BETA 1
 
-1. make backwards / forward buttons functional (list of k / current k in one page)
+1. Confirm dialog for "delete"
+1. List and current konsent in one page  
+1. add and remove participants from running konsent
+1. make an "forgot your password"
 1. archive konsents - but show them below the "active list"
 1. have an archive button in the active list. have an delete button in the archived list.
-1. use an invitation link to take part in an konsent without registration
-1. validate a users email-adress by clicking an email-link
-1. make an change your password.
-1. make an "forgot your password"
+--> BETA 2
+
+1. make it like a chat application (Profile-pictures?)
+1. show the potential proposers for everybody  
+1. user profile (change password, full name, language, emails-list - from konsents involved)
 1. ask for cockies
 1. have german law imprint  
-1. UNDO (see functional tv)
-1. notifications (changes indicators - in the sense of "waiting for you")
-1. Profile-pictures (round)
-1. make it like a chat application
+--> BETA 3 (public)
+
 
 ## nice to have and later
 1. change email adress
+1. validate a users email-adress by clicking an email-link
+1. change your password.
+1. UNDO (see functional tv)
+1. notifications (changes indicators - in the sense of "konsent is waiting for you")
+1. Profile-pictures (round)
 
 
 ## technical issues / refactoring / improvements
