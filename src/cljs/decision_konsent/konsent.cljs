@@ -364,7 +364,7 @@
        [:div.column.is-8
         [:form.box utils/prevent-reload
          [:div.field>div.control>textarea.textarea
-          {:placeholder "discuss perspectives, options, questions..."
+          {:placeholder (tr [:k/pla-discuss-perspectives] "discuss perspectives, options, questions...")
            :value       (:text @fields)
            :on-change   #(swap! fields assoc :text (value %))}]
          [:div.field>div.control>button.button
@@ -380,7 +380,7 @@
        [:div.column.is-8
         [:form.box utils/prevent-reload
          [:div.field>div.control>textarea.textarea
-          {:placeholder "create a proposal for voting"
+          {:placeholder (tr [:k/pla-create-proposal] "create a proposal for voting")
            :on-change   #(swap! fields assoc :text (value %))}]
          [:div.field>div.control>button.button
           {:on-click #(rf/dispatch [:konsent/propose @fields])}
@@ -601,14 +601,16 @@
           [:div
            [:div.is-divider.mt-6.mb-6 {:data-content (tr [:k/answer-questions] "answer questions regarding your proposal")}]
            [answer k]])
-        (when (k-fsm/propose? k u)
-          [:div
-           [:div.is-divider.mt-6.mb-6 {:data-content (tr [:k/sep-create-proposal] "create proposal")}]
-           [propose]])
+
         (when (k-fsm/discuss? k u)
           [:div
            [:div.is-divider.mt-6.mb-6 {:data-content (tr [:k/free-discussion] "free discussion to learn views, feelings, facts, opinions")}]
            [discuss]])
+
+        (when (k-fsm/propose? k u)
+          [:div
+           [:div.is-divider.mt-6.mb-6 {:data-content (tr [:k/sep-create-proposal] "create proposal")}]
+           [propose]])
         ;[:div.is-divider.mt-6.mb-6 {:data-content "or start a konsent by suggesting"}]
         ;[vote-for-konsent]
         ;[:div.is-divider.mt-6.mb-6 {:data-content "start konsent"}]

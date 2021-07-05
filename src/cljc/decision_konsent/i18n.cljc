@@ -34,7 +34,7 @@
                   :proposal                        "Vorschlag:"
                   :q&a                             "Fragen & Antworten:"
                   :discussion                      "Diskussion:"
-                  :discuss                         "diskutieren:"
+                  :discuss                         "Problem diskutieren:"
                   :participants                    "Teilnehmer:"
                   :creator                         "Ersteller:"
                   :questions-from-others           "Fragen zum Vorschlag:"
@@ -72,6 +72,9 @@
                   :inp-coffee-part                 "z.B.:\nhugo.huelsensack@the-company.com\nbruno.banani@the-same-company.com\nmarc.more@the-company.com\n\ngetrennt durch Leertaste, Komma, Strichpunkt oder neue Zeile."
 
                   :pla-vote-comments               "Ihr Kommentar zur Abstimmung..\nleichter Einwand - das wollte ich nochmal sagen.\nschwerwer Einwand - soll in Vorschlag eingearbeitet werden.\nVeto - Ich mache den nächsten Vorschlag."
+                  :pla-create-proposal             "Hier machen Sie einen konkreten Vorschlag.\nDann startet die Fragerunde.\nDann gibt's ne Konsent-Abstimmung."
+                  :pla-discuss-perspectives        "Zuerst Notwendigkeiten, Fakten, Zusammenhänge, Ideen,\nMeinugnen, Gefühle, Real-Optionen, Konsequenzen, etc. diskutieren...\nDANACH - irgendwann - macht jemand einen konreten Vorschlag."
+
 
 
 
@@ -208,11 +211,15 @@
                   :sep-create-proposal             "create proposal"
                   :proposal-accepted               "Proposal ACCEPTED"
                   :div-wainting-for-others-to-vote "waiting for others to vote"
-                  :pla-vote-comments               "Your comment here...\nminor-concern - please hear me.\nmajor-concern - needs be built into proposal.\nveto - I will do next proposal."
 
                   :inp-coffee-sn                   "e.g.    our old and loved coffee machine broke - what now?"
                   :inp-coffee-pd                   "e.g.\nIt broke. Repairing seems impossible.\nThere are plenty of options and unlimited prices and even more opinions.\nIts even unclear, if there is a real need for a coffee machine. So we need to take a decision and focus back on real topics."
                   :inp-coffee-part                 "e.g.\nhugo.huelsensack@the-company.com\nbruno.banani@the-same-company.com\nmarc.more@the-company.com\n\nseparated by space, comma, semicolon, return"
+
+                  :pla-vote-comments               "Your comment here...\nminor-concern - please hear me.\nmajor-concern - needs be built into proposal.\nveto - I will do next proposal."
+                  :pla-create-proposal             "create a proposal for voting"
+                  :pla-discuss-perspectives "discuss perspectives, options, questions..."
+
                   :unused                          ""}
 
         :n       {:home         "home"
