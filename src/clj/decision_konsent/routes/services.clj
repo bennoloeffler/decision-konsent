@@ -122,6 +122,7 @@
     ["/session"
      {:get {:summary "renew the session data after refresh and across browser tabs"
             :parameters {:query {}}
+            :responses {200 {:body {:session {:identity {:email string?}}}}} ;:auth-type keyword?}}}}}
             :handler    (fn [{{:keys [identity]} :session :as data}]
                           ;(println "\n\nsession:\n")
                           ;(cprint data)
@@ -207,7 +208,7 @@
                         ;(println "data: " data)
                         (let [params (-> data :body-params)]
                           (println "\n\n/save-konsent (:body-params):")
-                          (cprint params)
+                          (clojure.pprint/pprint params)
                           ;(println "\n\n/save-konsent (all DATA):")
                           ;(cprint data)
 
@@ -252,7 +253,7 @@
                             :body   {:messages (db/get-messages)}})}
 
       :post {:summary    "just send a message to everybody"
-             :parameters {:body-params {:message string?}}
+             :parameters {:body {:message string?}}
              ;:responses {200 {:body {:messages seq?}}}
              :handler    (fn [data]
                            (let [message (-> data :body-params :message)]
