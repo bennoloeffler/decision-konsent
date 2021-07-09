@@ -56,12 +56,17 @@
 (defn messages-form []
   (let [messages    @(rf/subscribe [:messages/list])
         localtime   @(rf/subscribe [:timestamp])
-        server-diff @(rf/subscribe [:server-diff-time])]
+        server-diff @(rf/subscribe [:server-diff-time])
+        user-is-bel (= @(rf/subscribe [:auth/user]) "benno.loeffler@gmx.de")]
     [:nav.panel
      [:p.panel-heading (tr [:h/txt-feedback-comments] "feedbacks & comments")]
      (for [message messages]
        ^{:key (:id message)}
        [:a.panel-block
+        (when user-is-bel
+          [:span.panel-icon.ml-1
+           [:i.fas.fa-trash {:aria-hidden "true" :on-click #(do (println (:id message) " --> " (:message message))
+                                                                (rf/dispatch [:message/delete message]))}]])
         [:span.panel-icon.ml-3
          [:i.fas.fa-book {:aria-hidden "true"}]]
         (:message message)
@@ -86,7 +91,7 @@
           {;:class  (if @(rf/subscribe [:messages/loading?])  "is-primary" "is-loading")
            :type     :button
            :value    (tr [:h/btn-send] "send")
-           :on-click #(save-message!)}]                             ;#(send-message! fields)}]
+           :on-click #(save-message!)}]                     ;#(send-message! fields)}]
          [:input.input
           {:type        :text
            :name        :message

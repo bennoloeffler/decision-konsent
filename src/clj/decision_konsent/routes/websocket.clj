@@ -27,7 +27,8 @@
 
 
 (defn handle-message! [channel ws-message]
-  (println "received data on socket: " (json/read-str ws-message))
+  ;(print ".") (flush)
+  ;(println "received data on socket: " (json/read-str ws-message))
   #_(let [message  (edn/read-string ws-message)
           #_response #_(try
                          (println "socket raw received: "  ws-message)

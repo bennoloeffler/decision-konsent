@@ -82,7 +82,7 @@
 
     ["/register"
      {:post {:summary   "create a new user"
-             ;:parameters {:body {:email string? :password string? :confirm string?}}
+             :parameters {:body {:email string? :password string? :confirm string?}}
              :responses {200 {:body {:email string? :message string?}}
                          400 {:body {:message string?}}
                          409 {:body {:message string?}}}
@@ -101,7 +101,7 @@
 
 
     ["/login"
-     {:post {:summary    "user authentictes with email and password"
+     {:post {:summary    "user authentictes with email and password."
              :parameters {:body {:email string? :password string?}}
              :responses  {200 {:body {:identity {:email string?}}}
                           401 {:body {:message string?}}}
@@ -115,11 +115,13 @@
 
 
     ["/logout"
-     {:post {:handler (fn [_] (println "logged out")
+     {:post {:summary "user will be logged out - session will be not available any more"
+             :handler (fn [_] (println "logged out")
                         (-> (response/ok {:logged-out-identity "ghost"})
                             (assoc :session nil)))}}]
     ["/session"
-     {:get {:parameters {:query {}}
+     {:get {:summary "renew the session data after refresh and across browser tabs"
+            :parameters {:query {}}
             :handler    (fn [{{:keys [identity]} :session :as data}]
                           ;(println "\n\nsession:\n")
                           ;(cprint data)
@@ -133,31 +135,42 @@
     ["/test-ajax"
      {:get  {:summary    "test data receiving and replying per ajax"
              :parameters {:query {:some string?}}
+             :responses  {200 {:body {:you-GET-me {:some string?}}}}
              :handler    (fn [data]
                            ;(cprint data)
                            ;(cprint (:params data))
-                           (response/ok (:params data)))}
+                           (response/ok {:you-GET-me (:params data)}))}
 
       :post {:summary    "test data receiving and replying per ajax"
-             :parameters {:body-params {:some string?}}
+             :parameters {:body {:some string?}}
+             :responses  {200 {:body {:you-POST-me {:some string?}}}}
              :handler    (fn [data]
                            (cprint data)
                            (cprint (-> data :body-params))
-                           (response/ok (-> data :body-params)))}}]
+                           (response/ok {:you-POST-me (-> data :body-params)}))}}]
 
     ["/unix-time"
      {:get {:summary "returns unix GMT milliseconds of the server"
+            ;:parameters {}
+            :responses {200 {:body {:server-time int?}}}
             :handler (fn [_] #_(println "get current time") (ok {:server-time (+ 0000 (ut/current-time))}))}}]
 
     ["/ping"
      {:get {:summary "just see the konsent app living..."
+            :responses {200 {:body {:message string?}}}
             :handler (constantly (ok {:message "pong"}))}}]
 
     ["/create-konsent"                                      ; TODO error on server - reply with meaningful, displayable error message, see login
      {:post {:summary "An owner (o) starts an konsent - with short-name problem-description and participants (p). An id will be created."
-             ;:parameters {:body {:email string? :password string?}}
+             :parameters {:body {;:iterations vector?
+                                 :owner string?
+                                 ;:participants vector?
+                                 :problem-statement string?
+                                 :short-name string?
+                                 :timestamp int?}}
              :handler (fn [data]
                         ;(cprint data)
+                        ;(cprint (-> data :body-params))
                         (let [params  (-> data :body-params)
                               konsent (k/create-konsent! params)
                               konsent (email/create-invitations
@@ -167,14 +180,10 @@
 
                           (assert (= 1 (k/save-konsent! konsent)))
                           (println "\n\n/create-konsent ")
-                          (cprint konsent)
+                          (clojure.pprint/pprint konsent)
                           (email/send-invitations! konsent)
                           (response/ok konsent)))}}]
 
-
-    ["/xinvitation/:invitation-id/:konsent-id"
-     {:get (fn [a] (-> (response/ok (with-out-str (puget.printer/cprint (:path-params a) {:color-markup :html-inline :color-scheme color-scheme})))
-                       (response/header "Content-Type" "text/html; charset=utf-8")))}]
 
     ["/invitation/:invitation-id/:konsent-id"
      {:get (fn [a] (let [konsent-id-str (-> a :path-params :konsent-id)
@@ -255,71 +264,86 @@
                              {:status 200
                               :body   {:messages (db/get-messages)}}))}}]
 
-    #_["/o-start-suggest-ask-vote-iteration"
-       {:get {:summary "when the time is right, somebody may start the formal konsent process. She then is the new owner (o)"
-              :handler (constantly (ok {:message "from now on - lets get formal! owner is now: "}))}}]
+    ["/delete-message"
+     {:post {:summary "delete a message with id"
+             :parameters {:body {:id int?}}
+             :responses {200 {:body {:messages seq}}}
+             :handler (fn [data]
+                        ;(println "received message: " data)
+                        (let [id (-> data :body-params :id)]
+                          ;(println "received message: " data)
+                          ;(println "received id: " id)
+                          ;(println "timestamp: " (ut/current-time))
+                          (println "deleted messages: " (db/delete-message! {:id id}) "  (:id " id ")")
+                          ;(println "wrote message: " message)
+                          {:status 200
+                           :body   {:messages (db/get-messages)}}))}}]]]
 
-    #_["/p-ask-to-understand-suggestion"
-       {:get {:summary "all the participants (p) may ask one or more questions in order to understand the suggested decision"
-              :handler (constantly (ok {:message "ask to get answers - not to pre-vote."}))}}]
+  #_["/o-start-suggest-ask-vote-iteration"
+     {:get {:summary "when the time is right, somebody may start the formal konsent process. She then is the new owner (o)"
+            :handler (constantly (ok {:message "from now on - lets get formal! owner is now: "}))}}]
 
-    #_["/o-answer"
-       {:get {:summary "the owner (o) has to answer the questions. Sometimes 'I don´t know' will be the truth"
-              :handler (constantly (ok {:message "understanding and answering may make the owner learn"}))}}]
+  #_["/p-ask-to-understand-suggestion"
+     {:get {:summary "all the participants (p) may ask one or more questions in order to understand the suggested decision"
+            :handler (constantly (ok {:message "ask to get answers - not to pre-vote."}))}}]
 
-    #_["/p-no-more-questions"
-       {:get {:summary "after a while, the participants (p) will signal: I have no more questions."
-              :handler (constantly (ok {:message "finished asking - waiting for vote"}))}}]
+  #_["/o-answer"
+     {:get {:summary "the owner (o) has to answer the questions. Sometimes 'I don´t know' will be the truth"
+            :handler (constantly (ok {:message "understanding and answering may make the owner learn"}))}}]
 
-    #_["/o-ask-for-vote"
-       {:get {:summary "the owner (o) summarises the proposed decision with the details/learnings from the questions and asks the participants (p) to vote"
-              :handler (constantly (ok {:message "this is my proposal XYZ. please vote. show concerns, veto - or just a YES!"}))}}]
+  #_["/p-no-more-questions"
+     {:get {:summary "after a while, the participants (p) will signal: I have no more questions."
+            :handler (constantly (ok {:message "finished asking - waiting for vote"}))}}]
 
-    #_["/p-vote"
-       {:get {:summary "a participant (p) votes with :yes :major :minor :veto and a hint"
-              :handler (constantly (ok {:message "you voted wisely"}))}}]
+  #_["/o-ask-for-vote"
+     {:get {:summary "the owner (o) summarises the proposed decision with the details/learnings from the questions and asks the participants (p) to vote"
+            :handler (constantly (ok {:message "this is my proposal XYZ. please vote. show concerns, veto - or just a YES!"}))}}]
 
-    #_["/o-end-konsent"
-       {:get {:summary "there may be no decision - but the owner stops the process. Either because there is no more need or she just gives up because of repeated major concerns or vetos"
-              :handler (constantly (ok {:message "understanding and answering may make the owner learn"}))}}]]
+  #_["/p-vote"
+     {:get {:summary "a participant (p) votes with :yes :major :minor :veto and a hint"
+            :handler (constantly (ok {:message "you voted wisely"}))}}]
+
+  #_["/o-end-konsent"
+     {:get {:summary "there may be no decision - but the owner stops the process. Either because there is no more need or she just gives up because of repeated major concerns or vetos"
+            :handler (constantly (ok {:message "understanding and answering may make the owner learn"}))}}]
 
 
 
-   #_["/math"
-      {:swagger {:tags ["math"]}}
+  #_["/math"
+     {:swagger {:tags ["math"]}}
 
-      ["/plus"
-       {:get  {:summary    "plus with spec query parameters"
-               :parameters {:query {:x int?, :y int?}}
-               :responses  {200 {:body {:total pos-int?}}}
-               :handler    (fn [{{{:keys [x y]} :query} :parameters}]
-                             {:status 200
-                              :body   {:total (+ x y)}})}
-        :post {:summary    "plus with spec body parameters"
-               :parameters {:body {:x int?, :y int?}}
-               :responses  {200 {:body {:total pos-int?}}}
-               :handler    (fn [{{{:keys [x y]} :body} :parameters}]
-                             {:status 200
-                              :body   {:total (+ x y)}})}}]]
+     ["/plus"
+      {:get  {:summary    "plus with spec query parameters"
+              :parameters {:query {:x int?, :y int?}}
+              :responses  {200 {:body {:total pos-int?}}}
+              :handler    (fn [{{{:keys [x y]} :query} :parameters}]
+                            {:status 200
+                             :body   {:total (+ x y)}})}
+       :post {:summary    "plus with spec body parameters"
+              :parameters {:body {:x int?, :y int?}}
+              :responses  {200 {:body {:total pos-int?}}}
+              :handler    (fn [{{{:keys [x y]} :body} :parameters}]
+                            {:status 200
+                             :body   {:total (+ x y)}})}}]]
 
-   #_["/files"
-      {:swagger {:tags ["files"]}}
+  #_["/files"
+     {:swagger {:tags ["files"]}}
 
-      ["/upload"
-       {:post {:summary    "upload a file"
-               :parameters {:multipart {:file multipart/temp-file-part}}
-               :responses  {200 {:body {:name string?, :size int?}}}
-               :handler    (fn [{{{:keys [file]} :multipart} :parameters}]
-                             {:status 200
-                              :body   {:name (:filename file)
-                                       :size (:size file)}})}}]
+     ["/upload"
+      {:post {:summary    "upload a file"
+              :parameters {:multipart {:file multipart/temp-file-part}}
+              :responses  {200 {:body {:name string?, :size int?}}}
+              :handler    (fn [{{{:keys [file]} :multipart} :parameters}]
+                            {:status 200
+                             :body   {:name (:filename file)
+                                      :size (:size file)}})}}]
 
-      ["/download"
-       {:get {:summary "downloads a file"
-              :swagger {:produces ["image/png"]}
-              :handler (fn [_]
-                         {:status  200
-                          :headers {"Content-Type" "image/png"}
-                          :body    (-> "public/img/warning_clojure.png"
-                                       (io/resource)
-                                       (io/input-stream))})}}]]])
+     ["/download"
+      {:get {:summary "downloads a file"
+             :swagger {:produces ["image/png"]}
+             :handler (fn [_]
+                        {:status  200
+                         :headers {"Content-Type" "image/png"}
+                         :body    (-> "public/img/warning_clojure.png"
+                                      (io/resource)
+                                      (io/input-stream))})}}]])

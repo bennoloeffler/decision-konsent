@@ -19,7 +19,10 @@
     [decision-konsent.auth :as l]
     [decision-konsent.websocket :as ws]
     [decision-konsent.test-button :as tb]
-    [decision-konsent.i18n :as i18n :refer [tr]])
+    [decision-konsent.i18n :as i18n :refer [tr]]
+    [reagent.core :as reagent])
+  ;["@creativebulma/bulma-tagsinput/dist/js/bulma-tagsinput.min.js" :as tags])
+
   (:import goog.History))
 
 
@@ -103,9 +106,9 @@
     [:article.message.is-primary
      [:div.message-header
       [:div (tr [:about/header] "about...")] [:div.card]
-                         #_[:div.card-image
-                            [:figure.image.is-3by3
-                             [:img {:src "img/logo-100x100-gelb-trans.png" :alt "Placeholder image"}]]]
+      #_[:div.card-image
+         [:figure.image.is-3by3
+          [:img {:src "img/logo-100x100-gelb-trans.png" :alt "Placeholder image"}]]]
       #_[:button.delete {:aria-label "delete"}]]
      [:div.message-body (tr [:about/message] "konsent with a K...")
       [:div [:a {:href "https://thedecider.app/consent-decision-making"} (tr [:about/see-more] "See here for more info.")]]
@@ -148,13 +151,89 @@
         [:div.message-body (first err)])]]))
 
 
+
+(defn tag-input-data []
+  (let [inputTags (.getElementById js/document "tags-input-id")
+        ;_         (js/BulmaTagsInput. inputTags)
+        _         (println "inputTags: " inputTags)
+        bti       (when inputTags (. inputTags BulmaTagsInput))
+        _         (println "bti: " bti)
+        bti-val   (when bti (.-value bti))]
+    bti-val))
+
+; (. js/BulmaTagsInput attach)
+(defn attach []
+  (let [TAGS (js/BEL)
+        _    (.attachtags TAGS)]))
+
+(defn value [element]
+  (-> element .-target .-value))
+
+(defn mail-model []
+  [:<>
+    [:option {:value "benno.loeffler@gmx.net" :selected true} "benno.loeffler@gmx.net"]
+    [:option {:value "Ralf.Kapp@arcor.de" :selected true} "Ralf.Kapp@arcor.de"]
+    [:option {:value "sabine.kiefer@gmx.de"} "sabine.kiefer@gmx.de"]])
+
+(defn tags-input-2 []
+  (let [fields (reagent/atom {})]                           ;; you can include state
+    (reagent/create-class
+      {:component-did-mount
+                     (fn [] (println "I mounted + attached") (attach))
+
+       ;; ... other methods go here
+       ;; see https://facebook.github.io/react/docs/react-component.html#the-component-lifecycle
+       ;; for a complete list
+
+       ;; name your component for inclusion in error messages
+       :display-name "complex-component"
+
+       ;; note the keyword for this method
+       :reagent-render
+                     (fn []
+                       [:div.field
+                        [:label.label "tags"]
+                        [:div.control
+                         [:button.button {:on-click #(println "click:" (tag-input-data))} "save"]
+                         [:div.field
+                          [:div.control
+                           ;type="text" data-item-text="name" data-item-value="numericCode" data-case-sensitive="false" placeholder="Try finding a country name" value=""
+                           #_[:input#tags-input-id.input {:type                "tags"
+                                                          :data-item-text=     "text"
+                                                          :data-item-value=    "value"
+                                                          :data-case-sensitive false
+                                                          ;:multiple true
+                                                          :value               ""
+                                                          :data-type           "tags"
+                                                          :data-placeholder    "Choose Email - start typing..."
+                                                          :source              [{"value" 1 "text" "One"},
+                                                                                {"value" 2 " text" "Two"}]}]
+
+
+                           [:select#tags-input-id {
+                                                   :type             "tags"
+                                                   :multiple         true
+                                                   ;:free-input       true
+                                                   :data-type        "tags"
+                                                   :data-placeholder "Choose Tags"
+                                                   ;:data-item-text   "text" :data-item-value "value"
+                                                   :source           ["Saab", "Volvo", "BMW"]}
+
+                            [mail-model]]]]]])})))
+
+
+;(swap! fields assoc :tags (value %)))}]]])})))
+
+
 (defn page []
   (if-let [page @(rf/subscribe [:common/page])]
     [:div.column                                            ;.is-two-thirds
      [navbar]
      [:div.columns.is-centered>div.column
+      ;[tags-input-2]
       [errors-section]
       [page]]]))
+
 
 
 (defn navigate! [match _]
@@ -197,6 +276,11 @@
 (defn ^:dev/after-load mount-components []
   (rf/clear-subscription-cache!)
   (rdom/render [#'page] (.getElementById js/document "app")))
+;(. js/BulmaTagsInput attach))
+;(attach))
+; https://github.com/helins/timer.cljs
+
+
 
 
 (defn init! []
@@ -206,3 +290,5 @@
   (rf/dispatch-sync [:initialize])
   (ws/init!)
   (mount-components))
+
+

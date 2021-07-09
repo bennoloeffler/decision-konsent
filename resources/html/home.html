@@ -25,6 +25,8 @@
     {% style "/css/screen.css" %}
     {% style "/css/mystyles.css" %}
 
+    {% style href="https://www.jsdelivr.com/package/npm/@creativebulma/bulma-tagsinput/dist/css/bulma-tagsinput.min.css" %}
+
     <!-- Cross-Origin Read Blocking (CORB) -->
     <!-- <script src="https://www.jsdelivr.com/package/npm/@creativebulma/bulma-tagsinput/dist/js/bulma-tagsinput.min.js"></script>-->
 
@@ -33,7 +35,37 @@
     </script>
     <!--<script src="https://cdn.jsdelivr.net/npm/@creativebulma/bulma-tagsinput@1.0.3/dist/js/bulma-tagsinput.min.js"></script>-->
     <!--<script src="https://cdn.jsdelivr.net/npm/bulma-extensions@4.0.0/dist/js/bulma-extensions.min.js"></script>-->
-    <!--<script src="/js/bulma-tagsinput.min.js"></script>-->
+    <script src="/js/bulma-tagsinput.min.js"></script>
+    <!--<script crossorigin="anonymous" src="https://www.jsdelivr.com/package/npm/@creativebulma/bulma-tagsinput/dist/js/bulma-tagsinput.min.js"></script>-->
+
     {% script "/js/app.js" %}
+
+    <script type="text/javascript">
+      BEL = function() {
+        var TAGS = {};
+        TAGS.attachtags = function() {
+
+            var inputTags = document.getElementById("tags-input-id");
+            if (inputTags) {
+              console.log("attached in home.html");
+
+              console.log(inputTags);
+              new BulmaTagsInput(inputTags);
+
+              // Access to the BulmaTagsInput instance
+              var btiInstance = inputTags.BulmaTagsInput();
+              console.log(btiInstance);
+
+              // Call BulmaTagsInput method
+              //btiInstance.add('new BEL Tag');
+            }
+        }
+
+       return TAGS;
+    };
+
+    </script>
+
+    </script>
   </body>
 </html>

@@ -6,9 +6,20 @@
 
 
 (rf/reg-event-fx
+  :message/delete
+  (fn [{:keys [db]} [_ message]]
+    (println "event: delete..." message)
+    ;(send-message! message)
+    {:http-xhrio (wrap-post {:uri        "api/konsent/delete-message"
+                             :params     message ; TODO map?
+                             :on-success [:messages/set]
+                             :on-failure [:common/set-error]})}))
+
+
+(rf/reg-event-fx
   :message/save
   (fn [{:keys [db]} [_ message]]
-    ;(println "event: saving..." message)
+    (println "event: saving..." message)
     ;(send-message! message)
     {:http-xhrio (wrap-post {:uri        "api/konsent/message"
                              :params     message

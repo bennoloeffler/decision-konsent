@@ -18,9 +18,9 @@
                                       (.parse js/JSON message)
                                       (js->clj message :keywordize-keys true)
                                       (receive-handler message)))
-      (reset! channel chan)
+      (reset! channel chan))
       ;(.send chan (clj->js {:init "websocket"}))
-      (.log js/console "try to connect websocket"))
+      ;(.log js/console "try to connect websocket"))
     (throw (ex-info "Websocket Connection Failed!"
                     {:url url}))))
 
@@ -60,6 +60,6 @@
         protocol (if (str/starts-with? host "localhost") "ws" "wss")
         url-ws   (str protocol "://" host "/ws")]
     ;_        (println "url: " url-ws)]
-    (.log js/console "try socket connection to: " url-ws)
+    ;(.log js/console "try socket connection to: " url-ws)
     (connect! url-ws handle-response!)))
 
