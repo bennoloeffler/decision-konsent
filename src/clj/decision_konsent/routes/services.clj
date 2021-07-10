@@ -16,7 +16,7 @@
     [decision-konsent.unix-time :as ut]
     [spec-tools.data-spec :as ds]
     [decision-konsent.db.konsent :as k]
-    [clojure.pprint :as pp]
+    [clojure.pprint :as pp :refer [pprint]]
     [puget.printer :refer [cprint]]
     [decision-konsent.email :as email])
 
@@ -81,33 +81,34 @@
     {:swagger {:tags ["user"]}}
 
     ["/register"
-     {:post {:summary   "create a new user"
+     {:post {:summary    "create a new user"
              :parameters {:body {:email string? :password string? :confirm string?}}
-             :responses {200 {:body {:email string? :message string?}}
-                         400 {:body {:message string?}}
-                         409 {:body {:message string?}}}
-             :handler   (fn [{{:keys [email password confirm]} :body-params}]
-                          ;(println "going to register user: " email)
-                          (if-not (= password confirm)
-                            (response/bad-request {:message "Password and confirm do not match."})
-                            (try
-                              (auth/create-user! email password)
-                              (response/ok {:email email :message "User registered. Please login."})
-                              (catch ExceptionInfo e
-                                (if (= (:decision-konsent/error-id (ex-data e))
-                                       ::auth/duplicate-user)
-                                  (response/conflict {:message "Failed. User already exists."})
-                                  (throw e))))))}}]
+             :responses  {200 {:body {:email string? :message string?}}
+                          400 {:body {:message string?}}
+                          409 {:body {:message string?}}}
+             :handler    (fn [{{:keys [email password confirm]} :body-params}]
+                           (println "going to register user: " email)
+                           (if-not (= password confirm)
+                             (response/bad-request {:message "Password and confirm do not match."})
+                             (try
+                               (auth/create-user! email password)
+                               (println "registered user: " email)
+                               (response/ok {:email email :message "User registered. Please login."})
+                               (catch ExceptionInfo e
+                                 (if (= (:decision-konsent/error-id (ex-data e))
+                                        ::auth/duplicate-user)
+                                   (response/conflict {:message "Failed. User already exists."})
+                                   (throw e))))))}}]
 
 
     ["/login"
-     {:post {:summary    "user authentictes with email and password."
+     {:post {:summary    "user authentictes with email and password. auth-type = :auth (EDN) or \"auth\" (json)"
              :parameters {:body {:email string? :password string?}}
-             :responses  {200 {:body {:identity {:email string?}}}
+             :responses  {200 {:body {:identity {:email string? :auth-type keyword?}}}
                           401 {:body {:message string?}}}
              :handler    (fn [{{:keys [email password]} :body-params session :session :as data}]
-                           ;(println "\n\nlogin:\n")
-                           ;(cprint data)
+                           (println "\n\ngoing to login:\n")
+                           (pprint data)
                            (if-some [user (auth/authenticate-user email password)]
                              (-> (response/ok {:identity (assoc user :auth-type :auth)})
                                  (assoc :session (assoc session :identity user)))
@@ -120,9 +121,9 @@
                         (-> (response/ok {:logged-out-identity "ghost"})
                             (assoc :session nil)))}}]
     ["/session"
-     {:get {:summary "renew the session data after refresh and across browser tabs"
+     {:get {:summary    "renew the session data after refresh and across browser tabs"
             :parameters {:query {}}
-            :responses {200 {:body {:session {:identity {:email string?}}}}} ;:auth-type keyword?}}}}}
+            :responses  {200 {:body {:session {:identity {:email string?}}}}} ;:auth-type keyword?}}}}}
             :handler    (fn [{{:keys [identity]} :session :as data}]
                           ;(println "\n\nsession:\n")
                           ;(cprint data)
@@ -151,54 +152,57 @@
                            (response/ok {:you-POST-me (-> data :body-params)}))}}]
 
     ["/unix-time"
-     {:get {:summary "returns unix GMT milliseconds of the server"
+     {:get {:summary   "returns unix GMT milliseconds of the server"
             ;:parameters {}
             :responses {200 {:body {:server-time int?}}}
-            :handler (fn [_] #_(println "get current time") (ok {:server-time (+ 0000 (ut/current-time))}))}}]
+            :handler   (fn [_] #_(println "get current time") (ok {:server-time (+ 0000 (ut/current-time))}))}}]
 
     ["/ping"
-     {:get {:summary "just see the konsent app living..."
+     {:get {:summary   "just see the konsent app living..."
             :responses {200 {:body {:message string?}}}
-            :handler (constantly (ok {:message "pong"}))}}]
+            :handler   (constantly (ok {:message "pong"}))}}]
 
     ["/create-konsent"                                      ; TODO error on server - reply with meaningful, displayable error message, see login
-     {:post {:summary "An owner (o) starts an konsent - with short-name problem-description and participants (p). An id will be created."
+     {:post {:summary    "An owner (o) starts an konsent - with short-name problem-description and participants (p). An id will be created."
              :parameters {:body {;:iterations vector?
-                                 :owner string?
+                                 :owner             string?
                                  ;:participants vector?
                                  :problem-statement string?
-                                 :short-name string?
-                                 :timestamp int?}}
-             :handler (fn [data]
-                        ;(cprint data)
-                        ;(cprint (-> data :body-params))
-                        (let [params  (-> data :body-params)
-                              konsent (k/create-konsent! params)
-                              konsent (email/create-invitations
-                                        konsent
-                                        (:server-name data)
-                                        (:server-port data))]
+                                 :short-name        string?
+                                 :timestamp         int?}}
+             :handler    (fn [data]
+                           ;(cprint data)
+                           ;(cprint (-> data :body-params))
+                           (let [params  (-> data :body-params)
+                                 konsent (k/create-konsent! params)
+                                 konsent (email/create-invitations
+                                           konsent
+                                           (:server-name data)
+                                           (:server-port data))]
 
-                          (assert (= 1 (k/save-konsent! konsent)))
-                          (println "\n\n/create-konsent ")
-                          (clojure.pprint/pprint konsent)
-                          (email/send-invitations! konsent)
-                          (response/ok konsent)))}}]
+                             (assert (= 1 (k/save-konsent! konsent)))
+                             (println "\n\n/create-konsent ")
+                             (clojure.pprint/pprint konsent)
+                             (email/send-invitations! konsent)
+                             (response/ok konsent)))}}]
 
 
     ["/invitation/:invitation-id/:konsent-id"
-     {:get (fn [a] (let [konsent-id-str (-> a :path-params :konsent-id)
-                         konsent-id     (Integer/valueOf konsent-id-str)
-                         invitation-id  (keyword (-> a :path-params :invitation-id))
-                         konsent        (db/get-konsent {:id konsent-id})
-                         invitation     (-> konsent :konsent :invitations invitation-id)
-                         real-user      (db/get-user {:email (:guest-email invitation)})]
-                     ;(puget.printer/cprint real-user)
-                     (if invitation
-                       (-> (response/found "/#/my-konsents")
-                           (assoc-in [:session :identity] {:email (:guest-email invitation) :auth-type (if real-user :auth :guest)}))
-                       (-> (response/unauthorized "ERROR: Did not find invitation. Sorry...")
-                           (response/header "Content-Type" "text/html; charset=utf-8")))))}]
+     {:summary "fast login by (existing, server sent) invitation link. auth-type = :auth (EDN) or \"auth\" (json)\" if user exists :guest otherwise"
+      :get     (fn [a] (let [konsent-id-str (-> a :path-params :konsent-id)
+                             konsent-id     (Integer/valueOf konsent-id-str)
+                             invitation-id  (keyword (-> a :path-params :invitation-id))
+                             konsent        (db/get-konsent {:id konsent-id})
+                             invitation     (-> konsent :konsent :invitations invitation-id)
+                             real-user      (db/get-user {:email (:guest-email invitation)})]
+                         (if invitation
+                           (do
+                             (println "/invitation:")
+                             (pprint invitation)
+                             (-> (response/found "/#/my-konsents")
+                                 (assoc-in [:session :identity] {:email (:guest-email invitation) :auth-type (if real-user :auth :guest)})))
+                           (-> (response/unauthorized "ERROR: Did not find invitation. Sorry...")
+                               (response/header "Content-Type" "text/html; charset=utf-8")))))}]
 
 
 
@@ -266,19 +270,19 @@
                               :body   {:messages (db/get-messages)}}))}}]
 
     ["/delete-message"
-     {:post {:summary "delete a message with id"
+     {:post {:summary    "delete a message with id"
              :parameters {:body {:id int?}}
-             :responses {200 {:body {:messages seq}}}
-             :handler (fn [data]
-                        ;(println "received message: " data)
-                        (let [id (-> data :body-params :id)]
-                          ;(println "received message: " data)
-                          ;(println "received id: " id)
-                          ;(println "timestamp: " (ut/current-time))
-                          (println "deleted messages: " (db/delete-message! {:id id}) "  (:id " id ")")
-                          ;(println "wrote message: " message)
-                          {:status 200
-                           :body   {:messages (db/get-messages)}}))}}]]]
+             :responses  {200 {:body {:messages seq}}}
+             :handler    (fn [data]
+                           ;(println "received message: " data)
+                           (let [id (-> data :body-params :id)]
+                             ;(println "received message: " data)
+                             ;(println "received id: " id)
+                             ;(println "timestamp: " (ut/current-time))
+                             (println "deleted messages: " (db/delete-message! {:id id}) "  (:id " id ")")
+                             ;(println "wrote message: " message)
+                             {:status 200
+                              :body   {:messages (db/get-messages)}}))}}]]]
 
   #_["/o-start-suggest-ask-vote-iteration"
      {:get {:summary "when the time is right, somebody may start the formal konsent process. She then is the new owner (o)"
