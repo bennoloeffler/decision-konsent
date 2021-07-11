@@ -163,28 +163,28 @@
             :handler   (constantly (ok {:message "pong"}))}}]
 
     ["/create-konsent"                                      ; TODO error on server - reply with meaningful, displayable error message, see login
-     {:post {:summary    "An owner (o) starts an konsent - with short-name problem-description and participants (p). An id will be created."
-             :parameters {:body {;:iterations vector?
-                                 :owner             string?
-                                 ;:participants vector?
-                                 :problem-statement string?
-                                 :short-name        string?
-                                 :timestamp         int?}}
-             :handler    (fn [data]
-                           ;(cprint data)
-                           ;(cprint (-> data :body-params))
-                           (let [params  (-> data :body-params)
-                                 konsent (k/create-konsent! params)
-                                 konsent (email/create-invitations
-                                           konsent
-                                           (:server-name data)
-                                           (:server-port data))]
+     {:post {:summary "An owner (o) starts an konsent - with short-name problem-description and participants (p). An id will be created."
+             #_:parameters #_{:body {;:iterations vector?
+                                     :owner             string?
+                                     ;:participants vector?
+                                     :problem-statement string?
+                                     :short-name        string?
+                                     :timestamp         int?}}
+             :handler (fn [data]
+                        ;(cprint data)
+                        ;(cprint (-> data :body-params))
+                        (let [params  (-> data :body-params)
+                              konsent (k/create-konsent! params)
+                              konsent (email/create-invitations
+                                        konsent
+                                        (:server-name data)
+                                        (:server-port data))]
 
-                             (assert (= 1 (k/save-konsent! konsent)))
-                             (println "\n\n/create-konsent ")
-                             (clojure.pprint/pprint konsent)
-                             (email/send-invitations! konsent)
-                             (response/ok konsent)))}}]
+                          (assert (= 1 (k/save-konsent! konsent)))
+                          (println "\n\n/create-konsent ")
+                          (clojure.pprint/pprint konsent)
+                          (email/send-invitations! konsent)
+                          (response/ok konsent)))}}]
 
 
     ["/invitation/:invitation-id/:konsent-id"

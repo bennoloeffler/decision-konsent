@@ -1,29 +1,31 @@
 (ns decision-konsent.email                                  ; SEE https://github.com/drewr/postal
-  (:require [postal.core :refer [send-message]]))
+  (:require [postal.core :refer [send-message]]
+            [clojure.pprint :as pp :refer [pprint]]
+            [clojure.core.async :as async :refer [go <! timeout]]))
 
 ;decision-konsent@gmx.de
 ;d_ecision-konsen-T
 
 
 (def server {:host "mail.gmx.net"
-             :user "decision-konsent@gmx.de"
-             :pass "d_ecision-konsen-T"
+             :user "benno.loeffler@gmx.de";"decision-konsent@gmx.de"
+             :pass "c_b450sxr600-R";"d_ecision-konsen-T"
              :port 587
              :tls  true})
 
 
 (defn send-mail! [body-html body-text subject receiver]
- (let [mail-data {:from    "decision-konsent@gmx.de"
-                  :to      receiver
-                  :subject subject
-                  :body    [:alternative
-                            {:type    "text/plain"
-                             :content body-text}
-                            {:type    "text/html"
-                             :content body-html}]}
-       send-result (send-message server mail-data)]))
-  ;(println "sent: " mail-data)
-  ;(println "result: " send-result)))
+  (let [mail-data   {:from    "benno.loeffler@gmx.de";"decision-konsent@gmx.de"
+                     :to      receiver
+                     :subject subject
+                     :body    [:alternative
+                               {:type    "text/plain"
+                                :content body-text}
+                               {:type    "text/html"
+                                :content body-html}]}
+        send-result (send-message server mail-data)]))
+;(println "sent: " mail-data)
+;(println "result: " send-result)))
 
 (comment (send-mail! "<html><head> </head><body><h1>Heading 1</h1><p>This is a test.</p></body></html>"
                      "Notfall-Text" "eine Testmail" "loeffler@v-und-s.de"))
@@ -69,29 +71,40 @@
                              "dec-kon.com" 8080))
 
 (defn check-email [email]
- (clojure.string/includes? email "@"))
+  (clojure.string/includes? email "@"))
 
-(defn send-invitation! [invitation owner]
+(defn send-invitation! [invitation konsent]
   ;(println "invitation: " invitation)
- (if (check-email (:guest-email invitation))
-  (send-mail! (str "<html><head> </head><body><h1>this is the link to the konsent,<br> you have been invited by: "
-                   owner "</h1><p>" (:invitation-url invitation) "</p></body></html>")
-              "Please enable html to see the invitation!"
-              "Please contribute to decision"
-              (:guest-email invitation))
-  (println "WARNING: ignoring email: " (:guest-email invitation))))
+  (if (check-email (:guest-email invitation))
+    (send-mail! (str "<html><head> </head><body><h1>Konsent: " (-> konsent :konsent :short-name)
+                     "</h1><p>You have been invited to that konsent by: " (-> konsent :konsent :owner)
+                     "</p><p>Click link to participate as guest:<br>" (:invitation-url invitation)
+                     "</p><p>Long description:<br>"
+                     "</p><p>" (-> konsent :konsent :problem-statement) "</p></body></html>")
+                "Please enable html to see the invitation!"
+                "Please contribute to decision"
+                (:guest-email invitation))
+    (println "WARNING: ignoring email: " (:guest-email invitation))))
 
 (comment (send-invitation! (create-invitation "benno.loeffler@gmx.de" "konsent-app.com" nil 27) "hugo.h@gmx.de"))
 
 (defn send-invitations! [konsent]
   ;(println "konsent: " konsent)
   ;(println "invitations: " (-> konsent :konsent :invitations vals))
-  (let [owner (-> konsent :konsent :owner)
+  (let [owner      (-> konsent :konsent :owner)
         iterations (-> konsent :konsent :invitations vals)]
-    (loop [i (first iterations)
-           r (next iterations)]
-      (when i (send-invitation! i owner))
-      (when r (recur (first r) (next r))))))
+    (go (loop [i (first iterations)
+               r (next iterations)]
+          (when i (try
+                    (send-invitation! i konsent)
+                    (println "invitation-email sent to: " (:guest-email i))
+                    (<! (timeout 1000))
+                    (catch Throwable t
+                      (println "INVITATION FAILED:")
+                      (pprint i)
+                      (println "DUE TO EXCEPTION:")
+                      (clojure.stacktrace/print-cause-trace t))))
+          (when r (recur (first r) (next r)))))))
 
 
 
