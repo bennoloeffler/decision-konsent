@@ -142,6 +142,28 @@
 ;;
 
 
+(defn my-vote [iteration, user-email]
+  [:div.columns
+   [:div.column.is-3 (tr [:k/my-vote] "my vote:")]
+   [:div.column.is-8
+    (doall ; otherwise - error
+     (for [v (-> iteration :votes) :when (= user-email (:participant v))]
+       (let [color     (case (:vote v)
+                             "yes" :lightgreen
+                             "minor-concern" :green
+                             "major-concern" :orange
+                             "veto" :red
+                             :lightgray)
+              vote-text (tr [(keyword (str "v/" (:vote v)))])]
+          [:div.card {:key (:participant v)}
+           [:div.card-content>div.content
+            [:div.columns
+             [:div.column.is-2 [:span {:style
+                                       {:color color}} vote-text]]
+             ;[:div.column.is-3 (:participant v)]
+             [:div.column>div.card>div.card-content>div.content
+              [add-time-user-badge (:timestamp v) (:participant v)] (:text v)]]]])))]])
+
 
 (defn votes [iteration]
   [:div.columns
@@ -566,6 +588,7 @@
           [:div
            [:div.is-divider.mt-6.mb-6 {:data-content (tr [:k/div-wainting-for-others-to-vote] "waiting for others to vote")}]
            [wait-for-everybody-voted k u]
+           [my-vote (k-fsm/active-iteration k) u]
            #_(when (k-fsm/user-is-proposer? k u)
                [force-vote k u])])
 
