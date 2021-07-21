@@ -100,12 +100,13 @@ migrate and rollback:
 1. use an invitation link to take part in an konsent without registration
 --> BETA 1
 
-1. List and current konsent in one page  
-1. make a link for the invitation, that activates the konsent
+1. make profile button for GUEST a register-button 
+1. ok List and current konsent in one page  
+1. ok make a link for the invitation, that activates the konsent
 1. send the invitation again 
 1. Confirm dialog for "delete"
 1. add and remove participants from running konsent
-1. make an "forgot your password"
+1. make an "forgot your password?"
 1. archive konsents - but show them below the "active list": have an archive button in the active list. have an delete button in the archived list.
 --> BETA 2
 

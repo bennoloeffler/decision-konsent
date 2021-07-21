@@ -89,15 +89,18 @@
 
 
 ;; -- Domino 1 - Event Dispatch -----------------------------------------------
+;(def first-timer (atom true))
 
 (defn dispatch-timer-event
   []
   (let [now (current-time)]
+   ;(if first-timer
+    ;(reset! first-timer false)
     (rf/dispatch [:timer now])))                            ;; <-- dispatch used
 
-;; Call the dispatching function every second.
+;; Call the dispatching function every xxx.
 ;; `defonce` is like `def` but it ensures only instance is ever
-;; created in the face of figwheel hot-reloading of this file.
+;; created in the face of hot-reloading of this file.
 (defonce do-timer (js/setInterval dispatch-timer-event 10000))
 
 
@@ -140,7 +143,7 @@
     ;(println "\n::ws-try-and-reconnect")
     (try
       (ws/send-message! {:random-keep-alive (rand-int 1000000)})
-      (catch :default e (do (println "try reconnect due to ERROR: " e) (ws/init!))))))
+      (catch :default e (do #_(println "try reconnect due to ERROR: " e) (ws/init!))))))
 
 
 (rf/reg-event-db

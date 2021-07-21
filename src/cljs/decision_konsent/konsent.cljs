@@ -94,9 +94,10 @@
 (defn konsents-of-user []
   "show all konsents for user based on data [{:id 12 :short-name 'abc' :timestamp :changes} ...]"
   ;(println @(rf/subscribe [:auth/guest?]))
-  (let [konsents @(rf/subscribe [:konsent/list])
-        guest?   @(rf/subscribe [:auth/guest?])
-        tooltip  (if guest? (tr [:k/guest-not-allowed-to-del]) (tr [:k/delete?]))]
+  (let [konsents  @(rf/subscribe [:konsent/list])
+        guest?    @(rf/subscribe [:auth/guest?])
+        tooltip   (if guest? (tr [:k/guest-not-allowed-to-del]) (tr [:k/delete?]))
+        active-id (str @(rf/subscribe [:konsent/active-id]))]
     [:div
      (for [konsent-info konsents]
        [:a.panel-block
@@ -106,15 +107,16 @@
           :data-tooltip tooltip
           :class        [:has-tooltip-warning :has-tooltip-arrow]}
          [:i.fas.fa-trash]]
-        [:span {:on-click #(rf/dispatch [:konsent/activate konsent-info])}
+        [:span {:style (if (= active-id (str (:id konsent-info))) {:font-weight :bold} {}) :on-click #(rf/dispatch [:common/navigate! :my-konsent {:id (:id konsent-info)}])} ;#(rf/dispatch [:konsent/activate konsent-info])}
          (get-in konsent-info [:konsent :short-name])]])]))
 
 
 (defn konsent-list-page []
   (let [guest? @(rf/subscribe [:auth/guest?])]
+
     [:nav.panel
      [:div.panel-heading
-      [:div.buttons
+      [:nav.level
        ;[:div.column.is-3
        [:button.button.is-primary.mr-5
 
@@ -128,7 +130,7 @@
           (not-logged-in))
 
         (when guest? [:span.badge.is-info (tr [:k/guest])])
-        [:div (tr [:k/create])]
+        ;[:div (tr [:k/create])]
         [:span.icon.is-large>i.fas.fa-1x.fa-plus-circle]]
 
        [:div (tr [:k/all-my-konsents] "all my konsents")]]]
@@ -146,14 +148,14 @@
   [:div.columns
    [:div.column.is-3 (tr [:k/my-vote] "my vote:")]
    [:div.column.is-8
-    (doall ; otherwise - error
-     (for [v (-> iteration :votes) :when (= user-email (:participant v))]
-       (let [color     (case (:vote v)
-                             "yes" :lightgreen
-                             "minor-concern" :green
-                             "major-concern" :orange
-                             "veto" :red
-                             :lightgray)
+    (doall                                                  ; otherwise - error
+      (for [v (-> iteration :votes) :when (= user-email (:participant v))]
+        (let [color     (case (:vote v)
+                          "yes" :lightgreen
+                          "minor-concern" :green
+                          "major-concern" :orange
+                          "veto" :red
+                          :lightgray)
               vote-text (tr [(keyword (str "v/" (:vote v)))])]
           [:div.card {:key (:participant v)}
            [:div.card-content>div.content
@@ -169,23 +171,23 @@
   [:div.columns
    [:div.column.is-3 (tr [:k/votes] "votes:")]
    [:div.column.is-8
-     (doall ; otherwise - error
+    (doall                                                  ; otherwise - error
       (for [v (-> iteration :votes)]
-       (let [color  (case (:vote v)
-                     "yes" :lightgreen
-                     "minor-concern" :green
-                     "major-concern" :orange
-                     "veto" :red
-                     :lightgray)
-             vote-text (tr [(keyword (str "v/" (:vote v)))])]
-        [:div.card {:key (:participant v)}
-         [:div.card-content>div.content
-          [:div.columns
-           [:div.column.is-2 [:span {:style
-                                     {:color color}} vote-text]]
-           ;[:div.column.is-3 (:participant v)]
-           [:div.column>div.card>div.card-content>div.content
-            [add-time-user-badge (:timestamp v) (:participant v)] (:text v)]]]])))]])
+        (let [color     (case (:vote v)
+                          "yes" :lightgreen
+                          "minor-concern" :green
+                          "major-concern" :orange
+                          "veto" :red
+                          :lightgray)
+              vote-text (tr [(keyword (str "v/" (:vote v)))])]
+          [:div.card {:key (:participant v)}
+           [:div.card-content>div.content
+            [:div.columns
+             [:div.column.is-2 [:span {:style
+                                       {:color color}} vote-text]]
+             ;[:div.column.is-3 (:participant v)]
+             [:div.column>div.card>div.card-content>div.content
+              [add-time-user-badge (:timestamp v) (:participant v)] (:text v)]]]])))]])
 
 
 (defn accepted [k u]
@@ -374,7 +376,7 @@
             ;)}
             (tr [:k/btn-ask] "ask")]
            [:button.button
-             {:on-click #(rf/dispatch [:konsent/ready-to-vote])}
+            {:on-click #(rf/dispatch [:konsent/ready-to-vote])}
             (tr [:k/btn-no-more-questions] "no more questions - ready to vote!")]]]]]])))
 
 
@@ -393,6 +395,29 @@
           {:on-click #(do (rf/dispatch [:konsent/discuss @fields]) (reset! fields {}))}
           (tr [:h/btn-send] "send")]]]])))
 
+(defn discuss-social []
+  (let [fields (r/atom {:text ""})]
+    (fn []
+      [:div.columns
+       ;[:div.column.is-3 (tr [:k/discuss] "discuss:")]
+       [:div.column.is-11
+        ;[:form.box utils/prevent-reload
+        ;[:nav.level
+        ;[:div.level-left
+        ;[:div.level-item
+        [:div.field>div.control>input.input.is-rounded
+         {:placeholder (tr [:k/pla-discuss-perspectives] "discuss perspectives, options, questions...")
+          :value       (:text @fields)
+          :on-change   #(swap! fields assoc :text (value %))}]]
+
+       ;[:div.level-item
+       [:div.column.is-1
+        [:div.field>div.control>button.button.is-rounded
+         {:on-click #(when (not-empty (:text @fields))
+                       (rf/dispatch [:konsent/discuss @fields])
+                       (reset! fields {}))}
+         [:span.icon.is-large>i.fas.fa-1x.fa-paper-plane]]]])))
+
 
 (defn propose []
   (let [fields (r/atom {})]
@@ -407,6 +432,21 @@
          [:div.field>div.control>button.button
           {:on-click #(rf/dispatch [:konsent/propose @fields])}
           (tr [:k/btn-send-proposal] "create proposal")]]]])))
+
+(defn propose-social []
+  (let [fields (r/atom {})]
+    (fn []
+      [:div.columns
+       ;[:div.column.is-3 (tr [:k/create-proposal] "propose:")]
+       [:div.column.is-11
+        ;[:form.box utils/prevent-reload
+        [:div.field>div.control>input.input.is-rounded
+         {:placeholder (tr [:k/pla-create-proposal] "create a proposal for voting")
+          :on-change   #(swap! fields assoc :text (value %))}]]
+       [:div.column.is-1
+        [:div.field>div.control>button.button.is-rounded
+         {:on-click #(when (not-empty (:text @fields)) (rf/dispatch [:konsent/propose @fields]))}
+         [:span.icon.is-large>i.fas.fa-1x.fa-users]]]])))
 
 
 (defn voters-set
@@ -562,90 +602,94 @@
         probs (-> k :konsent :problem-statement)]
     [:div
      [:div.columns
-      [:div.column.is-3
-       [:button.button.is-primary
-        (if u
-          {:on-click #(rf/dispatch [:konsent/de-activate])}
-          not-logged-in)
-        [:span.icon.is-large>i.fas.fa-1x.fa-arrow-alt-circle-left]
-        [:div (tr [:k/btn-back-to-all] "back to all konsents")]]]
+      #_[:div.column.is-3
+         [:button.button.is-primary
+          (if u
+            {:on-click #(rf/dispatch [:konsent/de-activate])}
+            not-logged-in)
+          [:span.icon.is-large>i.fas.fa-1x.fa-arrow-alt-circle-left]
+          [:div (tr [:k/btn-back-to-all] "back to all konsents")]]]
 
-      [:div.column.is-9 ""]]
-     (if u
-       [:div
-        ;[short-name-and-problemstatement sn probs]
-        ;[:div.is-divider.mt-6.mb-6 {:data-content "ask a question only to understand proposal"}]
-        ;[ask]
-        ;[:div.is-divider.mt-6.mb-6 {:data-content "free discussion to learn views, feelings, facts, opinions"}]
-        (when (k-fsm/accepted? k)
-          [:div
-           [:div.is-divider.mt-6.mb-6 {:data-content (tr [:k/proposal-accepted] "Proposal ACCEPTED")}]
-           [accepted k u]
-           #_(when (k-fsm/user-is-proposer? k u)
-               [force-vote k u])])
+      [:div.column
+       (if u
+         [:div
+          ;[short-name-and-problemstatement sn probs]
+          ;[:div.is-divider.mt-6.mb-6 {:data-content "ask a question only to understand proposal"}]
+          ;[ask]
+          ;[:div.is-divider.mt-6.mb-6 {:data-content "free discussion to learn views, feelings, facts, opinions"}]
+          (when (k-fsm/accepted? k)
+            [:div
+             [:div.is-divider.mt-6.mb-6 {:data-content (tr [:k/proposal-accepted] "Proposal ACCEPTED")}]
+             [accepted k u]
+             #_(when (k-fsm/user-is-proposer? k u)
+                 [force-vote k u])])
 
-        (when (and (k-fsm/voting-started? k) (k-fsm/user-voted? k u) (not (k-fsm/user-is-proposer? k u)) (not (k-fsm/accepted? k)))
-          [:div
-           [:div.is-divider.mt-6.mb-6 {:data-content (tr [:k/div-wainting-for-others-to-vote] "waiting for others to vote")}]
-           [wait-for-everybody-voted k u]
-           [my-vote (k-fsm/active-iteration k) u]
-           #_(when (k-fsm/user-is-proposer? k u)
-               [force-vote k u])])
+          (when (and (k-fsm/voting-started? k) (k-fsm/user-voted? k u) (not (k-fsm/user-is-proposer? k u)) (not (k-fsm/accepted? k)))
+            [:div
+             [:div.is-divider.mt-6.mb-6 {:data-content (tr [:k/div-wainting-for-others-to-vote] "waiting for others to vote")}]
+             [wait-for-everybody-voted k u]
+             [my-vote (k-fsm/active-iteration k) u]
+             #_(when (k-fsm/user-is-proposer? k u)
+                 [force-vote k u])])
 
-        (when (and (k-fsm/voting-started? k) (k-fsm/user-is-proposer? k u) (not (k-fsm/accepted? k)))
-          [:div
-           [:div.is-divider.mt-6.mb-6 {:data-content (tr [:k/force-end-of-voting] "force end of voting?")}]
-           [force-vote k u]])
+          (when (and (k-fsm/voting-started? k) (k-fsm/user-is-proposer? k u) (not (k-fsm/accepted? k)))
+            [:div
+             [:div.is-divider.mt-6.mb-6 {:data-content (tr [:k/force-end-of-voting] "force end of voting?")}]
+             [force-vote k u]])
 
-        (when (and (k-fsm/voting-started? k) (not (k-fsm/user-voted? k u)) (not (k-fsm/accepted? k)))
-          [:div
-           [:div.is-divider.mt-6.mb-6 {:data-content (tr [:k/voting-time] "voting time...")}]
-           [vote-for-konsent k u]
-           [wait-for-everybody-voted k u]])
+          (when (and (k-fsm/voting-started? k) (not (k-fsm/user-voted? k u)) (not (k-fsm/accepted? k)))
+            [:div
+             [:div.is-divider.mt-6.mb-6 {:data-content (tr [:k/voting-time] "voting time...")}]
+             [vote-for-konsent k u]
+             [wait-for-everybody-voted k u]])
 
-        (when (and (k-fsm/wait-for-other-users-to-be-ready k u)
-                   (k-fsm/user-is-proposer? k u)
-                   (not (k-fsm/voting-started? k)))
-          [:div
-           [:div.is-divider.mt-6.mb-6 {:data-content (tr [:k/go-ahead?] "go ahead?")}]
-           [wait-for-ready k u]
-           [force-ready k u]])
-        (when (and (k-fsm/wait-for-other-users-to-be-ready k u)
-                   (not (k-fsm/user-is-proposer? k u))
-                   (not (k-fsm/voting-started? k)))
-          [:div
-           [:div.is-divider.mt-6.mb-6 {:data-content (tr [:k/please-wait] "please wait")}]
-           [wait-for-ready k u]])
-        (when (k-fsm/ask? k u)
-          [:div
-           [:div.is-divider.mt-6.mb-6 {:data-content "understand proposal"}]
-           [ask k]])
-        (when (k-fsm/answer? k u)
-          [:div
-           [:div.is-divider.mt-6.mb-6 {:data-content (tr [:k/answer-questions] "answer questions regarding your proposal")}]
-           [answer k]])
+          (when (and (k-fsm/wait-for-other-users-to-be-ready k u)
+                     (k-fsm/user-is-proposer? k u)
+                     (not (k-fsm/voting-started? k)))
+            [:div
+             [:div.is-divider.mt-6.mb-6 {:data-content (tr [:k/go-ahead?] "go ahead?")}]
+             [wait-for-ready k u]
+             [force-ready k u]])
+          (when (and (k-fsm/wait-for-other-users-to-be-ready k u)
+                     (not (k-fsm/user-is-proposer? k u))
+                     (not (k-fsm/voting-started? k)))
+            [:div
+             [:div.is-divider.mt-6.mb-6 {:data-content (tr [:k/please-wait] "please wait")}]
+             [wait-for-ready k u]
+             [discuss-social]])
+          (when (k-fsm/ask? k u)
+            [:div
+             [:div.is-divider.mt-6.mb-6 {:data-content "understand proposal"}]
+             [ask k]])
+          (when (k-fsm/answer? k u)
+            [:div
+             [:div.is-divider.mt-6.mb-6 {:data-content (tr [:k/answer-questions] "answer questions regarding your proposal")}]
+             [answer k]])
+          ;[discuss-social]])
 
-        (when (k-fsm/discuss? k u)
-          [:div
-           [:div.is-divider.mt-6.mb-6 {:data-content (tr [:k/free-discussion] "free discussion to learn views, feelings, facts, opinions")}]
-           [discuss]])
+          (when (k-fsm/discuss? k u)
+            [:div
+             [:div.is-divider.mt-6.mb-6 {:data-content (tr [:k/free-discussion] "free discussion to learn views, feelings, facts, opinions")}]
+             [discuss]])
+          ;[discuss-social]])
 
-        (when (k-fsm/propose? k u)
-          [:div
-           [:div.is-divider.mt-6.mb-6 {:data-content (tr [:k/sep-create-proposal] "create proposal")}]
-           [propose]])
-        ;[:div.is-divider.mt-6.mb-6 {:data-content "or start a konsent by suggesting"}]
-        ;[vote-for-konsent]
-        ;[:div.is-divider.mt-6.mb-6 {:data-content "start konsent"}]
-        ;[start-konsent]
-        ;[:div.is-divider.mt-6.mb-6 {:data-content "what happend before..."}]
-        [history k]
-        [:div.is-divider.mt-6.mb-6 {:data-content (tr [:k/started-by-with-participants] "started by with participants")}]
-        [short-name-and-problemstatement sn probs]
-        [participants ps]
-        [created-by-when (-> k :konsent :owner) (-> k :konsent :timestamp)]]
-       ;[debugging k u]]
-       [konsent-example-list])]))
+          (when (k-fsm/propose? k u)
+            [:div
+             [:div.is-divider.mt-6.mb-6 {:data-content (tr [:k/sep-create-proposal] "create proposal")}]
+             [propose]])
+          ;[propose-social]])
+          ;[:div.is-divider.mt-6.mb-6 {:data-content "or start a konsent by suggesting"}]
+          ;[vote-for-konsent]
+          ;[:div.is-divider.mt-6.mb-6 {:data-content "start konsent"}]
+          ;[start-konsent]
+          ;[:div.is-divider.mt-6.mb-6 {:data-content "what happend before..."}]
+          [history k]
+          [:div.is-divider.mt-6.mb-6 {:data-content (tr [:k/started-by-with-participants] "started by with participants")}]
+          [short-name-and-problemstatement sn probs]
+          [participants ps]
+          [created-by-when (-> k :konsent :owner) (-> k :konsent :timestamp)]]
+         ;[debugging k u]]
+         [konsent-example-list])]]]))
 
 
 
@@ -655,6 +699,16 @@
 
 (defn my-konsents-page []
   [:section.section>div.container>div.content
-   (if @(rf/subscribe [:konsent/active])
-     [konsent-active]
-     [konsent-list-page])])
+   [:div.columns
+    [:div.column.is-4 [konsent-list-page]]
+    [:div.column.is-7
+     (if @(rf/subscribe [:konsent/active])
+       [konsent-active])]]])
+;[konsent-list-page])]]])
+
+(defn my-konsent-page [{{{:keys [id]} :path} :parameters}]
+  ;(println "my-konsent-page data: " id)
+  ;(println "going to dispatch :konsent/activate")
+  ;(rf/dispatch {:ms 1000 :dispatch [:konsent/activate {:id id}]})
+  [:section.section>div.container>div.content
+   [:div "BEL data: " id]])

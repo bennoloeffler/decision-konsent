@@ -309,7 +309,7 @@
 (rf/reg-event-db
   :gui-language
   (fn [db [_ data]]
-    (println data)
+    ;(println data)
     (assoc db :gui-language data)))
 
 

@@ -95,6 +95,12 @@
   (fn [route _]
     (-> route :data :view)))
 
+(rf/reg-sub
+  :common/path-params
+  :<- [:common/route]
+  (fn [route _]
+    (-> route :path-params)))
+
 ;;
 ;; error handling
 ;;

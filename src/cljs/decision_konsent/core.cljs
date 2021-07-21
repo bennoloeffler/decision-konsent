@@ -20,7 +20,8 @@
     [decision-konsent.websocket :as ws]
     [decision-konsent.test-button :as tb]
     [decision-konsent.i18n :as i18n :refer [tr]]
-    [reagent.core :as reagent])
+    [reagent.core :as reagent]
+    [spec-tools.data-spec :as ds])
   ;["@creativebulma/bulma-tagsinput/dist/js/bulma-tagsinput.min.js" :as tags])
 
   (:import goog.History))
@@ -171,9 +172,9 @@
 
 (defn mail-model []
   [:<>
-    [:option {:value "benno.loeffler@gmx.net" :selected true} "benno.loeffler@gmx.net"]
-    [:option {:value "Ralf.Kapp@arcor.de" :selected true} "Ralf.Kapp@arcor.de"]
-    [:option {:value "sabine.kiefer@gmx.de"} "sabine.kiefer@gmx.de"]])
+   [:option {:value "benno.loeffler@gmx.net" :selected true} "benno.loeffler@gmx.net"]
+   [:option {:value "Ralf.Kapp@arcor.de" :selected true} "Ralf.Kapp@arcor.de"]
+   [:option {:value "sabine.kiefer@gmx.de"} "sabine.kiefer@gmx.de"]])
 
 (defn tags-input-2 []
   (let [fields (reagent/atom {})]                           ;; you can include state
@@ -232,12 +233,12 @@
      [:div.columns.is-centered>div.column
       ;[tags-input-2]
       [errors-section]
-      [page]]]))
+      [page @(rf/subscribe [:common/route])]]]))
 
 
 
-(defn navigate! [match _]
-  ;(println (str "navigate! match = " match _))
+(defn navigate! [match history]
+  ;(println "navigate! match = " match "\nhistory = " history)
   (rf/dispatch [:common/navigate match]))
 
 
@@ -258,6 +259,17 @@
 
      ["/my-konsents" {:name :my-konsents
                       :view #'k/my-konsents-page}]
+
+     ["/my-konsent/:id" {:name :my-konsent
+                         :view #'k/my-konsent-page
+                         :parameters {:path {:id int?}}
+                         :controllers
+                         [{:parameters {:path [:id]}
+                           :start (fn [params] (js/console.log "Entering my-konsent: " params)
+                                               (rf/dispatch [:konsent/activate  (-> params :path)]))
+                           :stop  (fn [params] (js/console.log "Leaving my-konsent: " params))}]}]
+
+
      ["/new-konsent" {:name :new-konsent
                       :view #'k/new-konsent-page}]]))
 
@@ -285,10 +297,11 @@
 
 (defn init! []
   (println "starting up konsent CLIENT SPA")
+  ;(ws/init!)
   (start-router!)
   (ajax/load-interceptors!)
+
   (rf/dispatch-sync [:initialize])
-  (ws/init!)
   (mount-components))
 
 

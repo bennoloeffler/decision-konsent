@@ -41,7 +41,7 @@
 
 (defn get-active-konsent [k-list k-id]
   ;(println "\nk-list\n" k-list "\nk-id\n" k-id)
-  (first (filter #(= k-id (:id %)) k-list)))
+  (first (filter #(= (str k-id) (str (:id %))) k-list)))
 
 (defn get-active-konsent-from-db [db]
   (get-active-konsent @(rf/subscribe [ :konsent/list ]) (:konsent/active-id db)))
@@ -284,8 +284,9 @@
 (rf/reg-event-fx
   :konsent/activate
   (fn [{:keys [db] :as cofx} [_ data]]
+    (println ":konsent/activate: " (:id data))
     {:db         (assoc db :konsent/active-id (:id data))
-     :dispatch-n [[:common/navigate! :my-konsents nil nil] [:konsent/load-list]]}))
+     :dispatch-n [ [:konsent/load-list] [:common/navigate! :my-konsents nil nil]]}))
 
 
 (rf/reg-event-db

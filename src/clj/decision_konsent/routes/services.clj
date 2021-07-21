@@ -123,7 +123,7 @@
     ["/session"
      {:get {:summary    "renew the session data after refresh and across browser tabs"
             :parameters {:query {}}
-            :responses  {200 {:body {:session {:identity {:email string?}}}}} ;:auth-type keyword?}}}}}
+            ;:responses  {200 {:body {:session {:identity {:email string?}}}}} ;:auth-type keyword?}}}}}
             :handler    (fn [{{:keys [identity]} :session :as data}]
                           ;(println "\n\nsession:\n")
                           ;(cprint data)
@@ -186,7 +186,7 @@
                           (email/send-invitations! konsent)
                           (response/ok konsent)))}}]
 
-
+    ; b.l@gmx.net (guest) http://localhost:3000/api/konsent/invitation/1119765859799043611894664431870268928/76
     ["/invitation/:invitation-id/:konsent-id"
      {:summary "fast login by (existing, server sent) invitation link. auth-type = :auth (EDN) or \"auth\" (json)\" if user exists :guest otherwise"
       :get     (fn [a] (let [konsent-id-str (-> a :path-params :konsent-id)
@@ -199,9 +199,9 @@
                            (do
                              (println "/invitation:")
                              (pprint invitation)
-                             (-> (response/found "/#/my-konsents")
+                             (-> (response/found (str "/#/my-konsent/" konsent-id))
                                  (assoc-in [:session :identity] {:email (:guest-email invitation) :auth-type (if real-user :auth :guest)})))
-                           (-> (response/unauthorized "ERROR: Did not find invitation. Sorry...")
+                           (-> (response/unauthorized "<h1>ERROR: Did not find invitation. Sorry...</h1>")
                                (response/header "Content-Type" "text/html; charset=utf-8")))))}]
 
 
